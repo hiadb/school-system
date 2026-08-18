@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家长工作台 - 学校管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .welcome-banner {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .welcome-text h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-text p {
+            color: #666;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab:hover {
+            background: #f0f0f0;
+        }
+        
+        .nav-tab.active {
+            background: #f5576c;
+            color: white;
+        }
+        
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .child-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .child-card:hover {
+            border-color: #f5576c;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.2);
+        }
+        
+        .child-card.selected {
+            border-color: #f5576c;
+            background: #fff5f5;
+        }
+        
+        .child-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .child-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .child-class {
+            color: #666;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .score-high {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .score-medium {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        
+        .score-low {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-bind {
+            background: #f5576c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #f5576c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👨‍👩‍👦 家长工作台</h1>
+        <div class="user-info">
+            <span id="userName">家长</span>
+            <button class="btn-logout" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="welcome-banner">
+            <div class="welcome-text">
+                <h2>欢迎回来，<span id="welcomeName">家长</span>！</h2>
+                <p>关注孩子的学习情况</p>
+            </div>
+            <div style="font-size: 48px;">🏠</div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('children')">👨‍🎓 我的孩子</button>
+            <button class="nav-tab" onclick="showTab('bind')">🔗 绑定学生</button>
+        </div>
+        
+        <div class="content">
+            <!-- 孩子列表标签页 -->
+            <div id="childrenTab">
+                <h2 style="margin-bottom: 20px;">👨‍🎓 我的孩子</h2>
+                <div id="childrenList">
+                    <div class="empty-state">
+                        <div class="icon">👨‍👩‍👦</div>
+                        <p>还没有绑定学生</p>
+                        <p style="margin-top: 10px;">请在"绑定学生"标签页中添加</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 绑定学生标签页 -->
+            <div id="bindTab" style="display: none;">
+                <h2 style="margin-bottom: 20px;">🔗 绑定学生</h2>
+                <form id="bindForm">
+                    <div class="form-group">
+                        <label>学生ID</label>
+                        <input type="text" id="studentId" placeholder="请输入学生ID" required>
+                    </div>
+                    <button type="submit" class="btn-submit">绑定学生</button>
+                </form>
+                <p style="margin-top: 20px; color: #666; font-size: 14px;">
+                    💡 提示：请联系学校获取学生ID
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ========== 配置 ==========
+        const WORKER_URL = 'https://your-worker-name.your-subdomain.workers.dev';
+        const API_BASE = WORKER_URL + '/api';
+        
+        // ========== 工具函数 ==========
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+        
+        function getUser() {
+            return JSON.parse(localStorage.getItem('user') || '{}');
+        }
+        
+        function showTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('[id$="Tab"]').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+            
+            if (tabName === 'children') {
+                loadChildren();
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+        
+        function getScoreClass(score) {
+            if (score >= 90) return 'score-high';
+            if (score >= 60) return 'score-medium';
+            return 'score-low';
+        }
+        
+        // ========== 加载孩子列表 ==========
+        async function loadChildren() {
+            const user = getUser();
+            
+            try {
+                const response = await fetch(API_BASE + '/students', {
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                const students = await response.json();
+                const childrenList = document.getElementById('childrenList');
+                
+                // 筛选出自己的孩子
+                const myChildren = students.filter(s => s.parentId === user.userId);
+                
+                if (myChildren.length === 0) {
+                    childrenList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">👨‍👩‍👦</div>
+                            <p>还没有绑定学生</p>
+                            <p style="margin-top: 10px;">请在"绑定学生"标签页中添加</p>
+                        </div>
+                    `;
+                } else {
+                    childrenList.innerHTML = myChildren.map(child => `
+                        <div class="child-card" onclick="loadChildScores('${child.studentId}', '${child.name}')">
+                            <div class="child-info">
+                                <div>
+                                    <div class="child-name">${child.name}</div>
+                                    <div class="child-class">${child.class || '未分班'}</div>
+                                </div>
+                                <div style="font-size: 32px;">📊</div>
+                            </div>
+                            <div id="scores-${child.studentId}" style="margin-top: 10px;">
+                                <p style="color: #666;">点击查看成绩</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('加载孩子列表失败:', error);
+            }
+        }
+        
+        // ========== 加载孩子成绩 ==========
+        async function loadChildScores(studentId, studentName) {
+            try {
+                const response = await fetch(API_BASE + '/scores/' + studentId, {
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                const scores = await response.json();
+                const scoresContainer = document.getElementById('scores-' + studentId);
+                
+                if (scores.length === 0) {
+                    scoresContainer.innerHTML = '<p style="color: #999;">暂无成绩记录</p>';
+                } else {
+                    const avgScore = (scores.reduce((sum, s) => sum + parseFloat(s.score), 0) / scores.length).toFixed(1);
+                    
+                    scoresContainer.innerHTML = `
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <p style="font-weight: bold; margin-bottom: 10px;">
+                                ${studentName}的成绩（平均分：${avgScore}）
+                            </p>
+                            <table style="width: 100%; font-size: 14px;">
+                                <thead>
+                                    <tr>
+                                        <th>科目</th>
+                                        <th>分数</th>
+                                        <th>考试类型</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${scores.map(score => `
+                                        <tr>
+                                            <td>${score.subject}</td>
+                                            <td class="${getScoreClass(score.score)}">${score.score}</td>
+                                            <td>${score.examType || '未分类'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('加载成绩失败:', error);
+            }
+        }
+        
+        // ========== 绑定学生 ==========
+        document.getElementById('bindForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const studentId = document.getElementById('studentId').value.trim();
+            
+            if (!studentId) {
+                alert('请输入学生ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_BASE + '/parents/bind-student', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({ studentId })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    alert('绑定成功！');
+                    this.reset();
+                    showTab('children');
+                } else {
+                    alert(data.error || '绑定失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        });
+        
+        // ========== 初始化 ==========
+        function init() {
+            const user = getUser();
+            
+            // 检查登录状态
+            if (!getToken()) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // 显示用户信息
+            if (user.realName) {
+                document.getElementById('userName').textContent = user.realName;
+                document.getElementById('welcomeName').textContent = user.realName;
+            }
+            
+            // 加载孩子列表
+            loadChildren();
+        }
+        
+        // 页面加载完成后初始化
+        init();
+    </script>
+</body>
+</html>
