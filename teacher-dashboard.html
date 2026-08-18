@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师工作台 - 学校管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .btn-logout {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #d32f2f;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab:hover {
+            background: #f0f0f0;
+        }
+        
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn-add {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+        
+        .btn-add:hover {
+            background: #45a049;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .btn-edit {
+            background: #ffc107;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        
+        .btn-delete {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👨‍🏫 教师工作台</h1>
+        <div class="user-info">
+            <span id="userName">教师</span>
+            <button class="btn-logout" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('students')">👨‍🎓 学生管理</button>
+            <button class="nav-tab" onclick="showTab('scores')">📊 成绩录入</button>
+            <button class="nav-tab" onclick="showTab('classes')">📚 班级管理</button>
+        </div>
+        
+        <div class="content">
+            <!-- 学生管理标签页 -->
+            <div id="studentsTab">
+                <button class="btn-add" onclick="openAddStudentModal()">➕ 添加学生</button>
+                <table id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>用户名</th>
+                            <th>班级</th>
+                            <th>注册时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentList">
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <div class="icon">📭</div>
+                                <p>暂无学生数据</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 成绩录入标签页 -->
+            <div id="scoresTab" style="display: none;">
+                <h2 style="margin-bottom: 20px;">📊 成绩录入</h2>
+                <form id="scoreForm">
+                    <div class="form-group">
+                        <label>选择学生</label>
+                        <select id="scoreStudentId" required>
+                            <option value="">请选择学生</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>科目</label>
+                        <input type="text" id="scoreSubject" placeholder="如：数学" required>
+                    </div>
+                    <div class="form-group">
+                        <label>分数</label>
+                        <input type="number" id="scoreValue" min="0" max="100" placeholder="0-100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>考试类型</label>
+                        <select id="scoreType">
+                            <option value="期中考试">期中考试</option>
+                            <option value="期末考试">期末考试</option>
+                            <option value="月考">月考</option>
+                            <option value="测验">测验</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-submit">提交成绩</button>
+                </form>
+            </div>
+            
+            <!-- 班级管理标签页 -->
+            <div id="classesTab" style="display: none;">
+                <button class="btn-add" onclick="openAddClassModal()">➕ 创建班级</button>
+                <table id="classTable">
+                    <thead>
+                        <tr>
+                            <th>班级名称</th>
+                            <th>年级</th>
+                            <th>学生数量</th>
+                            <th>创建时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="classList">
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <div class="icon">📭</div>
+                                <p>暂无班级数据</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加学生模态框 -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加学生</h2>
+                <button class="btn-close" onclick="closeModal('addStudentModal')">&times;</button>
+            </div>
+            <form id="addStudentForm">
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="newStudentName" required>
+                </div>
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="newStudentUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>班级</label>
+                    <input type="text" id="newStudentClass" placeholder="如：初三1班">
+                </div>
+                <button type="submit" class="btn-submit">添加</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 创建班级模态框 -->
+    <div id="addClassModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>创建班级</h2>
+                <button class="btn-close" onclick="closeModal('addClassModal')">&times;</button>
+            </div>
+            <form id="addClassForm">
+                <div class="form-group">
+                    <label>班级名称</label>
+                    <input type="text" id="newClassName" required>
+                </div>
+                <div class="form-group">
+                    <label>年级</label>
+                    <input type="text" id="newClassGrade" required>
+                </div>
+                <button type="submit" class="btn-submit">创建</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // ========== 配置 ==========
+        const WORKER_URL = 'https://your-worker-name.your-subdomain.workers.dev';
+        const API_BASE = WORKER_URL + '/api';
+        
+        // ========== 工具函数 ==========
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+        
+        function getUser() {
+            return JSON.parse(localStorage.getItem('user') || '{}');
+        }
+        
+        function showTab(tabName) {
+            // 隐藏所有标签页
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('[id$="Tab"]').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // 显示选中的标签页
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+            
+            // 加载对应数据
+            if (tabName === 'students') {
+                loadStudents();
+            } else if (tabName === 'classes') {
+                loadClasses();
+            } else if (tabName === 'scores') {
+                loadStudentsForScore();
+            }
+        }
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+        
+        // ========== 加载学生列表 ==========
+        async function loadStudents() {
+            try {
+                const response = await fetch(API_BASE + '/students', {
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                const students = await response.json();
+                const tbody = document.getElementById('studentList');
+                
+                if (students.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <div class="icon">📭</div>
+                                <p>暂无学生数据</p>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = students.map(student => `
+                        <tr>
+                            <td>${student.name || '未设置'}</td>
+                            <td>${student.username || '未设置'}</td>
+                            <td>${student.class || '未分班'}</td>
+                            <td>${new Date(student.createdAt).toLocaleDateString()}</td>
+                            <td>
+                                <button class="btn-edit" onclick="editStudent('${student.studentId}')">编辑</button>
+                                <button class="btn-delete" onclick="deleteStudent('${student.studentId}')">删除</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('加载学生失败:', error);
+            }
+        }
+        
+        // ========== 添加学生 ==========
+        document.getElementById('addStudentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('newStudentName').value;
+            const username = document.getElementById('newStudentUsername').value;
+            const className = document.getElementById('newStudentClass').value;
+            
+            try {
+                const response = await fetch(API_BASE + '/students', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({ name, username, class: className })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    alert('学生添加成功！');
+                    closeModal('addStudentModal');
+                    this.reset();
+                    loadStudents();
+                } else {
+                    alert(data.error || '添加失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        });
+        
+        // ========== 删除学生 ==========
+        async function deleteStudent(studentId) {
+            if (!confirm('确定要删除这个学生吗？')) return;
+            
+            try {
+                const response = await fetch(API_BASE + '/students/' + studentId, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('删除成功！');
+                    loadStudents();
+                }
+            } catch (error) {
+                alert('删除失败');
+            }
+        }
+        
+        // ========== 加载班级 ==========
+        async function loadClasses() {
+            try {
+                const response = await fetch(API_BASE + '/classes', {
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                const classes = await response.json();
+                const tbody = document.getElementById('classList');
+                
+                if (classes.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <div class="icon">📭</div>
+                                <p>暂无班级数据</p>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = classes.map(cls
