@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生工作台 - 学校管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .welcome-banner {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .welcome-text h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-text p {
+            color: #666;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-card .stat-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab:hover {
+            background: #f0f0f0;
+        }
+        
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .score-high {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .score-medium {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        
+        .score-low {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #666;
+        }
+        
+        .info-value {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👨‍🎓 学生工作台</h1>
+        <div class="user-info">
+            <span id="userName">学生</span>
+            <button class="btn-logout" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="welcome-banner">
+            <div class="welcome-text">
+                <h2>欢迎回来，<span id="welcomeName">同学</span>！</h2>
+                <p>今天是美好的一天，继续加油！</p>
+            </div>
+            <div style="font-size: 48px;">📚</div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="totalScores">0</div>
+                <div class="stat-label">考试次数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-value" id="avgScore">0</div>
+                <div class="stat-label">平均分</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-value" id="bestScore">0</div>
+                <div class="stat-label">最高分</div>
+            </div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('scores')">📊 我的成绩</button>
+            <button class="nav-tab" onclick="showTab('info')">👤 个人信息</button>
+        </div>
+        
+        <div class="content">
+            <!-- 成绩标签页 -->
+            <div id="scoresTab">
+                <h2 style="margin-bottom: 20px;">📊 我的成绩</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>科目</th>
+                            <th>分数</th>
+                            <th>考试类型</th>
+                            <th>日期</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreList">
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <div class="icon">📭</div>
+                                <p>暂无成绩数据</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 个人信息标签页 -->
+            <div id="infoTab" style="display: none;">
+                <h2 style="margin-bottom: 20px;">👤 个人信息</h2>
+                <div class="info-card">
+                    <div class="info-row">
+                        <span class="info-label">姓名</span>
+                        <span class="info-value" id="infoName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">用户名</span>
+                        <span class="info-value" id="infoUsername">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">班级</span>
+                        <span class="info-value" id="infoClass">未分班</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">入学时间</span>
+                        <span class="info-value" id="infoEnrollment">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">邮箱</span>
+                        <span class="info-value" id="infoEmail">未设置</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">手机号</span>
+                        <span class="info-value" id="infoPhone">未设置</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ========== 配置 ==========
+        const WORKER_URL = 'https://your-worker-name.your-subdomain.workers.dev';
+        const API_BASE = WORKER_URL + '/api';
+        
+        // ========== 工具函数 ==========
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+        
+        function getUser() {
+            return JSON.parse(localStorage.getItem('user') || '{}');
+        }
+        
+        function showTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('[id$="Tab"]').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+        
+        function getScoreClass(score) {
+            if (score >= 90) return 'score-high';
+            if (score >= 60) return 'score-medium';
+            return 'score-low';
+        }
+        
+        // ========== 加载成绩 ==========
+        async function loadScores() {
+            const user = getUser();
+            
+            try {
+                const response = await fetch(API_BASE + '/scores/' + user.userId, {
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                const scores = await response.json();
+                const tbody = document.getElementById('scoreList');
+                
+                if (scores.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <div class="icon">📭</div>
+                                <p>暂无成绩数据</p>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = scores.map(score => `
+                        <tr>
+                            <td>${score.subject}</td>
+                            <td class="${getScoreClass(score.score)}">${score.score}</td>
+                            <td>${score.examType || '未分类'}</td>
+                            <td>${new Date(score.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                    `).join('');
+                    
+                    // 更新统计
+                    updateStats(scores);
+                }
+            } catch (error) {
+                console.error('加载成绩失败:', error);
+            }
+        }
+        
+        // ========== 更新统计 ==========
+        function updateStats(scores) {
+            const totalScores = scores.length;
+            const avgScore = totalScores > 0 
+                ? (scores.reduce((sum, s) => sum + parseFloat(s.score), 0) / totalScores).toFixed(1)
+                : 0;
+            const bestScore = totalScores > 0 
+                ? Math.max(...scores.map(s => parseFloat(s.score)))
+                : 0;
+            
+            document.getElementById('totalScores').textContent = totalScores;
+            document.getElementById('avgScore').textContent = avgScore;
+            document.getElementById('bestScore').textContent = bestScore;
+        }
+        
+        // ========== 加载个人信息 ==========
+        async function loadProfile() {
+            const user = getUser();
+            
+            // 显示基本信息
+            document.getElementById('infoName').textContent = user.realName || '-';
+            document.getElementById('infoUsername').textContent = user.username || '-';
+            document.getElementById('infoEmail').textContent = user.email || '未设置';
+            document.getElementById('infoPhone').textContent = user.phone || '未设置';
+            
+            // 获取详细学生信息
+            try {
+                const response = await fetch(API_BASE + '/students/' + user.userId, {
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                if (response.ok) {
+                    const studentInfo = await response.json();
+                    document.getElementById('infoClass').textContent = studentInfo.class || '未分班';
+                    document.getElementById('infoEnrollment').textContent = 
+                        studentInfo.enrollmentDate ? new Date(studentInfo.enrollmentDate).toLocaleDateString() : '-';
+                }
+            } catch (error) {
+                console.error('加载个人信息失败:', error);
+            }
+        }
+        
+        // ========== 初始化 ==========
+        function init() {
+            const user = getUser();
+            
+            // 检查登录状态
+            if (!getToken()) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // 显示用户信息
+            if (user.realName) {
+                document.getElementById('userName').textContent = user.realName;
+                document.getElementById('welcomeName').textContent = user.realName;
+            }
+            
+            // 加载数据
+            loadScores();
+            loadProfile();
+        }
+        
+        // 页面加载完成后初始化
+        init();
+    </script>
+</body>
+</html>
