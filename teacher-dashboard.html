@@ -538,4 +538,129 @@
                         </tr>
                     `;
                 } else {
-                    tbody.innerHTML = classes.map(cls
+                    tbody.innerHTML = classes.map(cls => `
+                        <tr>
+                            <td>${cls.className}</td>
+                            <td>${cls.grade}</td>
+                            <td>${cls.students ? cls.students.length : 0}</td>
+                            <td>${new Date(cls.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('加载班级失败:', error);
+            }
+        }
+        
+        // ========== 创建班级 ==========
+        document.getElementById('addClassForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const className = document.getElementById('newClassName').value;
+            const grade = document.getElementById('newClassGrade').value;
+            
+            try {
+                const response = await fetch(API_BASE + '/classes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({ className, grade })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    alert('班级创建成功！');
+                    closeModal('addClassModal');
+                    this.reset();
+                    loadClasses();
+                } else {
+                    alert(data.error || '创建失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        });
+        
+        // ========== 成绩录入 ==========
+        async function loadStudentsForScore() {
+            try {
+                const response = await fetch(API_BASE + '/students', {
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                const students = await response.json();
+                const select = document.getElementById('scoreStudentId');
+                
+                select.innerHTML = '<option value="">请选择学生</option>' + 
+                    students.map(student => `
+                        <option value="${student.studentId}">${student.name}</option>
+                    `).join('');
+            } catch (error) {
+                console.error('加载学生失败:', error);
+            }
+        }
+        
+        document.getElementById('scoreForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const studentId = document.getElementById('scoreStudentId').value;
+            const subject = document.getElementById('scoreSubject').value;
+            const score = document.getElementById('scoreValue').value;
+            const examType = document.getElementById('scoreType').value;
+            
+            if (!studentId) {
+                alert('请选择学生');
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_BASE + '/scores', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({ studentId, subject, score, examType })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    alert('成绩录入成功！');
+                    this.reset();
+                } else {
+                    alert(data.error || '录入失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        });
+        
+        // ========== 初始化 ==========
+        function init() {
+            // 显示用户信息
+            const user = getUser();
+            if (user.realName) {
+                document.getElementById('userName').textContent = user.realName;
+            }
+            
+            // 检查登录状态
+            if (!getToken()) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // 加载学生列表
+            loadStudents();
+        }
+        
+        // 页面加载完成后初始化
+        init();
+    </script>
+</body>
+</html>
