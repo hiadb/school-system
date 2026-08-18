@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学校管理系统 - 登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-login:hover {
+            background: #5a67d8;
+        }
+        
+        .btn-login:active {
+            transform: scale(0.98);
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid #fcc;
+        }
+        
+        .success-message {
+            background: #efe;
+            color: #3a3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid #cfc;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🏫 学校管理系统</h1>
+            <p>教师、学生、家长一体化管理平台</p>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" 
+                       placeholder="请输入用户名" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" 
+                       placeholder="请输入密码" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn-login">登 录</button>
+        </form>
+        
+        <div class="register-link">
+            还没有账号？<a href="/register.html">立即注册</a>
+        </div>
+    </div>
+    
+    <script>
+        // ========== 配置 ==========
+        // 重要：替换为你的 Worker URL
+        const WORKER_URL = 'https://your-worker-name.your-subdomain.workers.dev';
+        const API_BASE = WORKER_URL + '/api';
+        
+        // ========== 显示消息函数 ==========
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showSuccess(message) {
+            const successEl = document.getElementById('successMessage');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            setTimeout(() => {
+                successEl.style.display = 'none';
+            }, 3000);
+        }
+        
+        // ========== 登录表单处理 ==========
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // 验证输入
+            if (!username || !password) {
+                showError('请输入用户名和密码');
+                return;
+            }
+            
+            // 禁用登录按钮，防止重复提交
+            const loginBtn = document.querySelector('.btn-login');
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+            
+            try {
+                const response = await fetch(API_BASE + '/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // 保存登录信息
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    showSuccess('登录成功！正在跳转...');
+                    
+                    // 根据角色跳转到不同页面
+                    setTimeout(() => {
+                        switch(data.user.role) {
+                            case 'teacher':
+                                window.location.href = '/teacher-dashboard.html';
+                                break;
+                            case 'student':
+                                window.location.href = '/student-dashboard.html';
+                                break;
+                            case 'parent':
+                                window.location.href = '/parent-dashboard.html';
+                                break;
+                            default:
+                                showError('未知的用户角色');
+                        }
+                    }, 1000);
+                    
+                } else {
+                    showError(data.error || '登录失败，请重试');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = '登 录';
+                }
+                
+            } catch (error) {
+                console.error('登录错误:', error);
+                showError('网络错误，请检查网络连接');
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登 录';
+            }
+        });
+        
+        // ========== 检查是否已登录 ==========
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (token && user.role) {
+                // 如果已登录，直接跳转
+                switch(user.role) {
+                    case 'teacher':
+                        window.location.href = '/teacher-dashboard.html';
+                        break;
+                    case 'student':
+                        window.location.href = '/student-dashboard.html';
+                        break;
+                    case 'parent':
+                        window.location.href = '/parent-dashboard.html';
+                        break;
+                }
+            }
+        }
+        
+        // 页面加载时检查
+        checkLoginStatus();
+    </script>
+</body>
+</html>
