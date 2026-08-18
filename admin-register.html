@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员注册 - 学校管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .admin-register-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-register:hover {
+            background: #5a67d8;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #efe;
+            color: #3a3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-register-container">
+        <div class="header">
+            <div class="icon">🔐</div>
+            <h1>管理员注册</h1>
+            <p>请输入管理员注册密钥</p>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        
+        <form id="adminRegisterForm">
+            <div class="form-group">
+                <label for="adminKey">管理员注册密钥</label>
+                <input type="password" id="adminKey" placeholder="请输入管理员注册密钥" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="username">管理员账号</label>
+                <input type="text" id="username" placeholder="请输入管理员账号" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="realName">姓名</label>
+                <input type="text" id="realName" placeholder="请输入姓名" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="请输入密码（至少6位）" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">确认密码</label>
+                <input type="password" id="confirmPassword" placeholder="请再次输入密码" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">邮箱（可选）</label>
+                <input type="email" id="email" placeholder="example@email.com">
+            </div>
