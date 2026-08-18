@@ -108,6 +108,17 @@
             text-decoration: underline;
         }
         
+        .admin-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .admin-link a {
+            color: #999;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
         .error-message {
             background: #fee;
             color: #c33;
@@ -158,11 +169,14 @@
         <div class="register-link">
             还没有账号？<a href="/register.html">立即注册</a>
         </div>
+        
+        <div class="admin-link">
+            <a href="/admin-login.html">管理员登录</a>
+        </div>
     </div>
     
     <script>
         // ========== 配置 ==========
-        // 重要：替换为你的 Worker URL
         const WORKER_URL = 'https://school-api.hru123.workers.dev';
         const API_BASE = WORKER_URL + '/api';
         
@@ -228,9 +242,12 @@
                     
                     showSuccess('登录成功！正在跳转...');
                     
-                    // 根据角色跳转到不同页面
+                    // 根据角色跳转到不同页面（包含所有角色）
                     setTimeout(() => {
                         switch(data.user.role) {
+                            case 'admin':
+                                window.location.href = '/admin-dashboard.html';
+                                break;
                             case 'teacher':
                                 window.location.href = '/teacher-dashboard.html';
                                 break;
@@ -241,7 +258,9 @@
                                 window.location.href = '/parent-dashboard.html';
                                 break;
                             default:
-                                showError('未知的用户角色');
+                                showError('未知的用户角色: ' + data.user.role);
+                                loginBtn.disabled = false;
+                                loginBtn.textContent = '登 录';
                         }
                     }, 1000);
                     
@@ -265,8 +284,11 @@
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             
             if (token && user.role) {
-                // 如果已登录，直接跳转
+                // 如果已登录，直接跳转（包含所有角色）
                 switch(user.role) {
+                    case 'admin':
+                        window.location.href = '/admin-dashboard.html';
+                        break;
                     case 'teacher':
                         window.location.href = '/teacher-dashboard.html';
                         break;
