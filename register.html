@@ -5,14 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学校管理系统 - 注册</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            font-family: 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -20,52 +15,25 @@
             justify-content: center;
             padding: 20px;
         }
-        
         .register-container {
             background: white;
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 450px;
         }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .logo h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #333; font-size: 28px; margin-bottom: 10px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
         input, select {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s;
         }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
         .btn-register {
             width: 100%;
             padding: 14px;
@@ -76,26 +44,19 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 10px;
         }
-        
-        .btn-register:hover {
-            background: #5a67d8;
-        }
-        
-        .login-link {
+        .role-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+        .role-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             text-align: center;
-            margin-top: 20px;
-            color: #666;
+            cursor: pointer;
         }
-        
-        .login-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
+        .role-option.selected { border-color: #667eea; background: #f0f0ff; }
+        .role-option input { display: none; }
+        .role-icon { font-size: 32px; display: block; margin-bottom: 8px; }
         .error-message {
             background: #fee;
             color: #c33;
@@ -104,53 +65,14 @@
             margin-bottom: 20px;
             display: none;
         }
-        
-        .role-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .role-option {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .role-option:hover {
-            border-color: #667eea;
-        }
-        
-        .role-option.selected {
-            border-color: #667eea;
-            background: #f0f0ff;
-        }
-        
-        .role-option input[type="radio"] {
-            display: none;
-        }
-        
-        .role-option .role-icon {
-            font-size: 32px;
-            display: block;
-            margin-bottom: 8px;
-        }
-        
-        .role-option .role-name {
-            font-weight: bold;
-            color: #333;
-        }
+        .login-link { text-align: center; margin-top: 20px; }
+        .login-link a { color: #667eea; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="register-container">
         <div class="logo">
             <h1>📝 用户注册</h1>
-            <p>创建您的账户</p>
         </div>
         
         <div id="errorMessage" class="error-message"></div>
@@ -162,55 +84,45 @@
                     <div class="role-option selected" onclick="selectRole('teacher')">
                         <input type="radio" name="role" value="teacher" checked>
                         <span class="role-icon">👨‍🏫</span>
-                        <span class="role-name">教师</span>
+                        <span>教师</span>
                     </div>
                     <div class="role-option" onclick="selectRole('student')">
                         <input type="radio" name="role" value="student">
                         <span class="role-icon">👨‍🎓</span>
-                        <span class="role-name">学生</span>
+                        <span>学生</span>
                     </div>
                     <div class="role-option" onclick="selectRole('parent')">
                         <input type="radio" name="role" value="parent">
                         <span class="role-icon">👨‍👩‍👦</span>
-                        <span class="role-name">家长</span>
+                        <span>家长</span>
                     </div>
                 </div>
             </div>
             
+            <!-- 邀请码输入框（学生和教师显示） -->
+            <div class="form-group" id="inviteCodeGroup">
+                <label for="inviteCode">邀请码 *</label>
+                <input type="text" id="inviteCode" placeholder="请输入邀请码">
+            </div>
+            
             <div class="form-group">
                 <label for="username">用户名</label>
-                <input type="text" id="username" name="username" 
-                       placeholder="请输入用户名" required>
+                <input type="text" id="username" required>
             </div>
             
             <div class="form-group">
                 <label for="realName">真实姓名</label>
-                <input type="text" id="realName" name="realName" 
-                       placeholder="请输入真实姓名" required>
+                <input type="text" id="realName" required>
             </div>
             
             <div class="form-group">
                 <label for="password">密码</label>
-                <input type="password" id="password" name="password" 
-                       placeholder="请输入密码（至少6位）" required minlength="6">
+                <input type="password" id="password" required minlength="6">
             </div>
             
             <div class="form-group">
                 <label for="confirmPassword">确认密码</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" 
-                       placeholder="请再次输入密码" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">邮箱（可选）</label>
-                <input type="email" id="email" name="email" 
-                       placeholder="example@email.com">
-            </div>
-            
-            <div class="form-group">
-                <label for="phone">手机号（可选）</label>
-                <input type="tel" id="phone" name="phone" 
-                       placeholder="请输入手机号">
+                <input type="password" id="confirmPassword" required>
             </div>
             
             <button type="submit" class="btn-register">注 册</button>
@@ -222,33 +134,31 @@
     </div>
     
     <script>
-        // ========== 配置 ==========
-        const WORKER_URL = 'https://https://school-api.hru123.workers.dev';
+        const WORKER_URL = 'https://school-api.hru123.workers.dev';
         const API_BASE = WORKER_URL + '/api';
         
-        // ========== 角色选择 ==========
         function selectRole(role) {
-            // 更新 radio 选中状态
             document.querySelector(`input[name="role"][value="${role}"]`).checked = true;
-            
-            // 更新样式
             document.querySelectorAll('.role-option').forEach(el => {
                 el.classList.remove('selected');
             });
             event.currentTarget.classList.add('selected');
+            
+            // 学生和教师需要邀请码
+            if (role === 'student' || role === 'teacher') {
+                document.getElementById('inviteCodeGroup').style.display = 'block';
+            } else {
+                document.getElementById('inviteCodeGroup').style.display = 'none';
+            }
         }
         
-        // ========== 显示错误 ==========
         function showError(message) {
             const errorEl = document.getElementById('errorMessage');
             errorEl.textContent = message;
             errorEl.style.display = 'block';
-            setTimeout(() => {
-                errorEl.style.display = 'none';
-            }, 5000);
+            setTimeout(() => { errorEl.style.display = 'none'; }, 5000);
         }
         
-        // ========== 注册表单处理 ==========
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -257,44 +167,24 @@
             const realName = document.getElementById('realName').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            
-            // 验证
-            if (!username || !realName || !password) {
-                showError('请填写所有必填字段');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('密码长度至少6位');
-                return;
-            }
+            const inviteCode = document.getElementById('inviteCode').value.trim();
             
             if (password !== confirmPassword) {
                 showError('两次输入的密码不一致');
                 return;
             }
             
-            // 禁用按钮
-            const registerBtn = document.querySelector('.btn-register');
-            registerBtn.disabled = true;
-            registerBtn.textContent = '注册中...';
+            // 学生和教师必须输入邀请码
+            if ((role === 'student' || role === 'teacher') && !inviteCode) {
+                showError('请输入邀请码');
+                return;
+            }
             
             try {
                 const response = await fetch(API_BASE + '/auth/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        username,
-                        password,
-                        realName,
-                        role,
-                        email,
-                        phone
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, realName, role, inviteCode })
                 });
                 
                 const data = await response.json();
@@ -303,18 +193,15 @@
                     alert('注册成功！请登录');
                     window.location.href = '/login.html';
                 } else {
-                    showError(data.error || '注册失败，请重试');
-                    registerBtn.disabled = false;
-                    registerBtn.textContent = '注 册';
+                    showError(data.error || '注册失败');
                 }
-                
             } catch (error) {
-                console.error('注册错误:', error);
-                showError('网络错误，请检查网络连接');
-                registerBtn.disabled = false;
-                registerBtn.textContent = '注 册';
+                showError('网络错误，请重试');
             }
         });
+        
+        // 默认显示邀请码（教师角色）
+        document.getElementById('inviteCodeGroup').style.display = 'block';
     </script>
 </body>
 </html>
