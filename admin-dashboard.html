@@ -57,7 +57,7 @@
             padding: 0 20px;
         }
         
-        /* 统计卡片 - 一排显示 */
+        /* 统计卡片 */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -166,6 +166,11 @@
             cursor: pointer;
             font-size: 12px;
             margin-right: 5px;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            opacity: 0.8;
         }
         
         .btn-edit {
@@ -197,6 +202,14 @@
             margin-top: 5px;
         }
         
+        .btn-add-class {
+            background: #2196f3;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
         .status-active {
             color: #4CAF50;
             font-weight: bold;
@@ -220,43 +233,69 @@
         .role-student { background: #4caf50; }
         .role-parent { background: #ff9800; }
         
-        /* 年级和班级管理 */
+        /* 年级管理美化 */
         .grade-section {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
-        .grade-form {
+        .grade-add-form {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
+            align-items: center;
         }
         
-        .grade-form input,
-        .grade-form select {
-            padding: 10px;
+        .grade-add-form input {
+            flex: 1;
+            padding: 10px 15px;
             border: 2px solid #e0e0e0;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 14px;
+            transition: border-color 0.3s;
         }
         
-        .grade-list {
+        .grade-add-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-add-grade {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            transition: background 0.3s;
+        }
+        
+        .btn-add-grade:hover {
+            background: #5a67d8;
+        }
+        
+        /* 年级卡片网格 - 每行3个 */
+        .grade-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
         
         .grade-card {
             background: #f8f9fa;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 20px;
             transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
         }
         
         .grade-card:hover {
             border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
         }
         
         .grade-card-header {
@@ -264,36 +303,114 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
         }
         
         .grade-name {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #333;
         }
         
+        .grade-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-delete-grade {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+        
+        .btn-delete-grade:hover {
+            background: #d32f2f;
+        }
+        
         .class-list {
-            margin-top: 10px;
+            flex: 1;
+            margin-bottom: 15px;
         }
         
         .class-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px;
+            padding: 10px;
             background: white;
             border-radius: 5px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+        
+        .class-item:hover {
+            border-color: #2196f3;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
         }
         
         .class-name {
             font-weight: bold;
             color: #333;
+            font-size: 14px;
         }
         
         .class-student-count {
             color: #666;
             font-size: 12px;
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        
+        /* 班级添加区域 */
+        .class-add-form {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+        }
+        
+        .class-add-form input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 13px;
+            transition: border-color 0.3s;
+        }
+        
+        .class-add-form input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+        
+        .btn-add-class {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: background 0.3s;
+        }
+        
+        .btn-add-class:hover {
+            background: #1976d2;
+        }
+        
+        .no-classes {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 13px;
         }
         
         /* 邀请码管理 */
@@ -378,17 +495,26 @@
             color: #666;
         }
         
+        @media (max-width: 1024px) {
+            .grade-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
             
+            .grade-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .invite-code-form,
-            .grade-form {
+            .grade-add-form {
                 flex-direction: column;
             }
             
-            .grade-list,
             .invite-code-list {
                 grid-template-columns: 1fr;
             }
@@ -475,13 +601,13 @@
                 <h2 style="margin-bottom: 20px;">🏫 年级管理</h2>
                 
                 <!-- 添加年级 -->
-                <div class="grade-form">
-                    <input type="text" id="gradeName" placeholder="年级名称（如：初一）">
-                    <button class="btn-generate" onclick="addGrade()">➕ 添加年级</button>
+                <div class="grade-add-form">
+                    <input type="text" id="gradeNameInput" placeholder="输入年级名称（如：初一、初二、初三）" onkeypress="if(event.key==='Enter') addGrade()">
+                    <button class="btn-add-grade" onclick="addGrade()">➕ 添加年级</button>
                 </div>
                 
-                <!-- 年级列表 -->
-                <div id="gradeList" class="grade-list">
+                <!-- 年级列表 - 每行3个 -->
+                <div id="gradeGrid" class="grade-grid">
                     <div class="empty-state">暂无年级，请添加</div>
                 </div>
             </div>
@@ -490,7 +616,6 @@
             <div id="invitesTab" style="display: none;">
                 <h2 style="margin-bottom: 20px;">🎫 邀请码管理</h2>
                 
-                <!-- 生成邀请码 -->
                 <div class="invite-code-form">
                     <select id="inviteGrade">
                         <option value="">选择年级</option>
@@ -510,7 +635,6 @@
                     <button class="btn-generate" onclick="generateInviteCodes()">🎫 生成邀请码</button>
                 </div>
                 
-                <!-- 邀请码列表 -->
                 <div id="inviteCodeList" class="invite-code-list">
                     <div class="empty-state">暂无邀请码，请生成</div>
                 </div>
@@ -653,7 +777,7 @@
         
         // 添加年级
         async function addGrade() {
-            const gradeName = document.getElementById('gradeName').value.trim();
+            const gradeName = document.getElementById('gradeNameInput').value.trim();
             if (!gradeName) {
                 alert('请输入年级名称');
                 return;
@@ -671,8 +795,7 @@
                 
                 const data = await response.json();
                 if (response.ok) {
-                    alert('年级添加成功');
-                    document.getElementById('gradeName').value = '';
+                    document.getElementById('gradeNameInput').value = '';
                     loadGrades();
                     loadStats();
                 } else {
@@ -685,8 +808,8 @@
         
         // 加载年级
         async function loadGrades() {
-            const gradeList = document.getElementById('gradeList');
-            gradeList.innerHTML = '<div class="loading">加载中...</div>';
+            const gradeGrid = document.getElementById('gradeGrid');
+            gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
             
             try {
                 const response = await fetch(API_BASE + '/admin/grades', {
@@ -696,15 +819,14 @@
                 if (response.ok) {
                     const grades = await response.json();
                     if (grades.length === 0) {
-                        gradeList.innerHTML = '<div class="empty-state">暂无年级，请添加</div>';
+                        gradeGrid.innerHTML = '<div class="empty-state">暂无年级，请添加</div>';
                     } else {
-                        gradeList.innerHTML = grades.map(grade => `
+                        gradeGrid.innerHTML = grades.map(grade => `
                             <div class="grade-card">
                                 <div class="grade-card-header">
                                     <span class="grade-name">${grade.gradeName}</span>
-                                    <div>
-                                        <button class="btn btn-edit" onclick="addClass('${grade.gradeId}')">➕ 添加班级</button>
-                                        <button class="btn btn-delete" onclick="deleteGrade('${grade.gradeId}')">删除</button>
+                                    <div class="grade-actions">
+                                        <button class="btn-delete-grade" onclick="deleteGrade('${grade.gradeId}')">删除</button>
                                     </div>
                                 </div>
                                 <div class="class-list">
@@ -712,11 +834,18 @@
                                         grade.classes.map(cls => `
                                             <div class="class-item">
                                                 <span class="class-name">${cls.className}</span>
-                                                <span class="class-student-count">${cls.studentCount || 0} 名学生</span>
+                                                <span class="class-student-count">${cls.studentCount || 0} 人</span>
                                             </div>
                                         `).join('') 
-                                        : '<p style="color: #999;">暂无班级</p>'
+                                        : '<div class="no-classes">暂无班级</div>'
                                     }
+                                </div>
+                                <div class="class-add-form">
+                                    <input type="text" 
+                                           id="classInput_${grade.gradeId}" 
+                                           placeholder="输入班级名称（如：1班）" 
+                                           onkeypress="if(event.key==='Enter') addClass('${grade.gradeId}')">
+                                    <button class="btn-add-class" onclick="addClass('${grade.gradeId}')">➕ 添加</button>
                                 </div>
                             </div>
                         `).join('');
@@ -724,13 +853,19 @@
                 }
             } catch (error) {
                 console.error('加载年级失败:', error);
+                gradeGrid.innerHTML = '<div class="empty-state">加载失败</div>';
             }
         }
         
         // 添加班级
         async function addClass(gradeId) {
-            const className = prompt('请输入班级名称（如：1班）');
-            if (!className) return;
+            const input = document.getElementById(`classInput_${gradeId}`);
+            const className = input.value.trim();
+            
+            if (!className) {
+                alert('请输入班级名称');
+                return;
+            }
             
             try {
                 const response = await fetch(API_BASE + '/admin/classes', {
@@ -744,7 +879,6 @@
                 
                 const data = await response.json();
                 if (response.ok) {
-                    alert('班级添加成功');
                     loadGrades();
                     loadStats();
                 } else {
@@ -757,7 +891,7 @@
         
         // 删除年级
         async function deleteGrade(gradeId) {
-            if (!confirm('确定要删除这个年级吗？')) return;
+            if (!confirm('确定要删除这个年级吗？该年级下的所有班级也会被删除！')) return;
             
             try {
                 const response = await fetch(`${API_BASE}/admin/grades/${gradeId}`, {
@@ -766,12 +900,13 @@
                 });
                 
                 if (response.ok) {
-                    alert('删除成功');
                     loadGrades();
                     loadStats();
+                } else {
+                    alert('删除失败');
                 }
             } catch (error) {
-                alert('删除失败');
+                alert('网络错误');
             }
         }
         
@@ -929,12 +1064,38 @@
         // 用户操作
         async function toggleUser(userId) {
             if (!confirm('确定要切换用户状态吗？')) return;
-            // 实现省略，与之前相同
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/users/${userId}/toggle`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                
+                if (response.ok) {
+                    loadUsers();
+                    loadStats();
+                }
+            } catch (error) {
+                alert('操作失败');
+            }
         }
         
         async function deleteUser(userId) {
             if (!confirm('确定要删除用户吗？')) return;
-            // 实现省略，与之前相同
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                
+                if (response.ok) {
+                    loadUsers();
+                    loadStats();
+                }
+            } catch (error) {
+                alert('删除失败');
+            }
         }
         
         // 初始化
