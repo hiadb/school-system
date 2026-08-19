@@ -481,6 +481,21 @@
             border-color: #667eea;
         }
         
+        /* 教师设置下拉菜单 */
+        .teacher-setting-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .teacher-setting-form select {
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        
         @media (max-width: 1024px) {
             .grade-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -580,12 +595,11 @@
                                 <th>用户名</th>
                                 <th>所在班级/任课</th>
                                 <th>状态</th>
-                                <th>注册时间</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody id="teacherUserList">
-                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                            <tr><td colspan="5" class="loading">加载中...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -599,12 +613,11 @@
                                 <th>用户名</th>
                                 <th>孩子</th>
                                 <th>状态</th>
-                                <th>注册时间</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody id="parentUserList">
-                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                            <tr><td colspan="5" class="loading">加载中...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -678,6 +691,10 @@
         const WORKER_URL = 'https://school-api.hru123.workers.dev';
         const API_BASE = WORKER_URL + '/api';
         
+        let currentUserType = 'student';
+        let allGrades = [];
+        let allTeachers = [];
+        
         function getToken() {
             return localStorage.getItem('token');
         }
@@ -696,7 +713,7 @@
             
             if (tabName === 'users') {
                 document.getElementById('usersTab').style.display = 'block';
-                showUserTab('student');
+                showUserTab(currentUserType);
             } else if (tabName === 'grades') {
                 document.getElementById('gradesTab').style.display = 'block';
                 loadGrades();
@@ -707,6 +724,8 @@
         }
         
         function showUserTab(userType) {
+            currentUserType = userType;
+            
             document.querySelectorAll('.user-sub-tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
             
@@ -760,7 +779,22 @@
             }
         }
         
-        // 加载学生用户
+        // 加载所有年级（用于教师设置下拉菜单）
+        async function loadAllGrades() {
+            try {
+                const response = await fetch(API_BASE + '/admin/grades', {
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                
+                if (response.ok) {
+                    allGrades = await response.json();
+                }
+            } catch (error) {
+                console.error('加载年级失败:', error);
+            }
+        }
+        
+        // 加载学生用户（根据邀请码分类）
         async function loadStudentUsers() {
             const tbody = document.getElementById('studentUserList');
             tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
@@ -802,7 +836,7 @@
         // 加载教师用户
         async function loadTeacherUsers() {
             const tbody = document.getElementById('teacherUserList');
-            tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
                 const response = await fetch(API_BASE + '/admin/users?role=teacher', {
@@ -811,19 +845,19 @@
                 
                 if (response.ok) {
                     const users = await response.json();
+                    allTeachers = users;
+                    
                     if (users.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">暂无教师</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无教师</td></tr>';
                     } else {
                         tbody.innerHTML = users.map(user => {
                             let classInfo = '';
-                            if (user.teacherType === 'class' && user.classes && user.classes.length > 0) {
-                                classInfo = `<span class="teacher-type-badge teacher-class">${user.classes[0]}班主任</span>`;
-                            } else if (user.teacherType === 'subject' && user.subjects && user.subjects.length > 0) {
-                                classInfo = user.subjects.map(s => 
-                                    `<span class="teacher-type-badge teacher-subject">${s}</span>`
-                                ).join(' ');
+                            if (user.teacherType === 'class' && user.className) {
+                                classInfo = `<span class="teacher-type-badge teacher-class">${user.className}班主任</span>`;
+                            } else if (user.teacherType === 'subject' && user.subject) {
+                                classInfo = `<span class="teacher-type-badge teacher-subject">${user.subject}教师</span>`;
                             } else {
-                                classInfo = '<span style="color: #999;">未分配</span>';
+                                classInfo = '<span style="color: #999;">未设置</span>';
                             }
                             
                             return `
@@ -834,9 +868,8 @@
                                     <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
                                         ${user.status === 'active' ? '正常' : '禁用'}
                                     </td>
-                                    <td>${new Date(user.createdAt).toLocaleDateString()}</td>
                                     <td>
-                                        <button class="btn btn-set-teacher" onclick="setTeacherType('${user.userId}', '${user.realName}')">设置身份</button>
+                                        <button class="btn btn-set-teacher" onclick="openTeacherSetting('${user.userId}')">设置</button>
                                         <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
                                             ${user.status === 'active' ? '禁用' : '启用'}
                                         </button>
@@ -852,10 +885,179 @@
             }
         }
         
+        // 打开教师设置（使用下拉菜单）
+        function openTeacherSetting(teacherId) {
+            const teacher = allTeachers.find(t => t.userId === teacherId);
+            if (!teacher) return;
+            
+            // 创建模态框
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            
+            // 构建年级选项
+            const gradeOptions = allGrades.map(g => 
+                `<option value="${g.gradeName}">${g.gradeName}</option>`
+            ).join('');
+            
+            // 构建班级选项（基于第一个年级）
+            const firstGradeClasses = allGrades[0]?.classes || [];
+            const classOptions = firstGradeClasses.map(c => 
+                `<option value="${c.className}">${c.className}</option>`
+            ).join('');
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 10px; width: 400px;">
+                    <h3 style="margin-bottom: 20px;">设置教师身份 - ${teacher.realName}</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">教师类型</label>
+                        <select id="teacherTypeSelect" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;">
+                            <option value="class" ${teacher.teacherType === 'class' ? 'selected' : ''}>班主任</option>
+                            <option value="subject" ${teacher.teacherType === 'subject' ? 'selected' : ''}>任课教师</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">年级</label>
+                        <select id="teacherGradeSelect" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;" onchange="updateClassOptions()">
+                            <option value="">选择年级</option>
+                            ${gradeOptions}
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;" id="classSelectContainer">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">班级</label>
+                        <select id="teacherClassSelect" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;">
+                            <option value="">选择班级</option>
+                            ${classOptions}
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;" id="subjectInputContainer" style="display: none;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">科目</label>
+                        <select id="teacherSubjectSelect" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;">
+                            <option value="">选择科目</option>
+                            <option value="语文">语文</option>
+                            <option value="数学">数学</option>
+                            <option value="英语">英语</option>
+                            <option value="物理">物理</option>
+                            <option value="化学">化学</option>
+                            <option value="生物">生物</option>
+                            <option value="历史">历史</option>
+                            <option value="地理">地理</option>
+                            <option value="政治">政治</option>
+                            <option value="体育">体育</option>
+                            <option value="音乐">音乐</option>
+                            <option value="美术">美术</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="saveTeacherSetting('${teacherId}')" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">保存</button>
+                        <button onclick="this.closest('div[style]').parentElement.remove()" style="flex: 1; padding: 12px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">取消</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 根据教师类型显示/隐藏字段
+            const typeSelect = document.getElementById('teacherTypeSelect');
+            const classContainer = document.getElementById('classSelectContainer');
+            const subjectContainer = document.getElementById('subjectInputContainer');
+            
+            function updateVisibility() {
+                if (typeSelect.value === 'class') {
+                    classContainer.style.display = 'block';
+                    subjectContainer.style.display = 'none';
+                } else {
+                    classContainer.style.display = 'none';
+                    subjectContainer.style.display = 'block';
+                }
+            }
+            
+            typeSelect.addEventListener('change', updateVisibility);
+            updateVisibility();
+        }
+        
+        // 更新班级选项
+        function updateClassOptions() {
+            const gradeSelect = document.getElementById('teacherGradeSelect');
+            const classSelect = document.getElementById('teacherClassSelect');
+            const selectedGrade = gradeSelect.value;
+            
+            const grade = allGrades.find(g => g.gradeName === selectedGrade);
+            if (grade && grade.classes) {
+                classSelect.innerHTML = '<option value="">选择班级</option>' + 
+                    grade.classes.map(c => `<option value="${c.className}">${c.className}</option>`).join('');
+            }
+        }
+        
+        // 保存教师设置
+        async function saveTeacherSetting(teacherId) {
+            const teacherType = document.getElementById('teacherTypeSelect').value;
+            const gradeName = document.getElementById('teacherGradeSelect').value;
+            const className = document.getElementById('teacherClassSelect').value;
+            const subject = document.getElementById('teacherSubjectSelect').value;
+            
+            if (!gradeName) {
+                alert('请选择年级');
+                return;
+            }
+            
+            if (teacherType === 'class' && !className) {
+                alert('请选择班级');
+                return;
+            }
+            
+            if (teacherType === 'subject' && !subject) {
+                alert('请选择科目');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/teachers/${teacherId}/type`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({
+                        teacherType,
+                        gradeName,
+                        className: teacherType === 'class' ? className : '',
+                        subject: teacherType === 'subject' ? subject : ''
+                    })
+                });
+                
+                if (response.ok) {
+                    // 关闭模态框
+                    document.querySelector('div[style*="position: fixed"]').remove();
+                    loadTeacherUsers();
+                    alert('设置成功');
+                } else {
+                    alert('设置失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        }
+        
         // 加载家长用户
         async function loadParentUsers() {
             const tbody = document.getElementById('parentUserList');
-            tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
                 const response = await fetch(API_BASE + '/admin/users?role=parent', {
@@ -865,7 +1067,7 @@
                 if (response.ok) {
                     const users = await response.json();
                     if (users.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">暂无家长</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无家长</td></tr>';
                     } else {
                         tbody.innerHTML = users.map(user => `
                             <tr>
@@ -875,7 +1077,6 @@
                                 <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
                                     ${user.status === 'active' ? '正常' : '禁用'}
                                 </td>
-                                <td>${new Date(user.createdAt).toLocaleDateString()}</td>
                                 <td>
                                     <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
                                         ${user.status === 'active' ? '禁用' : '启用'}
@@ -888,43 +1089,6 @@
                 }
             } catch (error) {
                 console.error('加载家长失败:', error);
-            }
-        }
-        
-        // 设置教师身份
-        async function setTeacherType(teacherId, teacherName) {
-            const teacherType = prompt(
-                `请选择 ${teacherName} 的教师身份：\n` +
-                `1. 班主任（输入班级名称，如：一年级1班）\n` +
-                `2. 任课教师（输入科目，如：语文）\n` +
-                `请输入班级或科目名称：`
-            );
-            
-            if (!teacherType) return;
-            
-            // 判断是班级还是科目
-            const isClass = teacherType.includes('班');
-            
-            try {
-                const response = await fetch(`${API_BASE}/admin/teachers/${teacherId}/type`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
-                    },
-                    body: JSON.stringify({
-                        teacherType: isClass ? 'class' : 'subject',
-                        value: teacherType
-                    })
-                });
-                
-                if (response.ok) {
-                    loadTeacherUsers();
-                } else {
-                    alert('设置失败');
-                }
-            } catch (error) {
-                alert('网络错误');
             }
         }
         
@@ -948,7 +1112,7 @@
                 
                 if (response.ok) {
                     document.getElementById('gradeNameInput').value = '';
-                    await Promise.all([loadGrades(), loadStats()]);
+                    await Promise.all([loadGrades(), loadStats(), loadAllGrades()]);
                 }
             } catch (error) {
                 alert('网络错误');
@@ -966,6 +1130,8 @@
                 
                 if (response.ok) {
                     const grades = await response.json();
+                    allGrades = grades;
+                    
                     if (grades.length === 0) {
                         gradeGrid.innerHTML = '<div class="empty-state">暂无年级，请添加</div>';
                     } else {
@@ -984,7 +1150,6 @@
                                                     <span class="class-student-count">${cls.studentCount || 0} 人</span>
                                                 </div>
                                                 <div>
-                                                    <button class="btn-set-teacher" onclick="setClassTeacher('${grade.gradeId}', '${cls.className}')">任课教师</button>
                                                     <button class="btn-delete-class" onclick="deleteClass('${grade.gradeId}', '${cls.className}')">删除</button>
                                                 </div>
                                             </div>
@@ -1028,7 +1193,7 @@
                 });
                 
                 if (response.ok) {
-                    await Promise.all([loadGrades(), loadStats()]);
+                    await Promise.all([loadGrades(), loadStats(), loadAllGrades()]);
                 }
             } catch (error) {
                 alert('网络错误');
@@ -1049,7 +1214,7 @@
                 });
                 
                 if (response.ok) {
-                    await Promise.all([loadGrades(), loadStats()]);
+                    await Promise.all([loadGrades(), loadStats(), loadAllGrades()]);
                 }
             } catch (error) {
                 alert('网络错误');
@@ -1066,49 +1231,14 @@
                 });
                 
                 if (response.ok) {
-                    await Promise.all([loadGrades(), loadStats()]);
+                    await Promise.all([loadGrades(), loadStats(), loadAllGrades()]);
                 }
             } catch (error) {
                 alert('网络错误');
             }
         }
         
-        // 设置班级任课教师
-        async function setClassTeacher(gradeId, className) {
-            const subject = prompt(`请为 ${className} 设置任课教师：\n请输入科目（如：语文、数学）`);
-            if (!subject) return;
-            
-            const teacherName = prompt(`请输入 ${subject} 教师的姓名：`);
-            if (!teacherName) return;
-            
-            // 这里可以保存到班级信息中
-            alert(`已设置 ${className} ${subject}教师：${teacherName}`);
-            
-            // 实际实现需要调用 API 保存
-            try {
-                const response = await fetch(`${API_BASE}/admin/classes/teacher`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
-                    },
-                    body: JSON.stringify({
-                        gradeId,
-                        className,
-                        subject,
-                        teacherName
-                    })
-                });
-                
-                if (response.ok) {
-                    loadGrades();
-                }
-            } catch (error) {
-                alert('保存失败');
-            }
-        }
-        
-        // 邀请码管理
+        // 邀请码管理函数
         async function loadAllInviteCodes() {
             await Promise.all([
                 loadStudentInviteCodes(),
@@ -1365,10 +1495,9 @@
                 });
                 
                 loadStats();
-                const activeTab = document.querySelector('.user-sub-tab.active').textContent;
-                if (activeTab.includes('学生')) loadStudentUsers();
-                else if (activeTab.includes('教师')) loadTeacherUsers();
-                else if (activeTab.includes('家长')) loadParentUsers();
+                if (currentUserType === 'student') loadStudentUsers();
+                else if (currentUserType === 'teacher') loadTeacherUsers();
+                else if (currentUserType === 'parent') loadParentUsers();
             } catch (error) {
                 alert('操作失败');
             }
@@ -1384,10 +1513,9 @@
                 });
                 
                 loadStats();
-                const activeTab = document.querySelector('.user-sub-tab.active').textContent;
-                if (activeTab.includes('学生')) loadStudentUsers();
-                else if (activeTab.includes('教师')) loadTeacherUsers();
-                else if (activeTab.includes('家长')) loadParentUsers();
+                if (currentUserType === 'student') loadStudentUsers();
+                else if (currentUserType === 'teacher') loadTeacherUsers();
+                else if (currentUserType === 'parent') loadParentUsers();
             } catch (error) {
                 alert('删除失败');
             }
@@ -1402,6 +1530,7 @@
             
             document.getElementById('userName').textContent = user.realName || '管理员';
             loadStats();
+            loadAllGrades();
             showUserTab('student');
         }
         
