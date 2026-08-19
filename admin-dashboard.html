@@ -5,18 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理员工作台 - 学校管理系统</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
             background: #f5f5f5;
             min-height: 100vh;
         }
-        
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -26,17 +20,8 @@
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .header h1 {
-            font-size: 24px;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
+        .header h1 { font-size: 24px; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
         .btn-logout {
             background: rgba(255,255,255,0.2);
             color: white;
@@ -44,57 +29,25 @@
             padding: 8px 16px;
             border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s;
         }
-        
-        .btn-logout:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-        
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin-bottom: 20px;
         }
-        
         .stat-card {
             background: white;
-            padding: 15px 10px;
+            padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             text-align: center;
-            transition: transform 0.2s;
             cursor: pointer;
         }
-        
-        .stat-card:hover {
-            transform: translateY(-3px);
-        }
-        
-        .stat-card .stat-icon {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-        
-        .stat-card .stat-value {
-            font-size: 22px;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 3px;
-        }
-        
-        .stat-card .stat-label {
-            color: #666;
-            font-size: 12px;
-        }
-        
+        .stat-card .stat-icon { font-size: 24px; margin-bottom: 5px; }
+        .stat-card .stat-value { font-size: 28px; font-weight: bold; color: #667eea; }
+        .stat-card .stat-label { color: #666; font-size: 13px; }
         .nav-tabs {
             display: flex;
             gap: 10px;
@@ -104,7 +57,6 @@
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
-        
         .nav-tab {
             padding: 10px 20px;
             background: transparent;
@@ -112,51 +64,17 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 15px;
-            transition: all 0.3s;
         }
-        
-        .nav-tab:hover {
-            background: #f0f0f0;
-        }
-        
-        .nav-tab.active {
-            background: #667eea;
-            color: white;
-        }
-        
+        .nav-tab.active { background: #667eea; color: white; }
         .content {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #333;
-            font-size: 14px;
-        }
-        
-        td {
-            font-size: 14px;
-        }
-        
-        tr:hover {
-            background: #f9f9f9;
-        }
-        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #f8f9fa; font-weight: bold; }
         .btn {
             padding: 6px 12px;
             border: none;
@@ -164,258 +82,24 @@
             cursor: pointer;
             font-size: 12px;
             margin-right: 5px;
-            transition: all 0.2s;
             white-space: nowrap;
         }
-        
-        .btn:hover {
-            opacity: 0.8;
-        }
-        
-        .btn-toggle {
-            background: #ff9800;
-            color: white;
-        }
-        
-        .btn-delete {
-            background: #f44336;
-            color: white;
-        }
-        
-        .btn-set-teacher {
-            background: #9c27b0;
-            color: white;
-        }
-        
-        .btn-generate {
-            background: #4CAF50;
-            color: white;
-            padding: 8px 16px;
-            font-size: 13px;
-        }
-        
-        .btn-refresh {
-            background: #2196f3;
-            color: white;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-        
-        .btn-copy {
-            background: #667eea;
-            color: white;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-        
-        .btn-add-class {
-            background: #2196f3;
-            color: white;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-        
-        .btn-delete-class {
-            background: #ff5252;
-            color: white;
-            padding: 3px 8px;
-            font-size: 11px;
-        }
-        
-        .btn-delete-grade {
-            background: #f44336;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        .status-active {
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        
-        .status-disabled {
-            color: #f44336;
-            font-weight: bold;
-        }
-        
-        .teacher-type-badge {
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        
-        .teacher-class {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-        
-        .teacher-subject {
-            background: #f3e5f5;
-            color: #7b1fa2;
-        }
-        
-        .grade-add-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .grade-add-form input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        .btn-add-grade {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        .grade-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-        
-        .grade-card {
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-        }
-        
-        .grade-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        
-        .grade-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .class-list {
-            margin-bottom: 15px;
-        }
-        
-        .class-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .class-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .class-name {
-            font-weight: bold;
-            color: #333;
-            font-size: 14px;
-        }
-        
-        .class-student-count {
-            color: #666;
-            font-size: 12px;
-            background: #f0f0f0;
-            padding: 3px 8px;
-            border-radius: 10px;
-        }
-        
-        .class-add-form {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .class-add-form input {
-            flex: 1;
-            padding: 8px 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 13px;
-        }
-        
-        .no-classes {
-            text-align: center;
-            color: #999;
-            padding: 20px;
-            font-size: 13px;
-        }
-        
-        .invite-section {
-            margin-bottom: 30px;
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .invite-code-display {
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            font-weight: bold;
-            color: #667eea;
-            letter-spacing: 1px;
-        }
-        
-        .invite-status {
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .status-unused {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-used {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .user-sub-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
+        .btn-toggle { background: #ff9800; color: white; }
+        .btn-delete { background: #f44336; color: white; }
+        .btn-set-teacher { background: #9c27b0; color: white; }
+        .btn-generate { background: #4CAF50; color: white; padding: 8px 16px; font-size: 13px; }
+        .btn-refresh { background: #2196f3; color: white; padding: 5px 10px; font-size: 12px; }
+        .btn-copy { background: #667eea; color: white; padding: 5px 10px; font-size: 12px; }
+        .btn-add-class { background: #2196f3; color: white; padding: 5px 10px; font-size: 12px; }
+        .btn-delete-class { background: #ff5252; color: white; padding: 3px 8px; font-size: 11px; }
+        .btn-delete-grade { background: #f44336; color: white; padding: 5px 10px; font-size: 12px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-add-grade { background: #667eea; color: white; padding: 10px 20px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; }
+        .status-active { color: #4CAF50; font-weight: bold; }
+        .status-disabled { color: #f44336; font-weight: bold; }
+        .teacher-type-badge { padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+        .teacher-class { background: #e3f2fd; color: #1976d2; }
+        .teacher-subject { background: #f3e5f5; color: #7b1fa2; }
+        .user-sub-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .user-sub-tab {
             padding: 8px 16px;
             background: transparent;
@@ -423,117 +107,45 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s;
         }
-        
-        .user-sub-tab.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-        
-        /* 模态框 */
+        .user-sub-tab.active { background: #667eea; color: white; border-color: #667eea; }
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+        .grade-add-form { display: flex; gap: 10px; margin-bottom: 20px; }
+        .grade-add-form input { flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; }
+        .grade-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grade-card { background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; }
+        .grade-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e0e0e0; }
+        .grade-name { font-size: 18px; font-weight: bold; }
+        .class-list { margin-bottom: 15px; }
+        .class-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 5px; margin-bottom: 8px; border: 1px solid #e0e0e0; }
+        .class-info { display: flex; align-items: center; gap: 10px; }
+        .class-name { font-weight: bold; font-size: 14px; }
+        .class-student-count { color: #666; font-size: 12px; background: #f0f0f0; padding: 3px 8px; border-radius: 10px; }
+        .class-add-form { display: flex; gap: 8px; }
+        .class-add-form input { flex: 1; padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 13px; }
+        .no-classes { text-align: center; color: #999; padding: 20px; font-size: 13px; }
+        .invite-section { margin-bottom: 30px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; }
+        .section-title { font-size: 18px; font-weight: bold; }
+        .invite-code-display { font-family: 'Courier New', monospace; font-size: 16px; font-weight: bold; color: #667eea; }
+        .invite-status { padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; }
+        .status-unused { background: #d4edda; color: #155724; }
+        .status-used { background: #f8d7da; color: #721c24; }
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
-        
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 450px;
-        }
-        
-        .modal-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .btn-save {
-            flex: 1;
-            padding: 12px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        .btn-cancel {
-            flex: 1;
-            padding: 12px;
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        @media (max-width: 1024px) {
-            .grade-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .grade-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 450px; }
+        .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        .form-group select { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 14px; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-save { flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-cancel { flex: 1; padding: 12px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        @media (max-width: 1024px) { .grade-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .grade-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -579,64 +191,27 @@
             <!-- 用户管理 -->
             <div id="usersTab">
                 <h2 style="margin-bottom: 20px;">👥 用户管理</h2>
-                
                 <div class="user-sub-tabs">
                     <button class="user-sub-tab active" onclick="showUserTab('student')">👨‍🎓 学生</button>
                     <button class="user-sub-tab" onclick="showUserTab('teacher')">👨‍🏫 教师</button>
                     <button class="user-sub-tab" onclick="showUserTab('parent')">👨‍👩‍👦 家长</button>
                 </div>
-                
-                <!-- 学生列表 -->
                 <div id="studentUsersTab">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>姓名</th>
-                                <th>用户名</th>
-                                <th>班级</th>
-                                <th>状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentUserList">
-                            <tr><td colspan="5" class="loading">加载中...</td></tr>
-                        </tbody>
+                        <thead><tr><th>姓名</th><th>用户名</th><th>班级</th><th>状态</th><th>操作</th></tr></thead>
+                        <tbody id="studentUserList"><tr><td colspan="5" class="loading">加载中...</td></tr></tbody>
                     </table>
                 </div>
-                
-                <!-- 教师列表 -->
                 <div id="teacherUsersTab" style="display: none;">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>姓名</th>
-                                <th>用户名</th>
-                                <th>身份</th>
-                                <th>状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="teacherUserList">
-                            <tr><td colspan="5" class="loading">加载中...</td></tr>
-                        </tbody>
+                        <thead><tr><th>姓名</th><th>用户名</th><th>身份</th><th>状态</th><th>操作</th></tr></thead>
+                        <tbody id="teacherUserList"><tr><td colspan="5" class="loading">加载中...</td></tr></tbody>
                     </table>
                 </div>
-                
-                <!-- 家长列表 -->
                 <div id="parentUsersTab" style="display: none;">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>姓名</th>
-                                <th>用户名</th>
-                                <th>孩子</th>
-                                <th>状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="parentUserList">
-                            <tr><td colspan="5" class="loading">加载中...</td></tr>
-                        </tbody>
+                        <thead><tr><th>姓名</th><th>用户名</th><th>孩子</th><th>状态</th><th>操作</th></tr></thead>
+                        <tbody id="parentUserList"><tr><td colspan="5" class="loading">加载中...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -644,60 +219,34 @@
             <!-- 年级管理 -->
             <div id="gradesTab" style="display: none;">
                 <h2 style="margin-bottom: 20px;">🏫 年级管理</h2>
-                
                 <div class="grade-add-form">
                     <input type="text" id="gradeNameInput" placeholder="输入年级名称" onkeypress="if(event.key==='Enter') addGrade()">
                     <button class="btn-add-grade" onclick="addGrade()">➕ 添加年级</button>
                 </div>
-                
-                <div id="gradeGrid" class="grade-grid">
-                    <div class="empty-state">暂无年级，请添加</div>
-                </div>
+                <div id="gradeGrid" class="grade-grid"><div class="empty-state">加载中...</div></div>
             </div>
             
             <!-- 邀请码管理 -->
             <div id="invitesTab" style="display: none;">
                 <h2 style="margin-bottom: 20px;">🎫 邀请码管理</h2>
-                
                 <div class="invite-section">
                     <div class="section-header">
                         <div class="section-title">👨‍🎓 学生邀请码</div>
                         <button class="btn-generate" onclick="generateAllStudentInviteCodes()">🎫 一键生成全部</button>
                     </div>
-                    
                     <table>
-                        <thead>
-                            <tr>
-                                <th>年级</th>
-                                <th>班级</th>
-                                <th>邀请码</th>
-                                <th>状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentInviteList">
-                            <tr><td colspan="5" class="loading">加载中...</td></tr>
-                        </tbody>
+                        <thead><tr><th>年级</th><th>班级</th><th>邀请码</th><th>状态</th><th>操作</th></tr></thead>
+                        <tbody id="studentInviteList"><tr><td colspan="5" class="loading">加载中...</td></tr></tbody>
                     </table>
                 </div>
-                
                 <div class="invite-section">
                     <div class="section-header">
                         <div class="section-title">👨‍🏫 教师邀请码</div>
                         <button class="btn-generate" onclick="generateTeacherInviteCode()">🎫 生成/刷新</button>
                     </div>
-                    
                     <table>
-                        <thead>
-                            <tr>
-                                <th>邀请码</th>
-                                <th>使用次数</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="teacherInviteList">
-                            <tr><td colspan="3" class="loading">加载中...</td></tr>
-                        </tbody>
+                        <thead><tr><th>邀请码</th><th>使用次数</th><th>操作</th></tr></thead>
+                        <tbody id="teacherInviteList"><tr><td colspan="3" class="loading">加载中...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -705,7 +254,8 @@
     </div>
     
     <script>
-        const WORKER_URL = 'https://school-api.hru123.workers.dev;
+        // 配置 - 请替换为你的 Worker URL
+        const WORKER_URL = 'https://school-api.hru123.workers.dev';
         const API_BASE = WORKER_URL + '/api';
         
         let currentUserType = 'student';
@@ -719,13 +269,18 @@
         }
         
         function getUser() {
-            return JSON.parse(localStorage.getItem('user') || '{}');
+            const userStr = localStorage.getItem('user');
+            if (!userStr) return {};
+            try {
+                return JSON.parse(userStr);
+            } catch {
+                return {};
+            }
         }
         
         function showTab(tabName) {
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
-            
             document.getElementById('usersTab').style.display = 'none';
             document.getElementById('gradesTab').style.display = 'none';
             document.getElementById('invitesTab').style.display = 'none';
@@ -743,7 +298,6 @@
         
         function showUserTab(userType) {
             currentUserType = userType;
-            
             document.querySelectorAll('.user-sub-tab').forEach(tab => tab.classList.remove('active'));
             const tabs = document.querySelectorAll('.user-sub-tab');
             if (userType === 'student') tabs[0].classList.add('active');
@@ -781,10 +335,17 @@
             return code;
         }
         
+        // 加载统计
         async function loadStats() {
             try {
+                const token = getToken();
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
                 const response = await fetch(API_BASE + '/admin/stats', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
                 if (response.ok) {
@@ -793,75 +354,61 @@
                     document.getElementById('totalTeachers').textContent = stats.totalTeachers || 0;
                     document.getElementById('totalParents').textContent = stats.totalParents || 0;
                     document.getElementById('totalClasses').textContent = stats.totalClasses || 0;
+                } else {
+                    console.error('获取统计失败:', response.status);
                 }
             } catch (error) {
                 console.error('加载统计失败:', error);
             }
         }
         
-        async function loadAllGrades() {
+        // 加载所有用户
+        async function loadAllUsers() {
             try {
-                const response = await fetch(API_BASE + '/admin/grades', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                const token = getToken();
+                const response = await fetch(API_BASE + '/admin/users', {
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
                 if (response.ok) {
-                    allGrades = await response.json();
+                    const users = await response.json();
+                    return users;
                 }
+                return [];
             } catch (error) {
-                console.error('加载年级失败:', error);
+                console.error('加载用户失败:', error);
+                return [];
             }
         }
         
-        // 加载学生用户 - 只显示学生角色
+        // 加载学生用户
         async function loadStudentUsers() {
             const tbody = document.getElementById('studentUserList');
             tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
-                // 获取所有用户，然后筛选学生
-                const usersResponse = await fetch(API_BASE + '/admin/users', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
-                });
+                const users = await loadAllUsers();
+                const studentUsers = users.filter(u => u.role === 'student');
                 
-                // 获取学生详细信息
-                const studentsResponse = await fetch(API_BASE + '/students', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
-                });
-                
-                if (usersResponse.ok && studentsResponse.ok) {
-                    const users = await usersResponse.json();
-                    const students = await studentsResponse.json();
-                    
-                    // 筛选学生用户
-                    const studentUsers = users.filter(u => u.role === 'student');
-                    
-                    if (studentUsers.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无学生</td></tr>';
-                    } else {
-                        tbody.innerHTML = studentUsers.map(user => {
-                            // 查找学生的班级信息
-                            const studentInfo = students.find(s => s.studentId === user.userId);
-                            const className = studentInfo ? studentInfo.class : '未分班';
-                            
-                            return `
-                                <tr>
-                                    <td>${user.realName}</td>
-                                    <td>${user.username}</td>
-                                    <td>${className || '未分班'}</td>
-                                    <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
-                                        ${user.status === 'active' ? '正常' : '禁用'}
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
-                                            ${user.status === 'active' ? '禁用' : '启用'}
-                                        </button>
-                                        <button class="btn btn-delete" onclick="deleteUser('${user.userId}')">删除</button>
-                                    </td>
-                                </tr>
-                            `;
-                        }).join('');
-                    }
+                if (studentUsers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无学生</td></tr>';
+                } else {
+                    tbody.innerHTML = studentUsers.map(user => `
+                        <tr>
+                            <td>${user.realName}</td>
+                            <td>${user.username}</td>
+                            <td>${user.class || '未分班'}</td>
+                            <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
+                                ${user.status === 'active' ? '正常' : '禁用'}
+                            </td>
+                            <td>
+                                <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
+                                    ${user.status === 'active' ? '禁用' : '启用'}
+                                </button>
+                                <button class="btn btn-delete" onclick="deleteUser('${user.userId}')">删除</button>
+                            </td>
+                        </tr>
+                    `).join('');
                 }
             } catch (error) {
                 console.error('加载学生失败:', error);
@@ -869,54 +416,45 @@
             }
         }
         
-        // 加载教师用户 - 只显示教师角色
+        // 加载教师用户
         async function loadTeacherUsers() {
             const tbody = document.getElementById('teacherUserList');
             tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
-                const response = await fetch(API_BASE + '/admin/users', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
-                });
+                const users = await loadAllUsers();
+                const teacherUsers = users.filter(u => u.role === 'teacher');
+                allTeachers = teacherUsers;
                 
-                if (response.ok) {
-                    const users = await response.json();
-                    
-                    // 筛选教师用户
-                    const teacherUsers = users.filter(u => u.role === 'teacher');
-                    allTeachers = teacherUsers;
-                    
-                    if (teacherUsers.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无教师</td></tr>';
-                    } else {
-                        tbody.innerHTML = teacherUsers.map(user => {
-                            let identity = '<span style="color: #999;">未设置</span>';
-                            
-                            if (user.teacherType === 'class' && user.className) {
-                                identity = `<span class="teacher-type-badge teacher-class">${user.className}班主任</span>`;
-                            } else if (user.teacherType === 'subject' && user.subject) {
-                                identity = `<span class="teacher-type-badge teacher-subject">${user.subject}教师</span>`;
-                            }
-                            
-                            return `
-                                <tr>
-                                    <td>${user.realName}</td>
-                                    <td>${user.username}</td>
-                                    <td>${identity}</td>
-                                    <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
-                                        ${user.status === 'active' ? '正常' : '禁用'}
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-set-teacher" onclick="openTeacherSetting('${user.userId}')">设置身份</button>
-                                        <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
-                                            ${user.status === 'active' ? '禁用' : '启用'}
-                                        </button>
-                                        <button class="btn btn-delete" onclick="deleteUser('${user.userId}')">删除</button>
-                                    </td>
-                                </tr>
-                            `;
-                        }).join('');
-                    }
+                if (teacherUsers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无教师</td></tr>';
+                } else {
+                    tbody.innerHTML = teacherUsers.map(user => {
+                        let identity = '<span style="color: #999;">未设置</span>';
+                        if (user.teacherType === 'class' && user.className) {
+                            identity = `<span class="teacher-type-badge teacher-class">${user.className}班主任</span>`;
+                        } else if (user.teacherType === 'subject' && user.subject) {
+                            identity = `<span class="teacher-type-badge teacher-subject">${user.subject}教师</span>`;
+                        }
+                        
+                        return `
+                            <tr>
+                                <td>${user.realName}</td>
+                                <td>${user.username}</td>
+                                <td>${identity}</td>
+                                <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
+                                    ${user.status === 'active' ? '正常' : '禁用'}
+                                </td>
+                                <td>
+                                    <button class="btn btn-set-teacher" onclick="openTeacherSetting('${user.userId}')">设置身份</button>
+                                    <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
+                                        ${user.status === 'active' ? '禁用' : '启用'}
+                                    </button>
+                                    <button class="btn btn-delete" onclick="deleteUser('${user.userId}')">删除</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
                 }
             } catch (error) {
                 console.error('加载教师失败:', error);
@@ -924,42 +462,34 @@
             }
         }
         
-        // 加载家长用户 - 只显示家长角色
+        // 加载家长用户
         async function loadParentUsers() {
             const tbody = document.getElementById('parentUserList');
             tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
-                const response = await fetch(API_BASE + '/admin/users', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
-                });
+                const users = await loadAllUsers();
+                const parentUsers = users.filter(u => u.role === 'parent');
                 
-                if (response.ok) {
-                    const users = await response.json();
-                    
-                    // 筛选家长用户
-                    const parentUsers = users.filter(u => u.role === 'parent');
-                    
-                    if (parentUsers.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无家长</td></tr>';
-                    } else {
-                        tbody.innerHTML = parentUsers.map(user => `
-                            <tr>
-                                <td>${user.realName}</td>
-                                <td>${user.username}</td>
-                                <td>${user.children && user.children.length > 0 ? user.children.length + ' 个孩子' : '未绑定'}</td>
-                                <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
-                                    ${user.status === 'active' ? '正常' : '禁用'}
-                                </td>
-                                <td>
-                                    <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
-                                        ${user.status === 'active' ? '禁用' : '启用'}
-                                    </button>
-                                    <button class="btn btn-delete" onclick="deleteUser('${user.userId}')">删除</button>
-                                </td>
-                            </tr>
-                        `).join('');
-                    }
+                if (parentUsers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无家长</td></tr>';
+                } else {
+                    tbody.innerHTML = parentUsers.map(user => `
+                        <tr>
+                            <td>${user.realName}</td>
+                            <td>${user.username}</td>
+                            <td>${user.children && user.children.length > 0 ? user.children.length + ' 个孩子' : '未绑定'}</td>
+                            <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
+                                ${user.status === 'active' ? '正常' : '禁用'}
+                            </td>
+                            <td>
+                                <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
+                                    ${user.status === 'active' ? '禁用' : '启用'}
+                                </button>
+                                <button class="btn btn-delete" onclick="deleteUser('${user.userId}')">删除</button>
+                            </td>
+                        </tr>
+                    `).join('');
                 }
             } catch (error) {
                 console.error('加载家长失败:', error);
@@ -967,12 +497,11 @@
             }
         }
         
-        // 打开教师设置模态框
+        // 教师设置
         function openTeacherSetting(teacherId) {
             const teacher = allTeachers.find(t => t.userId === teacherId);
             if (!teacher) return;
             
-            // 移除旧模态框
             const oldModal = document.querySelector('.modal-overlay');
             if (oldModal) oldModal.remove();
             
@@ -990,7 +519,6 @@
             modal.innerHTML = `
                 <div class="modal-content">
                     <h3 class="modal-title">设置教师身份 - ${teacher.realName}</h3>
-                    
                     <div class="form-group">
                         <label>教师类型</label>
                         <select id="teacherTypeSelect" onchange="updateTeacherTypeVisibility()">
@@ -998,7 +526,6 @@
                             <option value="subject" ${teacher.teacherType === 'subject' ? 'selected' : ''}>任课教师</option>
                         </select>
                     </div>
-                    
                     <div class="form-group">
                         <label>年级</label>
                         <select id="teacherGradeSelect" onchange="updateClassOptions()">
@@ -1006,14 +533,12 @@
                             ${gradeOptions}
                         </select>
                     </div>
-                    
                     <div class="form-group" id="classSelectGroup">
                         <label>班级</label>
                         <select id="teacherClassSelect">
                             <option value="">请选择班级</option>
                         </select>
                     </div>
-                    
                     <div class="form-group" id="subjectSelectGroup" style="display: none;">
                         <label>科目</label>
                         <select id="teacherSubjectSelect">
@@ -1021,7 +546,6 @@
                             ${subjectOptions}
                         </select>
                     </div>
-                    
                     <div class="modal-buttons">
                         <button class="btn-save" onclick="saveTeacherSetting('${teacherId}')">保存</button>
                         <button class="btn-cancel" onclick="closeModal()">取消</button>
@@ -1030,8 +554,6 @@
             `;
             
             document.body.appendChild(modal);
-            
-            // 初始化显示
             updateTeacherTypeVisibility();
             updateClassOptions();
         }
@@ -1078,27 +600,17 @@
             const className = document.getElementById('teacherClassSelect').value;
             const subject = document.getElementById('teacherSubjectSelect').value;
             
-            if (!gradeName) {
-                alert('请选择年级');
-                return;
-            }
-            
-            if (teacherType === 'class' && !className) {
-                alert('请选择班级');
-                return;
-            }
-            
-            if (teacherType === 'subject' && !subject) {
-                alert('请选择科目');
-                return;
-            }
+            if (!gradeName) { alert('请选择年级'); return; }
+            if (teacherType === 'class' && !className) { alert('请选择班级'); return; }
+            if (teacherType === 'subject' && !subject) { alert('请选择科目'); return; }
             
             try {
+                const token = getToken();
                 const response = await fetch(`${API_BASE}/admin/teachers/${teacherId}/type`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({
                         teacherType,
@@ -1113,6 +625,7 @@
                 if (response.ok) {
                     closeModal();
                     loadTeacherUsers();
+                    alert('设置成功');
                 } else {
                     alert(data.error || '设置失败');
                 }
@@ -1123,39 +636,14 @@
         }
         
         // 年级管理
-        async function addGrade() {
-            const gradeName = document.getElementById('gradeNameInput').value.trim();
-            if (!gradeName) {
-                alert('请输入年级名称');
-                return;
-            }
-            
-            try {
-                const response = await fetch(API_BASE + '/admin/grades', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
-                    },
-                    body: JSON.stringify({ gradeName })
-                });
-                
-                if (response.ok) {
-                    document.getElementById('gradeNameInput').value = '';
-                    await Promise.all([loadGrades(), loadStats(), loadAllGrades()]);
-                }
-            } catch (error) {
-                alert('网络错误');
-            }
-        }
-        
         async function loadGrades() {
             const gradeGrid = document.getElementById('gradeGrid');
             gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
             
             try {
+                const token = getToken();
                 const response = await fetch(API_BASE + '/admin/grades', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
                 if (response.ok) {
@@ -1186,42 +674,63 @@
                                     }
                                 </div>
                                 <div class="class-add-form">
-                                    <input type="text" 
-                                           id="classInput_${grade.gradeId}" 
-                                           placeholder="输入班级名称" 
-                                           onkeypress="if(event.key==='Enter') addClass('${grade.gradeId}')">
+                                    <input type="text" id="classInput_${grade.gradeId}" placeholder="输入班级名称" onkeypress="if(event.key==='Enter') addClass('${grade.gradeId}')">
                                     <button class="btn-add-class" onclick="addClass('${grade.gradeId}')">➕ 添加</button>
                                 </div>
                             </div>
                         `).join('');
                     }
+                } else {
+                    gradeGrid.innerHTML = '<div class="empty-state">加载失败</div>';
                 }
             } catch (error) {
                 console.error('加载年级失败:', error);
+                gradeGrid.innerHTML = '<div class="empty-state">加载失败</div>';
+            }
+        }
+        
+        async function addGrade() {
+            const gradeName = document.getElementById('gradeNameInput').value.trim();
+            if (!gradeName) { alert('请输入年级名称'); return; }
+            
+            try {
+                const token = getToken();
+                const response = await fetch(API_BASE + '/admin/grades', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ gradeName })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('gradeNameInput').value = '';
+                    await Promise.all([loadGrades(), loadStats()]);
+                }
+            } catch (error) {
+                alert('网络错误');
             }
         }
         
         async function addClass(gradeId) {
             const input = document.getElementById(`classInput_${gradeId}`);
             const className = input.value.trim();
-            
-            if (!className) {
-                alert('请输入班级名称');
-                return;
-            }
+            if (!className) { alert('请输入班级名称'); return; }
             
             try {
+                const token = getToken();
                 const response = await fetch(API_BASE + '/admin/classes', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({ gradeId, className })
                 });
                 
                 if (response.ok) {
-                    await Promise.all([loadGrades(), loadStats(), loadAllGrades()]);
+                    await Promise.all([loadGrades(), loadStats()]);
                 }
             } catch (error) {
                 alert('网络错误');
@@ -1232,17 +741,18 @@
             if (!confirm(`确定要删除班级"${className}"吗？`)) return;
             
             try {
+                const token = getToken();
                 const response = await fetch(`${API_BASE}/admin/classes`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({ gradeId, className })
                 });
                 
                 if (response.ok) {
-                    await Promise.all([loadGrades(), loadStats(), loadAllGrades()]);
+                    await Promise.all([loadGrades(), loadStats()]);
                 }
             } catch (error) {
                 alert('网络错误');
@@ -1253,13 +763,14 @@
             if (!confirm('确定要删除这个年级吗？')) return;
             
             try {
+                const token = getToken();
                 const response = await fetch(`${API_BASE}/admin/grades/${gradeId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
                 if (response.ok) {
-                    await Promise.all([loadGrades(), loadStats(), loadAllGrades()]);
+                    await Promise.all([loadGrades(), loadStats()]);
                 }
             } catch (error) {
                 alert('网络错误');
@@ -1268,10 +779,7 @@
         
         // 邀请码管理
         async function loadAllInviteCodes() {
-            await Promise.all([
-                loadStudentInviteCodes(),
-                loadTeacherInviteCode()
-            ]);
+            await Promise.all([loadStudentInviteCodes(), loadTeacherInviteCode()]);
         }
         
         async function loadStudentInviteCodes() {
@@ -1279,12 +787,12 @@
             tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
+                const token = getToken();
                 const gradesResponse = await fetch(API_BASE + '/admin/grades', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
-                
                 const codesResponse = await fetch(API_BASE + '/admin/invite-codes?type=class', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
                 if (gradesResponse.ok && codesResponse.ok) {
@@ -1295,11 +803,7 @@
                     for (const grade of grades) {
                         if (grade.classes) {
                             for (const cls of grade.classes) {
-                                const code = codes.find(c => 
-                                    c.gradeId === grade.gradeId && 
-                                    c.target === cls.className
-                                );
-                                
+                                const code = codes.find(c => c.gradeId === grade.gradeId && c.target === cls.className);
                                 classList.push({
                                     gradeId: grade.gradeId,
                                     gradeName: grade.gradeName,
@@ -1312,26 +816,14 @@
                     }
                     
                     if (classList.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无班级</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无班级，请先在年级管理中添加</td></tr>';
                     } else {
                         tbody.innerHTML = classList.map(item => `
                             <tr>
                                 <td>${item.gradeName}</td>
                                 <td>${item.className}</td>
-                                <td>
-                                    ${item.inviteCode ? 
-                                        `<span class="invite-code-display">${item.inviteCode}</span>` : 
-                                        '<span style="color: #999;">未生成</span>'
-                                    }
-                                </td>
-                                <td>
-                                    ${item.inviteCode ? 
-                                        `<span class="invite-status ${item.status === 'unused' ? 'status-unused' : 'status-used'}">
-                                            ${item.status === 'unused' ? '未使用' : '已使用'}
-                                        </span>` : 
-                                        '<span style="color: #999;">-</span>'
-                                    }
-                                </td>
+                                <td>${item.inviteCode ? `<span class="invite-code-display">${item.inviteCode}</span>` : '<span style="color:#999;">未生成</span>'}</td>
+                                <td>${item.inviteCode ? `<span class="invite-status ${item.status === 'unused' ? 'status-unused' : 'status-used'}">${item.status === 'unused' ? '未使用' : '已使用'}</span>` : '<span style="color:#999;">-</span>'}</td>
                                 <td>
                                     ${item.inviteCode ? `
                                         <button class="btn btn-refresh" onclick="refreshStudentCode('${item.gradeId}', '${item.className}')">刷新</button>
@@ -1346,6 +838,7 @@
                 }
             } catch (error) {
                 console.error('加载学生邀请码失败:', error);
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">加载失败</td></tr>';
             }
         }
         
@@ -1354,13 +847,13 @@
             tbody.innerHTML = '<tr><td colspan="3" class="loading">加载中...</td></tr>';
             
             try {
+                const token = getToken();
                 const response = await fetch(API_BASE + '/admin/invite-codes?type=teacher', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
                 if (response.ok) {
                     const codes = await response.json();
-                    
                     if (codes.length === 0) {
                         tbody.innerHTML = '<tr><td colspan="3" class="empty-state">暂无教师邀请码</td></tr>';
                     } else {
@@ -1378,31 +871,23 @@
                 }
             } catch (error) {
                 console.error('加载教师邀请码失败:', error);
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-state">加载失败</td></tr>';
             }
         }
         
         async function generateStudentCode(gradeId, className) {
             const code = generateInviteCode();
-            
             try {
+                const token = getToken();
                 const response = await fetch(API_BASE + '/admin/invite-codes', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
+                        'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({
-                        type: 'class',
-                        target: className,
-                        gradeId,
-                        role: 'student',
-                        codes: [code]
-                    })
+                    body: JSON.stringify({ type: 'class', target: className, gradeId, role: 'student', codes: [code] })
                 });
-                
-                if (response.ok) {
-                    await loadStudentInviteCodes();
-                }
+                if (response.ok) await loadStudentInviteCodes();
             } catch (error) {
                 alert('生成失败');
             }
@@ -1410,13 +895,12 @@
         
         async function refreshStudentCode(gradeId, className) {
             if (!confirm('确定要刷新这个邀请码吗？')) return;
-            
             try {
+                const token = getToken();
                 await fetch(`${API_BASE}/admin/invite-codes/class/${gradeId}/${className}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
-                
                 await generateStudentCode(gradeId, className);
             } catch (error) {
                 alert('刷新失败');
@@ -1425,14 +909,13 @@
         
         async function generateAllStudentInviteCodes() {
             if (!confirm('确定要为所有未生成邀请码的班级生成邀请码吗？')) return;
-            
             try {
+                const token = getToken();
                 const gradesResponse = await fetch(API_BASE + '/admin/grades', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
-                
                 const codesResponse = await fetch(API_BASE + '/admin/invite-codes?type=class', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
                 if (gradesResponse.ok && codesResponse.ok) {
@@ -1442,32 +925,21 @@
                     for (const grade of grades) {
                         if (grade.classes) {
                             for (const cls of grade.classes) {
-                                const hasCode = existingCodes.some(c => 
-                                    c.gradeId === grade.gradeId && 
-                                    c.target === cls.className
-                                );
-                                
+                                const hasCode = existingCodes.some(c => c.gradeId === grade.gradeId && c.target === cls.className);
                                 if (!hasCode) {
                                     const code = generateInviteCode();
                                     await fetch(API_BASE + '/admin/invite-codes', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
-                                            'Authorization': 'Bearer ' + getToken()
+                                            'Authorization': 'Bearer ' + token
                                         },
-                                        body: JSON.stringify({
-                                            type: 'class',
-                                            target: cls.className,
-                                            gradeId: grade.gradeId,
-                                            role: 'student',
-                                            codes: [code]
-                                        })
+                                        body: JSON.stringify({ type: 'class', target: cls.className, gradeId: grade.gradeId, role: 'student', codes: [code] })
                                     });
                                 }
                             }
                         }
                     }
-                    
                     await loadStudentInviteCodes();
                     alert('已为所有班级生成邀请码！');
                 }
@@ -1478,28 +950,21 @@
         
         async function generateTeacherInviteCode() {
             if (!confirm('确定要刷新教师邀请码吗？')) return;
-            
             try {
+                const token = getToken();
                 await fetch(`${API_BASE}/admin/invite-codes/teacher`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
-                
                 const code = generateInviteCode();
                 await fetch(API_BASE + '/admin/invite-codes', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
+                        'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({
-                        type: 'teacher',
-                        target: 'all',
-                        role: 'teacher',
-                        codes: [code]
-                    })
+                    body: JSON.stringify({ type: 'teacher', target: 'all', role: 'teacher', codes: [code] })
                 });
-                
                 await loadTeacherInviteCode();
             } catch (error) {
                 alert('刷新失败');
@@ -1514,13 +979,12 @@
         
         async function toggleUser(userId) {
             if (!confirm('确定要切换用户状态吗？')) return;
-            
             try {
+                const token = getToken();
                 await fetch(`${API_BASE}/admin/users/${userId}/toggle`, {
                     method: 'PUT',
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
-                
                 loadStats();
                 if (currentUserType === 'student') loadStudentUsers();
                 else if (currentUserType === 'teacher') loadTeacherUsers();
@@ -1532,13 +996,12 @@
         
         async function deleteUser(userId) {
             if (!confirm('确定要删除用户吗？')) return;
-            
             try {
+                const token = getToken();
                 await fetch(`${API_BASE}/admin/users/${userId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
-                
                 loadStats();
                 if (currentUserType === 'student') loadStudentUsers();
                 else if (currentUserType === 'teacher') loadTeacherUsers();
@@ -1548,17 +1011,27 @@
             }
         }
         
+        // 初始化
         function init() {
             const user = getUser();
-            if (!getToken() || user.role !== 'admin') {
+            const token = getToken();
+            
+            if (!token || !user.userId) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            if (user.role !== 'admin') {
+                alert('无权限访问');
                 window.location.href = '/login.html';
                 return;
             }
             
             document.getElementById('userName').textContent = user.realName || '管理员';
             loadStats();
-            loadAllGrades();
-            showUserTab('student');
+            loadAllUsers().then(() => {
+                showUserTab('student');
+            });
         }
         
         init();
