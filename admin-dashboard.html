@@ -60,7 +60,7 @@
         /* 统计卡片 */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin-bottom: 20px;
         }
@@ -226,6 +226,13 @@
             border-radius: 3px;
         }
         
+        .btn-set-teacher {
+            background: #9c27b0;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
         .status-active {
             color: #4CAF50;
             font-weight: bold;
@@ -249,6 +256,23 @@
         .role-student { background: #4caf50; }
         .role-parent { background: #ff9800; }
         
+        .teacher-type-badge {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .teacher-class {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .teacher-subject {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
         /* 年级管理 */
         .grade-add-form {
             display: flex;
@@ -263,12 +287,6 @@
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        .grade-add-form input:focus {
-            outline: none;
-            border-color: #667eea;
         }
         
         .btn-add-grade {
@@ -279,7 +297,6 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
-            white-space: nowrap;
         }
         
         .grade-grid {
@@ -293,12 +310,6 @@
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             padding: 20px;
-            transition: all 0.3s;
-        }
-        
-        .grade-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
         }
         
         .grade-card-header {
@@ -399,37 +410,11 @@
             font-size: 18px;
             font-weight: bold;
             color: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
-        .badge {
-            background: #667eea;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-        }
-        
-        /* 学生邀请码表格 */
         .invite-table {
             width: 100%;
             border-collapse: collapse;
-        }
-        
-        .invite-table th,
-        .invite-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .invite-table th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #333;
-            font-size: 14px;
         }
         
         .invite-code-display {
@@ -469,6 +454,33 @@
             color: #666;
         }
         
+        /* 用户分类子标签 */
+        .user-sub-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .user-sub-tab {
+            padding: 8px 16px;
+            background: transparent;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .user-sub-tab:hover {
+            border-color: #667eea;
+        }
+        
+        .user-sub-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
         @media (max-width: 1024px) {
             .grade-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -477,15 +489,11 @@
         
         @media (max-width: 768px) {
             .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .grade-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .grade-add-form {
-                flex-direction: column;
             }
         }
     </style>
@@ -502,30 +510,20 @@
     <div class="container">
         <!-- 统计卡片 -->
         <div class="stats-grid">
-            <div class="stat-card" onclick="showTab('users')">
-                <div class="stat-icon">👥</div>
-                <div class="stat-value" id="totalUsers">0</div>
-                <div class="stat-label">总用户</div>
-            </div>
-            <div class="stat-card" onclick="showTab('users')">
+            <div class="stat-card" onclick="showUserTab('student')">
                 <div class="stat-icon">👨‍🎓</div>
                 <div class="stat-value" id="totalStudents">0</div>
                 <div class="stat-label">学生</div>
             </div>
-            <div class="stat-card" onclick="showTab('users')">
+            <div class="stat-card" onclick="showUserTab('teacher')">
                 <div class="stat-icon">👨‍🏫</div>
                 <div class="stat-value" id="totalTeachers">0</div>
                 <div class="stat-label">教师</div>
             </div>
-            <div class="stat-card" onclick="showTab('users')">
+            <div class="stat-card" onclick="showUserTab('parent')">
                 <div class="stat-icon">👨‍👩‍👦</div>
                 <div class="stat-value" id="totalParents">0</div>
                 <div class="stat-label">家长</div>
-            </div>
-            <div class="stat-card" onclick="showTab('grades')">
-                <div class="stat-icon">🏫</div>
-                <div class="stat-value" id="totalGrades">0</div>
-                <div class="stat-label">年级</div>
             </div>
             <div class="stat-card" onclick="showTab('grades')">
                 <div class="stat-icon">📚</div>
@@ -539,7 +537,6 @@
             <button class="nav-tab active" onclick="showTab('users')">👥 用户管理</button>
             <button class="nav-tab" onclick="showTab('grades')">🏫 年级管理</button>
             <button class="nav-tab" onclick="showTab('invites')">🎫 邀请码管理</button>
-            <button class="nav-tab" onclick="showTab('overview')">📊 系统概览</button>
         </div>
         
         <!-- 内容区域 -->
@@ -547,22 +544,70 @@
             <!-- 用户管理 -->
             <div id="usersTab">
                 <h2 style="margin-bottom: 20px;">👥 用户管理</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>用户名</th>
-                            <th>姓名</th>
-                            <th>角色</th>
-                            <th>邮箱</th>
-                            <th>状态</th>
-                            <th>注册时间</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userList">
-                        <tr><td colspan="7" class="loading">加载中...</td></tr>
-                    </tbody>
-                </table>
+                
+                <!-- 用户分类子标签 -->
+                <div class="user-sub-tabs">
+                    <button class="user-sub-tab active" onclick="showUserTab('student')">👨‍🎓 学生</button>
+                    <button class="user-sub-tab" onclick="showUserTab('teacher')">👨‍🏫 教师</button>
+                    <button class="user-sub-tab" onclick="showUserTab('parent')">👨‍👩‍👦 家长</button>
+                </div>
+                
+                <!-- 学生列表 -->
+                <div id="studentUsersTab">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>用户名</th>
+                                <th>班级</th>
+                                <th>状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentUserList">
+                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 教师列表 -->
+                <div id="teacherUsersTab" style="display: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>用户名</th>
+                                <th>所在班级/任课</th>
+                                <th>状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacherUserList">
+                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 家长列表 -->
+                <div id="parentUsersTab" style="display: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>用户名</th>
+                                <th>孩子</th>
+                                <th>状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="parentUserList">
+                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <!-- 年级管理 -->
@@ -570,7 +615,7 @@
                 <h2 style="margin-bottom: 20px;">🏫 年级管理</h2>
                 
                 <div class="grade-add-form">
-                    <input type="text" id="gradeNameInput" placeholder="输入年级名称（如：初一、初二、初三）" onkeypress="if(event.key==='Enter') addGrade()">
+                    <input type="text" id="gradeNameInput" placeholder="输入年级名称（如：一年级、二年级）" onkeypress="if(event.key==='Enter') addGrade()">
                     <button class="btn-add-grade" onclick="addGrade()">➕ 添加年级</button>
                 </div>
                 
@@ -583,13 +628,9 @@
             <div id="invitesTab" style="display: none;">
                 <h2 style="margin-bottom: 20px;">🎫 邀请码管理</h2>
                 
-                <!-- 学生邀请码 - 列表形式 -->
                 <div class="invite-section">
                     <div class="section-header">
-                        <div class="section-title">
-                            👨‍🎓 学生邀请码
-                            <span class="badge">每个班级一个邀请码</span>
-                        </div>
+                        <div class="section-title">👨‍🎓 学生邀请码</div>
                         <button class="btn-generate" onclick="generateAllStudentInviteCodes()">🎫 一键生成全部</button>
                     </div>
                     
@@ -600,23 +641,18 @@
                                 <th>班级</th>
                                 <th>邀请码</th>
                                 <th>状态</th>
-                                <th>创建时间</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody id="studentInviteList">
-                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                            <tr><td colspan="5" class="loading">加载中...</td></tr>
                         </tbody>
                     </table>
                 </div>
                 
-                <!-- 教师邀请码 -->
                 <div class="invite-section">
                     <div class="section-header">
-                        <div class="section-title">
-                            👨‍🏫 教师邀请码
-                            <span class="badge">所有教师共用一个</span>
-                        </div>
+                        <div class="section-title">👨‍🏫 教师邀请码</div>
                         <button class="btn-generate" onclick="generateTeacherInviteCode()">🎫 生成/刷新</button>
                     </div>
                     
@@ -624,26 +660,15 @@
                         <thead>
                             <tr>
                                 <th>邀请码</th>
-                                <th>状态</th>
                                 <th>使用次数</th>
                                 <th>创建时间</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody id="teacherInviteList">
-                            <tr><td colspan="5" class="loading">加载中...</td></tr>
+                            <tr><td colspan="4" class="loading">加载中...</td></tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-            
-            <!-- 系统概览 -->
-            <div id="overviewTab" style="display: none;">
-                <div class="empty-state">
-                    <div style="font-size: 48px; margin-bottom: 20px;">🏫</div>
-                    <h3>学校管理系统</h3>
-                    <p>版本 1.0.0</p>
-                    <p>基于 Cloudflare Workers + Upstash Redis</p>
                 </div>
             </div>
         </div>
@@ -668,19 +693,36 @@
             document.getElementById('usersTab').style.display = 'none';
             document.getElementById('gradesTab').style.display = 'none';
             document.getElementById('invitesTab').style.display = 'none';
-            document.getElementById('overviewTab').style.display = 'none';
             
             if (tabName === 'users') {
                 document.getElementById('usersTab').style.display = 'block';
-                loadUsers();
+                showUserTab('student');
             } else if (tabName === 'grades') {
                 document.getElementById('gradesTab').style.display = 'block';
                 loadGrades();
             } else if (tabName === 'invites') {
                 document.getElementById('invitesTab').style.display = 'block';
                 loadAllInviteCodes();
-            } else if (tabName === 'overview') {
-                document.getElementById('overviewTab').style.display = 'block';
+            }
+        }
+        
+        function showUserTab(userType) {
+            document.querySelectorAll('.user-sub-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('studentUsersTab').style.display = 'none';
+            document.getElementById('teacherUsersTab').style.display = 'none';
+            document.getElementById('parentUsersTab').style.display = 'none';
+            
+            if (userType === 'student') {
+                document.getElementById('studentUsersTab').style.display = 'block';
+                loadStudentUsers();
+            } else if (userType === 'teacher') {
+                document.getElementById('teacherUsersTab').style.display = 'block';
+                loadTeacherUsers();
+            } else if (userType === 'parent') {
+                document.getElementById('parentUsersTab').style.display = 'block';
+                loadParentUsers();
             }
         }
         
@@ -688,26 +730,6 @@
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/login.html';
-        }
-        
-        function getRoleBadge(role) {
-            const roleMap = {
-                'admin': 'role-admin',
-                'teacher': 'role-teacher',
-                'student': 'role-student',
-                'parent': 'role-parent'
-            };
-            return roleMap[role] || '';
-        }
-        
-        function getRoleName(role) {
-            const roleNames = {
-                'admin': '管理员',
-                'teacher': '教师',
-                'student': '学生',
-                'parent': '家长'
-            };
-            return roleNames[role] || role;
         }
         
         function generateInviteCode() {
@@ -728,11 +750,9 @@
                 
                 if (response.ok) {
                     const stats = await response.json();
-                    document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
                     document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
                     document.getElementById('totalTeachers').textContent = stats.totalTeachers || 0;
                     document.getElementById('totalParents').textContent = stats.totalParents || 0;
-                    document.getElementById('totalGrades').textContent = stats.totalGrades || 0;
                     document.getElementById('totalClasses').textContent = stats.totalClasses || 0;
                 }
             } catch (error) {
@@ -740,27 +760,26 @@
             }
         }
         
-        // 加载用户
-        async function loadUsers() {
-            const tbody = document.getElementById('userList');
-            tbody.innerHTML = '<tr><td colspan="7" class="loading">加载中...</td></tr>';
+        // 加载学生用户
+        async function loadStudentUsers() {
+            const tbody = document.getElementById('studentUserList');
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
             
             try {
-                const response = await fetch(API_BASE + '/admin/users', {
+                const response = await fetch(API_BASE + '/admin/users?role=student', {
                     headers: { 'Authorization': 'Bearer ' + getToken() }
                 });
                 
                 if (response.ok) {
                     const users = await response.json();
                     if (users.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">暂无用户</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">暂无学生</td></tr>';
                     } else {
                         tbody.innerHTML = users.map(user => `
                             <tr>
-                                <td>${user.username}</td>
                                 <td>${user.realName}</td>
-                                <td><span class="role-badge ${getRoleBadge(user.role)}">${getRoleName(user.role)}</span></td>
-                                <td>${user.email || '-'}</td>
+                                <td>${user.username}</td>
+                                <td>${user.class || '未分班'}</td>
                                 <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
                                     ${user.status === 'active' ? '正常' : '禁用'}
                                 </td>
@@ -776,11 +795,140 @@
                     }
                 }
             } catch (error) {
-                console.error('加载用户失败:', error);
+                console.error('加载学生失败:', error);
             }
         }
         
-        // 添加年级
+        // 加载教师用户
+        async function loadTeacherUsers() {
+            const tbody = document.getElementById('teacherUserList');
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+            
+            try {
+                const response = await fetch(API_BASE + '/admin/users?role=teacher', {
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    if (users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">暂无教师</td></tr>';
+                    } else {
+                        tbody.innerHTML = users.map(user => {
+                            let classInfo = '';
+                            if (user.teacherType === 'class' && user.classes && user.classes.length > 0) {
+                                classInfo = `<span class="teacher-type-badge teacher-class">${user.classes[0]}班主任</span>`;
+                            } else if (user.teacherType === 'subject' && user.subjects && user.subjects.length > 0) {
+                                classInfo = user.subjects.map(s => 
+                                    `<span class="teacher-type-badge teacher-subject">${s}</span>`
+                                ).join(' ');
+                            } else {
+                                classInfo = '<span style="color: #999;">未分配</span>';
+                            }
+                            
+                            return `
+                                <tr>
+                                    <td>${user.realName}</td>
+                                    <td>${user.username}</td>
+                                    <td>${classInfo}</td>
+                                    <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
+                                        ${user.status === 'active' ? '正常' : '禁用'}
+                                    </td>
+                                    <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                                    <td>
+                                        <button class="btn btn-set-teacher" onclick="setTeacherType('${user.userId}', '${user.realName}')">设置身份</button>
+                                        <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
+                                            ${user.status === 'active' ? '禁用' : '启用'}
+                                        </button>
+                                        <button class="btn btn-delete" onclick="deleteUser('${user.userId}')">删除</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('加载教师失败:', error);
+            }
+        }
+        
+        // 加载家长用户
+        async function loadParentUsers() {
+            const tbody = document.getElementById('parentUserList');
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+            
+            try {
+                const response = await fetch(API_BASE + '/admin/users?role=parent', {
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    if (users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">暂无家长</td></tr>';
+                    } else {
+                        tbody.innerHTML = users.map(user => `
+                            <tr>
+                                <td>${user.realName}</td>
+                                <td>${user.username}</td>
+                                <td>${user.children && user.children.length > 0 ? user.children.length + ' 个孩子' : '未绑定'}</td>
+                                <td class="${user.status === 'active' ? 'status-active' : 'status-disabled'}">
+                                    ${user.status === 'active' ? '正常' : '禁用'}
+                                </td>
+                                <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="btn btn-toggle" onclick="toggleUser('${user.userId}')">
+                                        ${user.status === 'active' ? '禁用' : '启用'}
+                                    </button>
+                                    <button class="btn btn-delete" onclick="deleteUser('${user.userId}')">删除</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('加载家长失败:', error);
+            }
+        }
+        
+        // 设置教师身份
+        async function setTeacherType(teacherId, teacherName) {
+            const teacherType = prompt(
+                `请选择 ${teacherName} 的教师身份：\n` +
+                `1. 班主任（输入班级名称，如：一年级1班）\n` +
+                `2. 任课教师（输入科目，如：语文）\n` +
+                `请输入班级或科目名称：`
+            );
+            
+            if (!teacherType) return;
+            
+            // 判断是班级还是科目
+            const isClass = teacherType.includes('班');
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/teachers/${teacherId}/type`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({
+                        teacherType: isClass ? 'class' : 'subject',
+                        value: teacherType
+                    })
+                });
+                
+                if (response.ok) {
+                    loadTeacherUsers();
+                } else {
+                    alert('设置失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        }
+        
+        // 年级管理函数
         async function addGrade() {
             const gradeName = document.getElementById('gradeNameInput').value.trim();
             if (!gradeName) {
@@ -798,19 +946,15 @@
                     body: JSON.stringify({ gradeName })
                 });
                 
-                const data = await response.json();
                 if (response.ok) {
                     document.getElementById('gradeNameInput').value = '';
                     await Promise.all([loadGrades(), loadStats()]);
-                } else {
-                    alert(data.error || '添加失败');
                 }
             } catch (error) {
                 alert('网络错误');
             }
         }
         
-        // 加载年级
         async function loadGrades() {
             const gradeGrid = document.getElementById('gradeGrid');
             gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
@@ -839,7 +983,10 @@
                                                     <span class="class-name">${cls.className}</span>
                                                     <span class="class-student-count">${cls.studentCount || 0} 人</span>
                                                 </div>
-                                                <button class="btn-delete-class" onclick="deleteClass('${grade.gradeId}', '${cls.className}')">删除</button>
+                                                <div>
+                                                    <button class="btn-set-teacher" onclick="setClassTeacher('${grade.gradeId}', '${cls.className}')">任课教师</button>
+                                                    <button class="btn-delete-class" onclick="deleteClass('${grade.gradeId}', '${cls.className}')">删除</button>
+                                                </div>
                                             </div>
                                         `).join('') 
                                         : '<div class="no-classes">暂无班级</div>'
@@ -858,11 +1005,9 @@
                 }
             } catch (error) {
                 console.error('加载年级失败:', error);
-                gradeGrid.innerHTML = '<div class="empty-state">加载失败</div>';
             }
         }
         
-        // 添加班级
         async function addClass(gradeId) {
             const input = document.getElementById(`classInput_${gradeId}`);
             const className = input.value.trim();
@@ -882,18 +1027,14 @@
                     body: JSON.stringify({ gradeId, className })
                 });
                 
-                const data = await response.json();
                 if (response.ok) {
                     await Promise.all([loadGrades(), loadStats()]);
-                } else {
-                    alert(data.error || '添加失败');
                 }
             } catch (error) {
                 alert('网络错误');
             }
         }
         
-        // 删除班级
         async function deleteClass(gradeId, className) {
             if (!confirm(`确定要删除班级"${className}"吗？`)) return;
             
@@ -909,18 +1050,14 @@
                 
                 if (response.ok) {
                     await Promise.all([loadGrades(), loadStats()]);
-                } else {
-                    const data = await response.json();
-                    alert(data.error || '删除失败');
                 }
             } catch (error) {
                 alert('网络错误');
             }
         }
         
-        // 删除年级
         async function deleteGrade(gradeId) {
-            if (!confirm('确定要删除这个年级吗？该年级下的所有班级也会被删除！')) return;
+            if (!confirm('确定要删除这个年级吗？')) return;
             
             try {
                 const response = await fetch(`${API_BASE}/admin/grades/${gradeId}`, {
@@ -930,17 +1067,48 @@
                 
                 if (response.ok) {
                     await Promise.all([loadGrades(), loadStats()]);
-                } else {
-                    alert('删除失败');
                 }
             } catch (error) {
                 alert('网络错误');
             }
         }
         
-        // ============ 邀请码管理 ============
+        // 设置班级任课教师
+        async function setClassTeacher(gradeId, className) {
+            const subject = prompt(`请为 ${className} 设置任课教师：\n请输入科目（如：语文、数学）`);
+            if (!subject) return;
+            
+            const teacherName = prompt(`请输入 ${subject} 教师的姓名：`);
+            if (!teacherName) return;
+            
+            // 这里可以保存到班级信息中
+            alert(`已设置 ${className} ${subject}教师：${teacherName}`);
+            
+            // 实际实现需要调用 API 保存
+            try {
+                const response = await fetch(`${API_BASE}/admin/classes/teacher`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({
+                        gradeId,
+                        className,
+                        subject,
+                        teacherName
+                    })
+                });
+                
+                if (response.ok) {
+                    loadGrades();
+                }
+            } catch (error) {
+                alert('保存失败');
+            }
+        }
         
-        // 加载所有邀请码（学生+教师）
+        // 邀请码管理
         async function loadAllInviteCodes() {
             await Promise.all([
                 loadStudentInviteCodes(),
@@ -948,18 +1116,15 @@
             ]);
         }
         
-        // 加载学生邀请码（列表形式）
         async function loadStudentInviteCodes() {
             const tbody = document.getElementById('studentInviteList');
-            tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
-                // 获取所有年级和班级
                 const gradesResponse = await fetch(API_BASE + '/admin/grades', {
                     headers: { 'Authorization': 'Bearer ' + getToken() }
                 });
                 
-                // 获取所有学生邀请码
                 const codesResponse = await fetch(API_BASE + '/admin/invite-codes?type=class', {
                     headers: { 'Authorization': 'Bearer ' + getToken() }
                 });
@@ -968,12 +1133,10 @@
                     const grades = await gradesResponse.json();
                     const codes = await codesResponse.json();
                     
-                    // 构建班级列表
                     const classList = [];
                     for (const grade of grades) {
                         if (grade.classes) {
                             for (const cls of grade.classes) {
-                                // 查找该班级的邀请码
                                 const code = codes.find(c => 
                                     c.gradeId === grade.gradeId && 
                                     c.target === cls.className
@@ -984,15 +1147,14 @@
                                     gradeName: grade.gradeName,
                                     className: cls.className,
                                     inviteCode: code ? code.code : null,
-                                    status: code ? code.status : 'none',
-                                    createdAt: code ? code.createdAt : null
+                                    status: code ? code.status : 'none'
                                 });
                             }
                         }
                     }
                     
                     if (classList.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">暂无班级，请先在年级管理中添加班级</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无班级</td></tr>';
                     } else {
                         tbody.innerHTML = classList.map(item => `
                             <tr>
@@ -1012,7 +1174,6 @@
                                         '<span style="color: #999;">-</span>'
                                     }
                                 </td>
-                                <td>${item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-'}</td>
                                 <td>
                                     ${item.inviteCode ? `
                                         <button class="btn btn-refresh" onclick="refreshStudentCode('${item.gradeId}', '${item.className}')">刷新</button>
@@ -1027,14 +1188,12 @@
                 }
             } catch (error) {
                 console.error('加载学生邀请码失败:', error);
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">加载失败</td></tr>';
             }
         }
         
-        // 加载教师邀请码
         async function loadTeacherInviteCode() {
             const tbody = document.getElementById('teacherInviteList');
-            tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="loading">加载中...</td></tr>';
             
             try {
                 const response = await fetch(API_BASE + '/admin/invite-codes?type=teacher', {
@@ -1045,14 +1204,11 @@
                     const codes = await response.json();
                     
                     if (codes.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无教师邀请码</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">暂无教师邀请码</td></tr>';
                     } else {
                         tbody.innerHTML = codes.map(code => `
                             <tr>
                                 <td><span class="invite-code-display">${code.code}</span></td>
-                                <td>
-                                    <span class="invite-status status-unused">长期有效</span>
-                                </td>
                                 <td>${code.usedCount || 0} 次</td>
                                 <td>${new Date(code.createdAt).toLocaleDateString()}</td>
                                 <td>
@@ -1068,11 +1224,10 @@
             }
         }
         
-        // 生成单个班级的学生邀请码
         async function generateStudentCode(gradeId, className) {
+            const code = generateInviteCode();
+            
             try {
-                const code = generateInviteCode();
-                
                 const response = await fetch(API_BASE + '/admin/invite-codes', {
                     method: 'POST',
                     headers: {
@@ -1096,9 +1251,8 @@
             }
         }
         
-        // 刷新学生邀请码
         async function refreshStudentCode(gradeId, className) {
-            if (!confirm('确定要刷新这个邀请码吗？旧邀请码将失效！')) return;
+            if (!confirm('确定要刷新这个邀请码吗？')) return;
             
             try {
                 await fetch(`${API_BASE}/admin/invite-codes/class/${gradeId}/${className}`, {
@@ -1106,31 +1260,12 @@
                     headers: { 'Authorization': 'Bearer ' + getToken() }
                 });
                 
-                const code = generateInviteCode();
-                const response = await fetch(API_BASE + '/admin/invite-codes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
-                    },
-                    body: JSON.stringify({
-                        type: 'class',
-                        target: className,
-                        gradeId,
-                        role: 'student',
-                        codes: [code]
-                    })
-                });
-                
-                if (response.ok) {
-                    await loadStudentInviteCodes();
-                }
+                await generateStudentCode(gradeId, className);
             } catch (error) {
                 alert('刷新失败');
             }
         }
         
-        // 一键生成所有班级的学生邀请码
         async function generateAllStudentInviteCodes() {
             if (!confirm('确定要为所有未生成邀请码的班级生成邀请码吗？')) return;
             
@@ -1184,9 +1319,8 @@
             }
         }
         
-        // 生成/刷新教师邀请码
         async function generateTeacherInviteCode() {
-            if (!confirm('确定要刷新教师邀请码吗？旧邀请码将失效！')) return;
+            if (!confirm('确定要刷新教师邀请码吗？')) return;
             
             try {
                 await fetch(`${API_BASE}/admin/invite-codes/teacher`, {
@@ -1195,7 +1329,7 @@
                 });
                 
                 const code = generateInviteCode();
-                const response = await fetch(API_BASE + '/admin/invite-codes', {
+                await fetch(API_BASE + '/admin/invite-codes', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1209,34 +1343,32 @@
                     })
                 });
                 
-                if (response.ok) {
-                    await loadTeacherInviteCode();
-                }
+                await loadTeacherInviteCode();
             } catch (error) {
                 alert('刷新失败');
             }
         }
         
-        // 复制邀请码
         function copyInviteCode(code) {
             navigator.clipboard.writeText(code).then(() => {
                 alert('邀请码已复制：' + code);
             });
         }
         
-        // 用户操作
         async function toggleUser(userId) {
             if (!confirm('确定要切换用户状态吗？')) return;
             
             try {
-                const response = await fetch(`${API_BASE}/admin/users/${userId}/toggle`, {
+                await fetch(`${API_BASE}/admin/users/${userId}/toggle`, {
                     method: 'PUT',
                     headers: { 'Authorization': 'Bearer ' + getToken() }
                 });
                 
-                if (response.ok) {
-                    await Promise.all([loadUsers(), loadStats()]);
-                }
+                loadStats();
+                const activeTab = document.querySelector('.user-sub-tab.active').textContent;
+                if (activeTab.includes('学生')) loadStudentUsers();
+                else if (activeTab.includes('教师')) loadTeacherUsers();
+                else if (activeTab.includes('家长')) loadParentUsers();
             } catch (error) {
                 alert('操作失败');
             }
@@ -1246,20 +1378,21 @@
             if (!confirm('确定要删除用户吗？')) return;
             
             try {
-                const response = await fetch(`${API_BASE}/admin/users/${userId}`, {
+                await fetch(`${API_BASE}/admin/users/${userId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + getToken() }
                 });
                 
-                if (response.ok) {
-                    await Promise.all([loadUsers(), loadStats()]);
-                }
+                loadStats();
+                const activeTab = document.querySelector('.user-sub-tab.active').textContent;
+                if (activeTab.includes('学生')) loadStudentUsers();
+                else if (activeTab.includes('教师')) loadTeacherUsers();
+                else if (activeTab.includes('家长')) loadParentUsers();
             } catch (error) {
                 alert('删除失败');
             }
         }
         
-        // 初始化
         function init() {
             const user = getUser();
             if (!getToken() || user.role !== 'admin') {
@@ -1269,7 +1402,7 @@
             
             document.getElementById('userName').textContent = user.realName || '管理员';
             loadStats();
-            loadUsers();
+            showUserTab('student');
         }
         
         init();
