@@ -167,6 +167,7 @@
             font-size: 12px;
             margin-right: 5px;
             transition: all 0.2s;
+            white-space: nowrap;
         }
         
         .btn:hover {
@@ -191,8 +192,8 @@
         .btn-generate {
             background: #4CAF50;
             color: white;
-            padding: 10px 20px;
-            font-size: 14px;
+            padding: 8px 16px;
+            font-size: 13px;
         }
         
         .btn-refresh {
@@ -205,8 +206,8 @@
         .btn-copy {
             background: #667eea;
             color: white;
-            width: 100%;
-            margin-top: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
         }
         
         .btn-add-class {
@@ -249,10 +250,6 @@
         .role-parent { background: #ff9800; }
         
         /* 年级管理 */
-        .grade-section {
-            margin-bottom: 20px;
-        }
-        
         .grade-add-form {
             display: flex;
             gap: 10px;
@@ -283,11 +280,6 @@
             cursor: pointer;
             font-size: 14px;
             white-space: nowrap;
-            transition: background 0.3s;
-        }
-        
-        .btn-add-grade:hover {
-            background: #5a67d8;
         }
         
         .grade-grid {
@@ -302,14 +294,11 @@
             border-radius: 10px;
             padding: 20px;
             transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
         }
         
         .grade-card:hover {
             border-color: #667eea;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
-            transform: translateY(-2px);
         }
         
         .grade-card-header {
@@ -327,11 +316,6 @@
             color: #333;
         }
         
-        .grade-actions {
-            display: flex;
-            gap: 5px;
-        }
-        
         .btn-delete-grade {
             background: #f44336;
             color: white;
@@ -340,15 +324,9 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 12px;
-            transition: background 0.3s;
-        }
-        
-        .btn-delete-grade:hover {
-            background: #d32f2f;
         }
         
         .class-list {
-            flex: 1;
             margin-bottom: 15px;
         }
         
@@ -361,12 +339,6 @@
             border-radius: 5px;
             margin-bottom: 8px;
             border: 1px solid #e0e0e0;
-            transition: all 0.2s;
-        }
-        
-        .class-item:hover {
-            border-color: #2196f3;
-            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
         }
         
         .class-info {
@@ -392,7 +364,6 @@
         .class-add-form {
             display: flex;
             gap: 8px;
-            margin-top: auto;
         }
         
         .class-add-form input {
@@ -401,12 +372,6 @@
             border: 2px solid #e0e0e0;
             border-radius: 5px;
             font-size: 13px;
-            transition: border-color 0.3s;
-        }
-        
-        .class-add-form input:focus {
-            outline: none;
-            border-color: #2196f3;
         }
         
         .no-classes {
@@ -417,21 +382,29 @@
         }
         
         /* 邀请码管理 */
-        .invite-code-section {
+        .invite-section {
             margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
         }
         
         .section-title {
             font-size: 18px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
-        .section-title .badge {
+        .badge {
             background: #667eea;
             color: white;
             padding: 3px 8px;
@@ -439,74 +412,35 @@
             font-size: 12px;
         }
         
-        .invite-code-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
+        /* 学生邀请码表格 */
+        .invite-table {
+            width: 100%;
+            border-collapse: collapse;
         }
         
-        .invite-code-form select,
-        .invite-code-form input {
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
+        .invite-table th,
+        .invite-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .invite-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
             font-size: 14px;
         }
         
-        .invite-code-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-        }
-        
-        .invite-code-card {
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .invite-code-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-        }
-        
-        .invite-code-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .invite-code-value {
-            font-size: 20px;
+        .invite-code-display {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
             font-weight: bold;
             color: #667eea;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
         
-        .invite-code-actions {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .invite-code-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-            font-size: 13px;
-        }
-        
-        .invite-code-status {
+        .invite-status {
             padding: 3px 8px;
             border-radius: 3px;
             font-size: 12px;
@@ -550,13 +484,8 @@
                 grid-template-columns: 1fr;
             }
             
-            .invite-code-form,
             .grade-add-form {
                 flex-direction: column;
-            }
-            
-            .invite-code-list {
-                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -654,44 +583,57 @@
             <div id="invitesTab" style="display: none;">
                 <h2 style="margin-bottom: 20px;">🎫 邀请码管理</h2>
                 
-                <!-- 学生邀请码 - 每个班级一个 -->
-                <div class="invite-code-section">
-                    <div class="section-title">
-                        👨‍🎓 学生邀请码
-                        <span class="badge">每个班级一个邀请码</span>
+                <!-- 学生邀请码 - 列表形式 -->
+                <div class="invite-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            👨‍🎓 学生邀请码
+                            <span class="badge">每个班级一个邀请码</span>
+                        </div>
+                        <button class="btn-generate" onclick="generateAllStudentInviteCodes()">🎫 一键生成全部</button>
                     </div>
                     
-                    <div class="invite-code-form">
-                        <select id="studentInviteGrade">
-                            <option value="">选择年级</option>
-                        </select>
-                        
-                        <select id="studentInviteClass">
-                            <option value="">选择班级</option>
-                        </select>
-                        
-                        <button class="btn-generate" onclick="generateStudentInviteCode()">🎫 生成/刷新邀请码</button>
-                    </div>
-                    
-                    <div id="studentInviteCodeList" class="invite-code-list">
-                        <div class="empty-state">暂无学生邀请码</div>
-                    </div>
+                    <table class="invite-table">
+                        <thead>
+                            <tr>
+                                <th>年级</th>
+                                <th>班级</th>
+                                <th>邀请码</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentInviteList">
+                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
                 
-                <!-- 教师邀请码 - 统一一个 -->
-                <div class="invite-code-section">
-                    <div class="section-title">
-                        👨‍🏫 教师邀请码
-                        <span class="badge">所有教师共用一个邀请码</span>
+                <!-- 教师邀请码 -->
+                <div class="invite-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            👨‍🏫 教师邀请码
+                            <span class="badge">所有教师共用一个</span>
+                        </div>
+                        <button class="btn-generate" onclick="generateTeacherInviteCode()">🎫 生成/刷新</button>
                     </div>
                     
-                    <div class="invite-code-form">
-                        <button class="btn-generate" onclick="generateTeacherInviteCode()">🎫 生成/刷新教师邀请码</button>
-                    </div>
-                    
-                    <div id="teacherInviteCodeList" class="invite-code-list">
-                        <div class="empty-state">暂无教师邀请码</div>
-                    </div>
+                    <table class="invite-table">
+                        <thead>
+                            <tr>
+                                <th>邀请码</th>
+                                <th>状态</th>
+                                <th>使用次数</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacherInviteList">
+                            <tr><td colspan="5" class="loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             
@@ -736,9 +678,7 @@
                 loadGrades();
             } else if (tabName === 'invites') {
                 document.getElementById('invitesTab').style.display = 'block';
-                loadGradesForInvite();
-                loadStudentInviteCodes();
-                loadTeacherInviteCode();
+                loadAllInviteCodes();
             } else if (tabName === 'overview') {
                 document.getElementById('overviewTab').style.display = 'block';
             }
@@ -768,6 +708,15 @@
                 'parent': '家长'
             };
             return roleNames[role] || role;
+        }
+        
+        function generateInviteCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
         }
         
         // 加载统计
@@ -831,7 +780,7 @@
             }
         }
         
-        // 添加年级（不刷新页面）
+        // 添加年级
         async function addGrade() {
             const gradeName = document.getElementById('gradeNameInput').value.trim();
             if (!gradeName) {
@@ -852,7 +801,6 @@
                 const data = await response.json();
                 if (response.ok) {
                     document.getElementById('gradeNameInput').value = '';
-                    // 只更新年级列表和统计，不刷新整个页面
                     await Promise.all([loadGrades(), loadStats()]);
                 } else {
                     alert(data.error || '添加失败');
@@ -862,7 +810,7 @@
             }
         }
         
-        // 加载年级（不刷新页面）
+        // 加载年级
         async function loadGrades() {
             const gradeGrid = document.getElementById('gradeGrid');
             gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
@@ -881,9 +829,7 @@
                             <div class="grade-card">
                                 <div class="grade-card-header">
                                     <span class="grade-name">${grade.gradeName}</span>
-                                    <div class="grade-actions">
-                                        <button class="btn-delete-grade" onclick="deleteGrade('${grade.gradeId}')">删除</button>
-                                    </div>
+                                    <button class="btn-delete-grade" onclick="deleteGrade('${grade.gradeId}')">删除</button>
                                 </div>
                                 <div class="class-list">
                                     ${grade.classes && grade.classes.length > 0 ? 
@@ -916,7 +862,7 @@
             }
         }
         
-        // 添加班级（不刷新页面）
+        // 添加班级
         async function addClass(gradeId) {
             const input = document.getElementById(`classInput_${gradeId}`);
             const className = input.value.trim();
@@ -938,7 +884,6 @@
                 
                 const data = await response.json();
                 if (response.ok) {
-                    // 只更新年级列表和统计
                     await Promise.all([loadGrades(), loadStats()]);
                 } else {
                     alert(data.error || '添加失败');
@@ -948,7 +893,7 @@
             }
         }
         
-        // 删除班级（不刷新页面）
+        // 删除班级
         async function deleteClass(gradeId, className) {
             if (!confirm(`确定要删除班级"${className}"吗？`)) return;
             
@@ -973,7 +918,7 @@
             }
         }
         
-        // 删除年级（不刷新页面）
+        // 删除年级
         async function deleteGrade(gradeId) {
             if (!confirm('确定要删除这个年级吗？该年级下的所有班级也会被删除！')) return;
             
@@ -993,86 +938,139 @@
             }
         }
         
-        // 为邀请码加载年级下拉框
-        async function loadGradesForInvite() {
-            try {
-                const response = await fetch(API_BASE + '/admin/grades', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
-                });
-                
-                if (response.ok) {
-                    const grades = await response.json();
-                    const select = document.getElementById('studentInviteGrade');
-                    
-                    select.innerHTML = '<option value="">选择年级</option>' + 
-                        grades.map(grade => `
-                            <option value="${grade.gradeId}">${grade.gradeName}</option>
-                        `).join('');
-                }
-            } catch (error) {
-                console.error('加载年级失败:', error);
-            }
+        // ============ 邀请码管理 ============
+        
+        // 加载所有邀请码（学生+教师）
+        async function loadAllInviteCodes() {
+            await Promise.all([
+                loadStudentInviteCodes(),
+                loadTeacherInviteCode()
+            ]);
         }
         
-        // 年级变化时加载班级
-        document.getElementById('studentInviteGrade').addEventListener('change', async function() {
-            const gradeId = this.value;
-            const classSelect = document.getElementById('studentInviteClass');
-            
-            if (!gradeId) {
-                classSelect.innerHTML = '<option value="">选择班级</option>';
-                return;
-            }
+        // 加载学生邀请码（列表形式）
+        async function loadStudentInviteCodes() {
+            const tbody = document.getElementById('studentInviteList');
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
             
             try {
-                const response = await fetch(API_BASE + '/admin/grades', {
+                // 获取所有年级和班级
+                const gradesResponse = await fetch(API_BASE + '/admin/grades', {
                     headers: { 'Authorization': 'Bearer ' + getToken() }
                 });
                 
-                if (response.ok) {
-                    const grades = await response.json();
-                    const grade = grades.find(g => g.gradeId === gradeId);
+                // 获取所有学生邀请码
+                const codesResponse = await fetch(API_BASE + '/admin/invite-codes?type=class', {
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                
+                if (gradesResponse.ok && codesResponse.ok) {
+                    const grades = await gradesResponse.json();
+                    const codes = await codesResponse.json();
                     
-                    if (grade && grade.classes) {
-                        classSelect.innerHTML = '<option value="">选择班级</option>' + 
-                            grade.classes.map(cls => `
-                                <option value="${cls.className}">${cls.className}</option>
-                            `).join('');
+                    // 构建班级列表
+                    const classList = [];
+                    for (const grade of grades) {
+                        if (grade.classes) {
+                            for (const cls of grade.classes) {
+                                // 查找该班级的邀请码
+                                const code = codes.find(c => 
+                                    c.gradeId === grade.gradeId && 
+                                    c.target === cls.className
+                                );
+                                
+                                classList.push({
+                                    gradeId: grade.gradeId,
+                                    gradeName: grade.gradeName,
+                                    className: cls.className,
+                                    inviteCode: code ? code.code : null,
+                                    status: code ? code.status : 'none',
+                                    createdAt: code ? code.createdAt : null
+                                });
+                            }
+                        }
+                    }
+                    
+                    if (classList.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">暂无班级，请先在年级管理中添加班级</td></tr>';
+                    } else {
+                        tbody.innerHTML = classList.map(item => `
+                            <tr>
+                                <td>${item.gradeName}</td>
+                                <td>${item.className}</td>
+                                <td>
+                                    ${item.inviteCode ? 
+                                        `<span class="invite-code-display">${item.inviteCode}</span>` : 
+                                        '<span style="color: #999;">未生成</span>'
+                                    }
+                                </td>
+                                <td>
+                                    ${item.inviteCode ? 
+                                        `<span class="invite-status ${item.status === 'unused' ? 'status-unused' : 'status-used'}">
+                                            ${item.status === 'unused' ? '未使用' : '已使用'}
+                                        </span>` : 
+                                        '<span style="color: #999;">-</span>'
+                                    }
+                                </td>
+                                <td>${item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-'}</td>
+                                <td>
+                                    ${item.inviteCode ? `
+                                        <button class="btn btn-refresh" onclick="refreshStudentCode('${item.gradeId}', '${item.className}')">刷新</button>
+                                        <button class="btn btn-copy" onclick="copyInviteCode('${item.inviteCode}')">复制</button>
+                                    ` : `
+                                        <button class="btn btn-generate" onclick="generateStudentCode('${item.gradeId}', '${item.className}')">生成</button>
+                                    `}
+                                </td>
+                            </tr>
+                        `).join('');
                     }
                 }
             } catch (error) {
-                console.error('加载班级失败:', error);
+                console.error('加载学生邀请码失败:', error);
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">加载失败</td></tr>';
             }
-        });
-        
-        // 生成随机邀请码
-        function generateInviteCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 8; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return code;
         }
         
-        // 生成/刷新学生邀请码（每个班级一个）
-        async function generateStudentInviteCode() {
-            const gradeId = document.getElementById('studentInviteGrade').value;
-            const className = document.getElementById('studentInviteClass').value;
-            
-            if (!gradeId || !className) {
-                alert('请选择年级和班级');
-                return;
-            }
+        // 加载教师邀请码
+        async function loadTeacherInviteCode() {
+            const tbody = document.getElementById('teacherInviteList');
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
-                // 先删除该班级的旧邀请码
-                await fetch(`${API_BASE}/admin/invite-codes/class/${gradeId}/${className}`, {
-                    method: 'DELETE',
+                const response = await fetch(API_BASE + '/admin/invite-codes?type=teacher', {
                     headers: { 'Authorization': 'Bearer ' + getToken() }
                 });
                 
-                // 生成新邀请码
+                if (response.ok) {
+                    const codes = await response.json();
+                    
+                    if (codes.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无教师邀请码</td></tr>';
+                    } else {
+                        tbody.innerHTML = codes.map(code => `
+                            <tr>
+                                <td><span class="invite-code-display">${code.code}</span></td>
+                                <td>
+                                    <span class="invite-status status-unused">长期有效</span>
+                                </td>
+                                <td>${code.usedCount || 0} 次</td>
+                                <td>${new Date(code.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="btn btn-refresh" onclick="generateTeacherInviteCode()">刷新</button>
+                                    <button class="btn btn-copy" onclick="copyInviteCode('${code.code}')">复制</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('加载教师邀请码失败:', error);
+            }
+        }
+        
+        // 生成单个班级的学生邀请码
+        async function generateStudentCode(gradeId, className) {
+            try {
                 const code = generateInviteCode();
                 
                 const response = await fetch(API_BASE + '/admin/invite-codes', {
@@ -1090,132 +1088,11 @@
                     })
                 });
                 
-                const data = await response.json();
                 if (response.ok) {
                     await loadStudentInviteCodes();
-                } else {
-                    alert(data.error || '生成失败');
                 }
             } catch (error) {
-                alert('网络错误');
-            }
-        }
-        
-        // 生成/刷新教师邀请码（统一一个）
-        async function generateTeacherInviteCode() {
-            try {
-                // 删除旧教师邀请码
-                await fetch(`${API_BASE}/admin/invite-codes/teacher`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
-                });
-                
-                // 生成新邀请码
-                const code = generateInviteCode();
-                
-                const response = await fetch(API_BASE + '/admin/invite-codes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
-                    },
-                    body: JSON.stringify({
-                        type: 'teacher',
-                        target: 'all',
-                        role: 'teacher',
-                        codes: [code]
-                    })
-                });
-                
-                const data = await response.json();
-                if (response.ok) {
-                    await loadTeacherInviteCode();
-                } else {
-                    alert(data.error || '生成失败');
-                }
-            } catch (error) {
-                alert('网络错误');
-            }
-        }
-        
-        // 加载学生邀请码
-        async function loadStudentInviteCodes() {
-            const listContainer = document.getElementById('studentInviteCodeList');
-            listContainer.innerHTML = '<div class="loading">加载中...</div>';
-            
-            try {
-                const response = await fetch(API_BASE + '/admin/invite-codes?type=class', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
-                });
-                
-                if (response.ok) {
-                    const codes = await response.json();
-                    if (codes.length === 0) {
-                        listContainer.innerHTML = '<div class="empty-state">暂无学生邀请码</div>';
-                    } else {
-                        listContainer.innerHTML = codes.map(code => `
-                            <div class="invite-code-card">
-                                <div class="invite-code-card-header">
-                                    <span class="invite-code-value">${code.code}</span>
-                                    <div class="invite-code-actions">
-                                        <button class="btn btn-refresh" onclick="refreshStudentCode('${code.gradeId}', '${code.target}')">刷新</button>
-                                    </div>
-                                </div>
-                                <div class="invite-code-info">
-                                    <span>班级: ${code.target}</span>
-                                    <span class="invite-code-status ${code.status === 'unused' ? 'status-unused' : 'status-used'}">
-                                        ${code.status === 'unused' ? '未使用' : '已使用'}
-                                    </span>
-                                </div>
-                                <div class="invite-code-info">
-                                    <span>创建时间: ${new Date(code.createdAt).toLocaleDateString()}</span>
-                                </div>
-                                <button class="btn btn-copy" onclick="copyInviteCode('${code.code}')">复制邀请码</button>
-                            </div>
-                        `).join('');
-                    }
-                }
-            } catch (error) {
-                console.error('加载学生邀请码失败:', error);
-            }
-        }
-        
-        // 加载教师邀请码
-        async function loadTeacherInviteCode() {
-            const listContainer = document.getElementById('teacherInviteCodeList');
-            listContainer.innerHTML = '<div class="loading">加载中...</div>';
-            
-            try {
-                const response = await fetch(API_BASE + '/admin/invite-codes?type=teacher', {
-                    headers: { 'Authorization': 'Bearer ' + getToken() }
-                });
-                
-                if (response.ok) {
-                    const codes = await response.json();
-                    if (codes.length === 0) {
-                        listContainer.innerHTML = '<div class="empty-state">暂无教师邀请码</div>';
-                    } else {
-                        listContainer.innerHTML = codes.map(code => `
-                            <div class="invite-code-card">
-                                <div class="invite-code-card-header">
-                                    <span class="invite-code-value">${code.code}</span>
-                                    <div class="invite-code-actions">
-                                        <button class="btn btn-refresh" onclick="generateTeacherInviteCode()">刷新</button>
-                                    </div>
-                                </div>
-                                <div class="invite-code-info">
-                                    <span>所有教师通用</span>
-                                    <span class="invite-code-status ${code.status === 'unused' ? 'status-unused' : 'status-used'}">
-                                        ${code.status === 'unused' ? '未使用' : '已使用'}
-                                    </span>
-                                </div>
-                                <button class="btn btn-copy" onclick="copyInviteCode('${code.code}')">复制邀请码</button>
-                            </div>
-                        `).join('');
-                    }
-                }
-            } catch (error) {
-                console.error('加载教师邀请码失败:', error);
+                alert('生成失败');
             }
         }
         
@@ -1247,6 +1124,93 @@
                 
                 if (response.ok) {
                     await loadStudentInviteCodes();
+                }
+            } catch (error) {
+                alert('刷新失败');
+            }
+        }
+        
+        // 一键生成所有班级的学生邀请码
+        async function generateAllStudentInviteCodes() {
+            if (!confirm('确定要为所有未生成邀请码的班级生成邀请码吗？')) return;
+            
+            try {
+                const gradesResponse = await fetch(API_BASE + '/admin/grades', {
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                
+                const codesResponse = await fetch(API_BASE + '/admin/invite-codes?type=class', {
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                
+                if (gradesResponse.ok && codesResponse.ok) {
+                    const grades = await gradesResponse.json();
+                    const existingCodes = await codesResponse.json();
+                    
+                    for (const grade of grades) {
+                        if (grade.classes) {
+                            for (const cls of grade.classes) {
+                                const hasCode = existingCodes.some(c => 
+                                    c.gradeId === grade.gradeId && 
+                                    c.target === cls.className
+                                );
+                                
+                                if (!hasCode) {
+                                    const code = generateInviteCode();
+                                    await fetch(API_BASE + '/admin/invite-codes', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': 'Bearer ' + getToken()
+                                        },
+                                        body: JSON.stringify({
+                                            type: 'class',
+                                            target: cls.className,
+                                            gradeId: grade.gradeId,
+                                            role: 'student',
+                                            codes: [code]
+                                        })
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    
+                    await loadStudentInviteCodes();
+                    alert('已为所有班级生成邀请码！');
+                }
+            } catch (error) {
+                alert('生成失败');
+            }
+        }
+        
+        // 生成/刷新教师邀请码
+        async function generateTeacherInviteCode() {
+            if (!confirm('确定要刷新教师邀请码吗？旧邀请码将失效！')) return;
+            
+            try {
+                await fetch(`${API_BASE}/admin/invite-codes/teacher`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + getToken() }
+                });
+                
+                const code = generateInviteCode();
+                const response = await fetch(API_BASE + '/admin/invite-codes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({
+                        type: 'teacher',
+                        target: 'all',
+                        role: 'teacher',
+                        codes: [code]
+                    })
+                });
+                
+                if (response.ok) {
+                    await loadTeacherInviteCode();
                 }
             } catch (error) {
                 alert('刷新失败');
