@@ -151,8 +151,8 @@
         .identity-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #f8f9fa; border-radius: 5px; margin-bottom: 5px; }
         .identity-item .identity-text { font-size: 14px; }
         .btn-remove-identity { background: #f44336; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; }
-        .add-identity-form { display: flex; gap: 8px; flex-wrap: wrap; }
-        .add-identity-form select { flex: 1; min-width: 120px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 13px; }
+        .add-identity-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .add-identity-form select { flex: 1; min-width: 100px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 13px; }
         .btn-add-identity { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; white-space: nowrap; }
         @media (max-width: 1024px) { .grade-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .grade-grid { grid-template-columns: 1fr; } }
@@ -568,7 +568,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>添加班主任身份</label>
+                        <label>添加班主任身份（选择年级+班级）</label>
                         <div class="add-identity-form">
                             <select id="classGradeSelect" onchange="updateClassOptions()">
                                 <option value="">选择年级</option>
@@ -577,7 +577,7 @@
                             <select id="classSelect">
                                 <option value="">选择班级</option>
                             </select>
-                            <button class="btn-add-identity" onclick="addClassIdentity()">➕ 添加班主任</button>
+                            <button class="btn-add-identity" onclick="addClassIdentity()">➕ 添加</button>
                         </div>
                     </div>
                     
@@ -588,7 +588,7 @@
                                 <option value="">选择科目</option>
                                 ${subjectOptions}
                             </select>
-                            <button class="btn-add-identity" onclick="addSubjectIdentity()">➕ 添加任课</button>
+                            <button class="btn-add-identity" onclick="addSubjectIdentity()">➕ 添加</button>
                         </div>
                     </div>
                     
@@ -640,7 +640,7 @@
             const grade = allGrades.find(g => g.gradeId === gradeId);
             const gradeName = grade ? grade.gradeName : '';
             
-            // 使用年级+班级作为唯一标识
+            // 关键修复：使用"年级名称+班级名称"作为唯一标识
             const fullClassName = `${gradeName}${className}`;
             
             if (window.tempIdentities.some(id => id.type === 'class' && id.value === fullClassName)) {
@@ -651,9 +651,7 @@
             window.tempIdentities.push({ 
                 type: 'class', 
                 value: fullClassName, 
-                label: `${fullClassName}班主任`,
-                gradeId: gradeId,
-                className: className
+                label: `${fullClassName}班主任`
             });
             renderIdentityList();
         }
@@ -739,7 +737,7 @@
             }
         }
         
-        // 加载年级（修复班主任匹配问题）
+        // 加载年级（关键修复：使用年级+班级匹配班主任）
         async function loadGrades() {
             const gradeGrid = document.getElementById('gradeGrid');
             gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
@@ -769,7 +767,7 @@
                                 <div class="class-list">
                                     ${grade.classes && grade.classes.length > 0 ? 
                                         grade.classes.map(cls => {
-                                            // 修复：使用年级+班级名称匹配班主任
+                                            // 关键修复：使用"年级名称+班级名称"匹配班主任
                                             const fullClassName = `${grade.gradeName}${cls.className}`;
                                             const classTeacher = teachers.find(t => 
                                                 t.classTeacherOf && t.classTeacherOf.includes(fullClassName)
