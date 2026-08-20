@@ -56,6 +56,7 @@
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
         }
         .nav-tab {
             padding: 10px 20px;
@@ -154,6 +155,12 @@
         .add-identity-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .add-identity-form select { flex: 1; min-width: 100px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 13px; }
         .btn-add-identity { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+        /* 班级管理样式 */
+        .class-management-form { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+        .class-management-form select { flex: 1; max-width: 300px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; }
+        .teacher-list-section { margin-bottom: 30px; }
+        .student-list-section { margin-bottom: 30px; }
+        .list-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333; }
         @media (max-width: 1024px) { .grade-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .grade-grid { grid-template-columns: 1fr; } }
     </style>
@@ -184,7 +191,7 @@
                 <div class="stat-value" id="totalParents">0</div>
                 <div class="stat-label">家长</div>
             </div>
-            <div class="stat-card" onclick="showTab('grades')">
+            <div class="stat-card" onclick="showTab('classes')">
                 <div class="stat-icon">📚</div>
                 <div class="stat-value" id="totalClasses">0</div>
                 <div class="stat-label">班级</div>
@@ -194,6 +201,7 @@
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="showTab('users')">👥 用户管理</button>
             <button class="nav-tab" onclick="showTab('grades')">🏫 年级管理</button>
+            <button class="nav-tab" onclick="showTab('classes')">📚 班级管理</button>
             <button class="nav-tab" onclick="showTab('invites')">🎫 邀请码管理</button>
         </div>
         
@@ -236,6 +244,19 @@
                 <div id="gradeGrid" class="grade-grid"><div class="empty-state">加载中...</div></div>
             </div>
             
+            <!-- 班级管理 -->
+            <div id="classesTab" style="display: none;">
+                <h2 style="margin-bottom: 20px;">📚 班级管理</h2>
+                <div class="class-management-form">
+                    <select id="classManagementSelect" onchange="loadClassManagementData()">
+                        <option value="">请选择班级</option>
+                    </select>
+                </div>
+                <div id="classManagementContent">
+                    <div class="empty-state">请选择班级查看详情</div>
+                </div>
+            </div>
+            
             <!-- 邀请码管理 -->
             <div id="invitesTab" style="display: none;">
                 <h2 style="margin-bottom: 20px;">🎫 邀请码管理</h2>
@@ -271,6 +292,7 @@
         let currentUserType = 'student';
         let allGrades = [];
         let allTeachers = [];
+        let allStudents = [];
         
         const SUBJECTS = ['语文', '数学', '英语', '物理', '化学', '生物', '历史', '地理', '政治', '体育', '音乐', '美术', '信息技术', '科学', '道德与法治', '劳动'];
         
@@ -289,6 +311,7 @@
             event.target.classList.add('active');
             document.getElementById('usersTab').style.display = 'none';
             document.getElementById('gradesTab').style.display = 'none';
+            document.getElementById('classesTab').style.display = 'none';
             document.getElementById('invitesTab').style.display = 'none';
             
             if (tabName === 'users') {
@@ -296,6 +319,9 @@
             } else if (tabName === 'grades') {
                 document.getElementById('gradesTab').style.display = 'block';
                 loadGrades();
+            } else if (tabName === 'classes') {
+                document.getElementById('classesTab').style.display = 'block';
+                loadClassManagementSelect();
             } else if (tabName === 'invites') {
                 document.getElementById('invitesTab').style.display = 'block';
                 loadAllInviteCodes();
@@ -375,6 +401,20 @@
             } catch (error) {
                 console.error('加载用户失败:', error);
                 return [];
+            }
+        }
+        
+        async function loadAllStudentsData() {
+            try {
+                const token = getToken();
+                const response = await fetch(API_BASE + '/students', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    allStudents = await response.json();
+                }
+            } catch (error) {
+                console.error('加载学生数据失败:', error);
             }
         }
         
@@ -508,6 +548,156 @@
             } catch (error) {
                 console.error('加载家长失败:', error);
                 tbody.innerHTML = '<tr><td colspan="5" class="empty-state">加载失败</td></tr>';
+            }
+        }
+        
+        // 班级管理
+        async function loadClassManagementSelect() {
+            const select = document.getElementById('classManagementSelect');
+            
+            try {
+                await loadAllGradesData();
+                await loadAllStudentsData();
+                
+                let options = '<option value="">请选择班级</option>';
+                
+                for (const grade of allGrades) {
+                    if (grade.classes) {
+                        for (const cls of grade.classes) {
+                            const fullName = `${grade.gradeName}${cls.className}`;
+                            options += `<option value="${fullName}">${fullName}</option>`;
+                        }
+                    }
+                }
+                
+                select.innerHTML = options;
+            } catch (error) {
+                console.error('加载班级选择失败:', error);
+            }
+        }
+        
+        async function loadAllGradesData() {
+            try {
+                const token = getToken();
+                const response = await fetch(API_BASE + '/admin/grades', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    allGrades = await response.json();
+                }
+            } catch (error) {
+                console.error('加载年级数据失败:', error);
+            }
+        }
+        
+        async function loadClassManagementData() {
+            const select = document.getElementById('classManagementSelect');
+            const selectedClass = select.value;
+            const contentDiv = document.getElementById('classManagementContent');
+            
+            if (!selectedClass) {
+                contentDiv.innerHTML = '<div class="empty-state">请选择班级查看详情</div>';
+                return;
+            }
+            
+            contentDiv.innerHTML = '<div class="loading">加载中...</div>';
+            
+            try {
+                await loadAllUsers();
+                await loadAllStudentsData();
+                
+                // 获取该班级的班主任
+                const classTeacher = allTeachers.find(t => 
+                    t.classTeacherOf && t.classTeacherOf.includes(selectedClass)
+                );
+                
+                // 获取该班级的任课教师
+                const subjectTeachers = allTeachers.filter(t => 
+                    t.subjectTeacherOf && t.subjectTeacherOf.some(s => s.startsWith(selectedClass))
+                );
+                
+                // 获取该班级的学生
+                const classStudents = allStudents.filter(s => {
+                    const studentFullClass = s.class || '';
+                    return studentFullClass === selectedClass || studentFullClass.includes(selectedClass);
+                });
+                
+                let html = '';
+                
+                // 任课教师名单（班主任在最前面）
+                html += `
+                    <div class="teacher-list-section">
+                        <div class="list-title">👨‍🏫 任课教师名单</div>
+                        <table>
+                            <thead><tr><th>姓名</th><th>身份</th><th>科目/职务</th></tr></thead>
+                            <tbody>
+                `;
+                
+                // 班主任在最前面
+                if (classTeacher) {
+                    html += `
+                        <tr>
+                            <td>${classTeacher.realName}</td>
+                            <td><span class="teacher-type-badge teacher-class">班主任</span></td>
+                            <td>${selectedClass}班主任</td>
+                        </tr>
+                    `;
+                }
+                
+                // 任课教师
+                if (subjectTeachers.length > 0) {
+                    subjectTeachers.forEach(teacher => {
+                        const subjectIdentity = teacher.subjectTeacherOf.find(s => s.startsWith(selectedClass));
+                        if (subjectIdentity) {
+                            const subjectName = subjectIdentity.replace(selectedClass, '');
+                            html += `
+                                <tr>
+                                    <td>${teacher.realName}</td>
+                                    <td><span class="teacher-type-badge teacher-subject">任课教师</span></td>
+                                    <td>${subjectName}</td>
+                                </tr>
+                            `;
+                        }
+                    });
+                }
+                
+                if (!classTeacher && subjectTeachers.length === 0) {
+                    html += '<tr><td colspan="3" class="empty-state">暂无教师</td></tr>';
+                }
+                
+                html += '</tbody></table></div>';
+                
+                // 学生名单
+                html += `
+                    <div class="student-list-section">
+                        <div class="list-title">👨‍🎓 学生名单（${classStudents.length}人）</div>
+                        <table>
+                            <thead><tr><th>姓名</th><th>用户名</th><th>状态</th></tr></thead>
+                            <tbody>
+                `;
+                
+                if (classStudents.length > 0) {
+                    classStudents.forEach(student => {
+                        const userInfo = allTeachers.find(t => t.userId === student.studentId) || {};
+                        html += `
+                            <tr>
+                                <td>${student.name || '未知'}</td>
+                                <td>${student.username || '-'}</td>
+                                <td class="status-active">正常</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    html += '<tr><td colspan="3" class="empty-state">暂无学生</td></tr>';
+                }
+                
+                html += '</tbody></table></div>';
+                
+                contentDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('加载班级管理数据失败:', error);
+                contentDiv.innerHTML = '<div class="empty-state">加载失败</div>';
             }
         }
         
@@ -706,7 +896,6 @@
             const grade = allGrades.find(g => g.gradeId === gradeId);
             const gradeName = grade ? grade.gradeName : '';
             
-            // 使用"年级+班级+科目"作为唯一标识
             const fullSubjectIdentity = `${gradeName}${className}${subject}`;
             const label = `${gradeName}${className}${subject}教师`;
             
@@ -782,7 +971,7 @@
             }
         }
         
-        // 加载年级（修复班主任匹配问题）
+        // 加载年级
         async function loadGrades() {
             const gradeGrid = document.getElementById('gradeGrid');
             gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
