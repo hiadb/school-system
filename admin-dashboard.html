@@ -427,21 +427,18 @@
                     tbody.innerHTML = teacherUsers.map(user => {
                         let identities = [];
                         
-                        // 班主任身份
                         if (user.classTeacherOf && user.classTeacherOf.length > 0) {
                             user.classTeacherOf.forEach(cls => {
                                 identities.push(`<span class="teacher-type-badge teacher-class">${cls}班主任</span>`);
                             });
                         }
                         
-                        // 任课教师身份
                         if (user.subjectTeacherOf && user.subjectTeacherOf.length > 0) {
                             user.subjectTeacherOf.forEach(subj => {
                                 identities.push(`<span class="teacher-type-badge teacher-subject">${subj}教师</span>`);
                             });
                         }
                         
-                        // 兼容旧数据
                         if (identities.length === 0) {
                             if (user.teacherType === 'class' && user.className) {
                                 identities.push(`<span class="teacher-type-badge teacher-class">${user.className}班主任</span>`);
@@ -525,11 +522,9 @@
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             
-            // 获取现有身份
             const classTeacherOf = teacher.classTeacherOf || [];
             const subjectTeacherOf = teacher.subjectTeacherOf || [];
             
-            // 兼容旧数据
             if (classTeacherOf.length === 0 && teacher.teacherType === 'class' && teacher.className) {
                 classTeacherOf.push(teacher.className);
             }
@@ -538,14 +533,13 @@
             }
             
             const gradeOptions = allGrades.map(g => 
-                `<option value="${g.gradeName}">${g.gradeName}</option>`
+                `<option value="${g.gradeId}">${g.gradeName}</option>`
             ).join('');
             
             const subjectOptions = SUBJECTS.map(s => 
                 `<option value="${s}">${s}</option>`
             ).join('');
             
-            // 现有身份列表
             const existingIdentities = [];
             classTeacherOf.forEach(cls => {
                 existingIdentities.push({ type: 'class', value: cls, label: `${cls}班主任` });
@@ -574,28 +568,27 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>添加身份</label>
+                        <label>添加班主任身份</label>
                         <div class="add-identity-form">
-                            <select id="identityTypeSelect" onchange="updateIdentityFields()">
-                                <option value="class">班主任</option>
-                                <option value="subject">任课教师</option>
-                            </select>
-                            
-                            <select id="identityGradeSelect" onchange="updateIdentityClassOptions()">
+                            <select id="classGradeSelect" onchange="updateClassOptions()">
                                 <option value="">选择年级</option>
                                 ${gradeOptions}
                             </select>
-                            
-                            <select id="identityClassSelect" style="display: none;">
+                            <select id="classSelect">
                                 <option value="">选择班级</option>
                             </select>
-                            
-                            <select id="identitySubjectSelect" style="display: none;">
+                            <button class="btn-add-identity" onclick="addClassIdentity()">➕ 添加班主任</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>添加任课教师身份</label>
+                        <div class="add-identity-form">
+                            <select id="subjectSelect">
                                 <option value="">选择科目</option>
                                 ${subjectOptions}
                             </select>
-                            
-                            <button class="btn-add-identity" onclick="addIdentity()">➕ 添加</button>
+                            <button class="btn-add-identity" onclick="addSubjectIdentity()">➕ 添加任课</button>
                         </div>
                     </div>
                     
@@ -607,37 +600,17 @@
             `;
             
             document.body.appendChild(modal);
-            updateIdentityFields();
-            
-            // 存储临时身份列表
             window.tempIdentities = existingIdentities;
         }
         
-        function updateIdentityFields() {
-            const typeSelect = document.getElementById('identityTypeSelect');
-            const gradeSelect = document.getElementById('identityGradeSelect');
-            const classSelect = document.getElementById('identityClassSelect');
-            const subjectSelect = document.getElementById('identitySubjectSelect');
-            
-            if (typeSelect.value === 'class') {
-                gradeSelect.style.display = 'block';
-                classSelect.style.display = 'block';
-                subjectSelect.style.display = 'none';
-            } else {
-                gradeSelect.style.display = 'none';
-                classSelect.style.display = 'none';
-                subjectSelect.style.display = 'block';
-            }
-        }
-        
-        function updateIdentityClassOptions() {
-            const gradeSelect = document.getElementById('identityGradeSelect');
-            const classSelect = document.getElementById('identityClassSelect');
+        function updateClassOptions() {
+            const gradeSelect = document.getElementById('classGradeSelect');
+            const classSelect = document.getElementById('classSelect');
             
             if (!gradeSelect || !classSelect) return;
             
-            const selectedGrade = gradeSelect.value;
-            const grade = allGrades.find(g => g.gradeName === selectedGrade);
+            const selectedGradeId = gradeSelect.value;
+            const grade = allGrades.find(g => g.gradeId === selectedGradeId);
             
             if (grade && grade.classes) {
                 classSelect.innerHTML = '<option value="">选择班级</option>' + 
@@ -647,51 +620,63 @@
             }
         }
         
-        function addIdentity() {
-            const typeSelect = document.getElementById('identityTypeSelect');
-            const gradeSelect = document.getElementById('identityGradeSelect');
-            const classSelect = document.getElementById('identityClassSelect');
-            const subjectSelect = document.getElementById('identitySubjectSelect');
+        function addClassIdentity() {
+            const gradeSelect = document.getElementById('classGradeSelect');
+            const classSelect = document.getElementById('classSelect');
             
-            const type = typeSelect.value;
-            let label = '';
-            let value = '';
+            const gradeId = gradeSelect.value;
+            const className = classSelect.value;
             
-            if (type === 'class') {
-                const gradeName = gradeSelect.value;
-                const className = classSelect.value;
-                
-                if (!gradeName || !className) {
-                    alert('请选择年级和班级');
-                    return;
-                }
-                
-                value = className;
-                label = `${className}班主任`;
-                
-                // 检查是否已存在
-                if (window.tempIdentities.some(id => id.type === 'class' && id.value === className)) {
-                    alert('该班主任身份已存在');
-                    return;
-                }
-            } else {
-                const subject = subjectSelect.value;
-                
-                if (!subject) {
-                    alert('请选择科目');
-                    return;
-                }
-                
-                value = subject;
-                label = `${subject}教师`;
-                
-                if (window.tempIdentities.some(id => id.type === 'subject' && id.value === subject)) {
-                    alert('该任课教师身份已存在');
-                    return;
-                }
+            if (!gradeId) {
+                alert('请选择年级');
+                return;
             }
             
-            window.tempIdentities.push({ type, value, label });
+            if (!className) {
+                alert('请选择班级');
+                return;
+            }
+            
+            const grade = allGrades.find(g => g.gradeId === gradeId);
+            const gradeName = grade ? grade.gradeName : '';
+            
+            // 使用年级+班级作为唯一标识
+            const fullClassName = `${gradeName}${className}`;
+            
+            if (window.tempIdentities.some(id => id.type === 'class' && id.value === fullClassName)) {
+                alert('该班主任身份已存在');
+                return;
+            }
+            
+            window.tempIdentities.push({ 
+                type: 'class', 
+                value: fullClassName, 
+                label: `${fullClassName}班主任`,
+                gradeId: gradeId,
+                className: className
+            });
+            renderIdentityList();
+        }
+        
+        function addSubjectIdentity() {
+            const subjectSelect = document.getElementById('subjectSelect');
+            const subject = subjectSelect.value;
+            
+            if (!subject) {
+                alert('请选择科目');
+                return;
+            }
+            
+            if (window.tempIdentities.some(id => id.type === 'subject' && id.value === subject)) {
+                alert('该任课教师身份已存在');
+                return;
+            }
+            
+            window.tempIdentities.push({ 
+                type: 'subject', 
+                value: subject, 
+                label: `${subject}教师`
+            });
             renderIdentityList();
         }
         
@@ -754,7 +739,7 @@
             }
         }
         
-        // 加载年级（显示班主任姓名）
+        // 加载年级（修复班主任匹配问题）
         async function loadGrades() {
             const gradeGrid = document.getElementById('gradeGrid');
             gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
@@ -769,7 +754,6 @@
                     const grades = await response.json();
                     allGrades = grades;
                     
-                    // 获取所有教师信息用于显示班主任
                     const users = await loadAllUsers();
                     const teachers = users.filter(u => u.role === 'teacher');
                     
@@ -785,9 +769,10 @@
                                 <div class="class-list">
                                     ${grade.classes && grade.classes.length > 0 ? 
                                         grade.classes.map(cls => {
-                                            // 查找该班级的班主任
+                                            // 修复：使用年级+班级名称匹配班主任
+                                            const fullClassName = `${grade.gradeName}${cls.className}`;
                                             const classTeacher = teachers.find(t => 
-                                                t.classTeacherOf && t.classTeacherOf.includes(cls.className)
+                                                t.classTeacherOf && t.classTeacherOf.includes(fullClassName)
                                             );
                                             const teacherName = classTeacher ? classTeacher.realName : '';
                                             
