@@ -139,7 +139,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
-        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 550px; max-height: 80vh; overflow-y: auto; }
         .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
@@ -435,7 +435,7 @@
                         
                         if (user.subjectTeacherOf && user.subjectTeacherOf.length > 0) {
                             user.subjectTeacherOf.forEach(subj => {
-                                identities.push(`<span class="teacher-type-badge teacher-subject">${subj}教师</span>`);
+                                identities.push(`<span class="teacher-type-badge teacher-subject">${subj}</span>`);
                             });
                         }
                         
@@ -511,7 +511,7 @@
             }
         }
         
-        // 打开教师设置模态框（支持多身份）
+        // 打开教师设置模态框（支持多身份，任课教师也要选年级和班级）
         function openTeacherSetting(teacherId) {
             const teacher = allTeachers.find(t => t.userId === teacherId);
             if (!teacher) return;
@@ -545,7 +545,7 @@
                 existingIdentities.push({ type: 'class', value: cls, label: `${cls}班主任` });
             });
             subjectTeacherOf.forEach(subj => {
-                existingIdentities.push({ type: 'subject', value: subj, label: `${subj}教师` });
+                existingIdentities.push({ type: 'subject', value: subj, label: `${subj}` });
             });
             
             modal.innerHTML = `
@@ -582,8 +582,15 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>添加任课教师身份</label>
+                        <label>添加任课教师身份（选择年级+班级+科目）</label>
                         <div class="add-identity-form">
+                            <select id="subjectGradeSelect" onchange="updateSubjectClassOptions()">
+                                <option value="">选择年级</option>
+                                ${gradeOptions}
+                            </select>
+                            <select id="subjectClassSelect">
+                                <option value="">选择班级</option>
+                            </select>
                             <select id="subjectSelect">
                                 <option value="">选择科目</option>
                                 ${subjectOptions}
@@ -620,6 +627,23 @@
             }
         }
         
+        function updateSubjectClassOptions() {
+            const gradeSelect = document.getElementById('subjectGradeSelect');
+            const classSelect = document.getElementById('subjectClassSelect');
+            
+            if (!gradeSelect || !classSelect) return;
+            
+            const selectedGradeId = gradeSelect.value;
+            const grade = allGrades.find(g => g.gradeId === selectedGradeId);
+            
+            if (grade && grade.classes) {
+                classSelect.innerHTML = '<option value="">选择班级</option>' + 
+                    grade.classes.map(c => `<option value="${c.className}">${c.className}</option>`).join('');
+            } else {
+                classSelect.innerHTML = '<option value="">选择班级</option>';
+            }
+        }
+        
         function addClassIdentity() {
             const gradeSelect = document.getElementById('classGradeSelect');
             const classSelect = document.getElementById('classSelect');
@@ -640,7 +664,6 @@
             const grade = allGrades.find(g => g.gradeId === gradeId);
             const gradeName = grade ? grade.gradeName : '';
             
-            // 关键修复：使用"年级名称+班级名称"作为唯一标识
             const fullClassName = `${gradeName}${className}`;
             
             if (window.tempIdentities.some(id => id.type === 'class' && id.value === fullClassName)) {
@@ -657,23 +680,45 @@
         }
         
         function addSubjectIdentity() {
+            const gradeSelect = document.getElementById('subjectGradeSelect');
+            const classSelect = document.getElementById('subjectClassSelect');
             const subjectSelect = document.getElementById('subjectSelect');
+            
+            const gradeId = gradeSelect.value;
+            const className = classSelect.value;
             const subject = subjectSelect.value;
+            
+            if (!gradeId) {
+                alert('请选择年级');
+                return;
+            }
+            
+            if (!className) {
+                alert('请选择班级');
+                return;
+            }
             
             if (!subject) {
                 alert('请选择科目');
                 return;
             }
             
-            if (window.tempIdentities.some(id => id.type === 'subject' && id.value === subject)) {
+            const grade = allGrades.find(g => g.gradeId === gradeId);
+            const gradeName = grade ? grade.gradeName : '';
+            
+            // 使用"年级+班级+科目"作为唯一标识
+            const fullSubjectIdentity = `${gradeName}${className}${subject}`;
+            const label = `${gradeName}${className}${subject}教师`;
+            
+            if (window.tempIdentities.some(id => id.type === 'subject' && id.value === fullSubjectIdentity)) {
                 alert('该任课教师身份已存在');
                 return;
             }
             
             window.tempIdentities.push({ 
                 type: 'subject', 
-                value: subject, 
-                label: `${subject}教师`
+                value: fullSubjectIdentity, 
+                label: label
             });
             renderIdentityList();
         }
@@ -737,7 +782,7 @@
             }
         }
         
-        // 加载年级（关键修复：使用年级+班级匹配班主任）
+        // 加载年级（修复班主任匹配问题）
         async function loadGrades() {
             const gradeGrid = document.getElementById('gradeGrid');
             gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
@@ -767,7 +812,6 @@
                                 <div class="class-list">
                                     ${grade.classes && grade.classes.length > 0 ? 
                                         grade.classes.map(cls => {
-                                            // 关键修复：使用"年级名称+班级名称"匹配班主任
                                             const fullClassName = `${grade.gradeName}${cls.className}`;
                                             const classTeacher = teachers.find(t => 
                                                 t.classTeacherOf && t.classTeacherOf.includes(fullClassName)
