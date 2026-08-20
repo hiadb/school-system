@@ -511,7 +511,7 @@
             }
         }
         
-        // 打开教师设置模态框（支持多身份，任课教师也要选年级和班级）
+        // 打开教师设置模态框
         function openTeacherSetting(teacherId) {
             const teacher = allTeachers.find(t => t.userId === teacherId);
             if (!teacher) return;
@@ -545,7 +545,7 @@
                 existingIdentities.push({ type: 'class', value: cls, label: `${cls}班主任` });
             });
             subjectTeacherOf.forEach(subj => {
-                existingIdentities.push({ type: 'subject', value: subj, label: `${subj}` });
+                existingIdentities.push({ type: 'subject', value: subj, label: subj });
             });
             
             modal.innerHTML = `
@@ -568,7 +568,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>添加班主任身份（选择年级+班级）</label>
+                        <label>添加班主任身份</label>
                         <div class="add-identity-form">
                             <select id="classGradeSelect" onchange="updateClassOptions()">
                                 <option value="">选择年级</option>
@@ -577,12 +577,12 @@
                             <select id="classSelect">
                                 <option value="">选择班级</option>
                             </select>
-                            <button class="btn-add-identity" onclick="addClassIdentity()">➕ 添加</button>
+                            <button class="btn-add-identity" onclick="addClassIdentity()">➕ 添加班主任</button>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label>添加任课教师身份（选择年级+班级+科目）</label>
+                        <label>添加任课教师身份（年级+班级+科目）</label>
                         <div class="add-identity-form">
                             <select id="subjectGradeSelect" onchange="updateSubjectClassOptions()">
                                 <option value="">选择年级</option>
@@ -595,7 +595,7 @@
                                 <option value="">选择科目</option>
                                 ${subjectOptions}
                             </select>
-                            <button class="btn-add-identity" onclick="addSubjectIdentity()">➕ 添加</button>
+                            <button class="btn-add-identity" onclick="addSubjectIdentity()">➕ 添加任课</button>
                         </div>
                     </div>
                     
