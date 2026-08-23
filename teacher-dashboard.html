@@ -5,58 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>教师工作台 - 学校管理系统</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
             background: #f5f5f5;
             min-height: 100vh;
         }
-        
         .header {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        
-        .header h1 {
-            font-size: 24px;
-        }
-        
-        .user-info {
+        .header h1 { font-size: 24px; }
+        .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .user-name-display { font-weight: bold; }
+        .class-selector {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 8px;
         }
-        
-        .btn-logout {
-            background: #f44336;
+        .class-selector label {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .class-selector select {
+            padding: 8px 12px;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 5px;
+            background: rgba(255,255,255,0.2);
             color: white;
-            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        .class-selector select option {
+            background: white;
+            color: #333;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
             padding: 8px 16px;
             border-radius: 5px;
             cursor: pointer;
             transition: background 0.3s;
         }
-        
         .btn-logout:hover {
-            background: #d32f2f;
+            background: rgba(255,255,255,0.3);
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .welcome-banner {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        
+        .welcome-text h2 { color: #333; margin-bottom: 10px; }
+        .welcome-text p { color: #666; }
         .nav-tabs {
             display: flex;
             gap: 10px;
@@ -65,146 +83,41 @@
             padding: 10px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
         }
-        
         .nav-tab {
             padding: 12px 24px;
             background: transparent;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             transition: all 0.3s;
         }
-        
-        .nav-tab:hover {
-            background: #f0f0f0;
-        }
-        
-        .nav-tab.active {
-            background: #667eea;
-            color: white;
-        }
-        
+        .nav-tab:hover { background: #f0f0f0; }
+        .nav-tab.active { background: #667eea; color: white; }
         .content {
             background: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .btn-add {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-bottom: 20px;
-            transition: background 0.3s;
-        }
-        
-        .btn-add:hover {
-            background: #45a049;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        tr:hover {
-            background: #f5f5f5;
-        }
-        
-        .btn-edit {
-            background: #ffc107;
-            color: white;
-            border: none;
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
+        th { background: #f8f9fa; font-weight: bold; color: #333; }
+        tr:hover { background: #f5f5f5; }
+        .btn {
             padding: 6px 12px;
+            border: none;
             border-radius: 3px;
             cursor: pointer;
+            font-size: 12px;
             margin-right: 5px;
+            white-space: nowrap;
         }
-        
-        .btn-delete {
-            background: #f44336;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .btn-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
+        .btn-edit { background: #ffc107; color: white; }
+        .btn-delete { background: #f44336; color: white; }
+        .btn-add { background: #4CAF50; color: white; padding: 10px 20px; margin-bottom: 20px; }
         .btn-submit {
             width: 100%;
             padding: 12px;
@@ -215,16 +128,42 @@
             font-size: 16px;
             cursor: pointer;
         }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
+        .score-high { color: #4CAF50; font-weight: bold; }
+        .score-medium { color: #ff9800; font-weight: bold; }
+        .score-low { color: #f44336; font-weight: bold; }
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .empty-state .icon { font-size: 48px; margin-bottom: 20px; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
         }
-        
-        .empty-state .icon {
-            font-size: 48px;
+        .class-info-banner {
+            background: #f0f0ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
             margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .class-info-banner .current-class {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 16px;
+        }
+        @media (max-width: 768px) {
+            .header { flex-direction: column; align-items: flex-start; }
+            .user-info { width: 100%; justify-content: space-between; }
+            .class-selector select { min-width: 120px; }
         }
     </style>
 </head>
@@ -232,46 +171,40 @@
     <div class="header">
         <h1>👨‍🏫 教师工作台</h1>
         <div class="user-info">
-            <span id="userName">教师</span>
+            <span class="user-name-display" id="userName">教师</span>
+            <div class="class-selector">
+                <label for="classSelect">当前班级：</label>
+                <select id="classSelect" onchange="changeCurrentClass()">
+                    <option value="">请选择班级</option>
+                </select>
+            </div>
             <button class="btn-logout" onclick="logout()">退出登录</button>
         </div>
     </div>
     
     <div class="container">
+        <div class="welcome-banner">
+            <div class="welcome-text">
+                <h2>欢迎回来，<span id="welcomeName">教师</span>！</h2>
+                <p>今天是美好的一天，继续加油！</p>
+            </div>
+            <div style="font-size: 48px;">📚</div>
+        </div>
+        
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showTab('students')">👨‍🎓 学生管理</button>
-            <button class="nav-tab" onclick="showTab('scores')">📊 成绩录入</button>
-            <button class="nav-tab" onclick="showTab('classes')">📚 班级管理</button>
+            <button class="nav-tab active" onclick="showTab('scores')">📊 成绩管理</button>
+            <button class="nav-tab" onclick="showTab('students')">👨‍🎓 学生管理</button>
+            <button class="nav-tab" onclick="showTab('profile')">👤 个人信息</button>
         </div>
         
         <div class="content">
-            <!-- 学生管理标签页 -->
-            <div id="studentsTab">
-                <button class="btn-add" onclick="openAddStudentModal()">➕ 添加学生</button>
-                <table id="studentTable">
-                    <thead>
-                        <tr>
-                            <th>姓名</th>
-                            <th>用户名</th>
-                            <th>班级</th>
-                            <th>注册时间</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentList">
-                        <tr>
-                            <td colspan="5" class="empty-state">
-                                <div class="icon">📭</div>
-                                <p>暂无学生数据</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- 成绩录入标签页 -->
-            <div id="scoresTab" style="display: none;">
-                <h2 style="margin-bottom: 20px;">📊 成绩录入</h2>
+            <!-- 成绩管理 -->
+            <div id="scoresTab">
+                <h2 style="margin-bottom: 20px;">📊 成绩管理</h2>
+                <div class="class-info-banner" id="classInfoBanner">
+                    <span>当前班级：<span class="current-class" id="currentClassName">未选择</span></span>
+                    <span>学生数量：<span id="currentClassStudentCount">0</span> 人</span>
+                </div>
                 <form id="scoreForm">
                     <div class="form-group">
                         <label>选择学生</label>
@@ -281,7 +214,7 @@
                     </div>
                     <div class="form-group">
                         <label>科目</label>
-                        <input type="text" id="scoreSubject" placeholder="如：数学" required>
+                        <input type="text" id="scoreSubject" placeholder="如：语文、数学" required>
                     </div>
                     <div class="form-group">
                         <label>分数</label>
@@ -294,126 +227,99 @@
                             <option value="期末考试">期末考试</option>
                             <option value="月考">月考</option>
                             <option value="测验">测验</option>
+                            <option value="作业">作业</option>
                         </select>
                     </div>
                     <button type="submit" class="btn-submit">提交成绩</button>
                 </form>
             </div>
             
-            <!-- 班级管理标签页 -->
-            <div id="classesTab" style="display: none;">
-                <button class="btn-add" onclick="openAddClassModal()">➕ 创建班级</button>
-                <table id="classTable">
+            <!-- 学生管理 -->
+            <div id="studentsTab" style="display: none;">
+                <h2 style="margin-bottom: 20px;">👨‍🎓 学生管理</h2>
+                <div class="class-info-banner" id="studentClassInfoBanner">
+                    <span>当前班级：<span class="current-class" id="studentCurrentClassName">未选择</span></span>
+                    <span>学生数量：<span id="studentClassStudentCount">0</span> 人</span>
+                </div>
+                <table>
                     <thead>
                         <tr>
-                            <th>班级名称</th>
-                            <th>年级</th>
-                            <th>学生数量</th>
-                            <th>创建时间</th>
+                            <th>姓名</th>
+                            <th>用户名</th>
+                            <th>班级</th>
+                            <th>注册时间</th>
                         </tr>
                     </thead>
-                    <tbody id="classList">
-                        <tr>
-                            <td colspan="4" class="empty-state">
-                                <div class="icon">📭</div>
-                                <p>暂无班级数据</p>
-                            </td>
-                        </tr>
+                    <tbody id="studentList">
+                        <tr><td colspan="4" class="loading">请选择班级</td></tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-    
-    <!-- 添加学生模态框 -->
-    <div id="addStudentModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>添加学生</h2>
-                <button class="btn-close" onclick="closeModal('addStudentModal')">&times;</button>
+            
+            <!-- 个人信息 -->
+            <div id="profileTab" style="display: none;">
+                <h2 style="margin-bottom: 20px;">👤 个人信息</h2>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <div style="margin-bottom: 15px;">
+                        <strong>姓名：</strong><span id="profileName">-</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>用户名：</strong><span id="profileUsername">-</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>角色：</strong><span>教师</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>身份：</strong><span id="profileIdentities">-</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>邮箱：</strong><span id="profileEmail">未设置</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>手机号：</strong><span id="profilePhone">未设置</span>
+                    </div>
+                </div>
             </div>
-            <form id="addStudentForm">
-                <div class="form-group">
-                    <label>姓名</label>
-                    <input type="text" id="newStudentName" required>
-                </div>
-                <div class="form-group">
-                    <label>用户名</label>
-                    <input type="text" id="newStudentUsername" required>
-                </div>
-                <div class="form-group">
-                    <label>班级</label>
-                    <input type="text" id="newStudentClass" placeholder="如：初三1班">
-                </div>
-                <button type="submit" class="btn-submit">添加</button>
-            </form>
-        </div>
-    </div>
-    
-    <!-- 创建班级模态框 -->
-    <div id="addClassModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>创建班级</h2>
-                <button class="btn-close" onclick="closeModal('addClassModal')">&times;</button>
-            </div>
-            <form id="addClassForm">
-                <div class="form-group">
-                    <label>班级名称</label>
-                    <input type="text" id="newClassName" required>
-                </div>
-                <div class="form-group">
-                    <label>年级</label>
-                    <input type="text" id="newClassGrade" required>
-                </div>
-                <button type="submit" class="btn-submit">创建</button>
-            </form>
         </div>
     </div>
     
     <script>
-        // ========== 配置 ==========
+        // 配置 - 请替换为你的 Worker URL
         const WORKER_URL = 'https://school-api.hru123.workers.dev';
         const API_BASE = WORKER_URL + '/api';
         
-        // ========== 工具函数 ==========
+        let currentClass = '';
+        let allStudents = [];
+        let teacherIdentities = [];
+        
         function getToken() {
             return localStorage.getItem('token');
         }
         
         function getUser() {
-            return JSON.parse(localStorage.getItem('user') || '{}');
+            const userStr = localStorage.getItem('user');
+            if (!userStr) return {};
+            try { return JSON.parse(userStr); } catch { return {}; }
         }
         
         function showTab(tabName) {
-            // 隐藏所有标签页
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('[id$="Tab"]').forEach(tab => {
-                tab.style.display = 'none';
-            });
-            
-            // 显示选中的标签页
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
-            document.getElementById(tabName + 'Tab').style.display = 'block';
             
-            // 加载对应数据
-            if (tabName === 'students') {
-                loadStudents();
-            } else if (tabName === 'classes') {
-                loadClasses();
-            } else if (tabName === 'scores') {
+            document.getElementById('scoresTab').style.display = 'none';
+            document.getElementById('studentsTab').style.display = 'none';
+            document.getElementById('profileTab').style.display = 'none';
+            
+            if (tabName === 'scores') {
+                document.getElementById('scoresTab').style.display = 'block';
                 loadStudentsForScore();
+            } else if (tabName === 'students') {
+                document.getElementById('studentsTab').style.display = 'block';
+                loadStudentsList();
+            } else if (tabName === 'profile') {
+                document.getElementById('profileTab').style.display = 'block';
+                loadProfile();
             }
-        }
-        
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
         }
         
         function logout() {
@@ -422,194 +328,186 @@
             window.location.href = '/login.html';
         }
         
-        // ========== 加载学生列表 ==========
-        async function loadStudents() {
-            try {
-                const response = await fetch(API_BASE + '/students', {
-                    headers: {
-                        'Authorization': 'Bearer ' + getToken()
+        // 获取教师的所有班级身份
+        function getTeacherClasses() {
+            const user = getUser();
+            const classes = [];
+            
+            // 班主任身份
+            if (user.classTeacherOf && user.classTeacherOf.length > 0) {
+                user.classTeacherOf.forEach(cls => {
+                    classes.push({ className: cls, type: 'class' });
+                });
+            }
+            
+            // 任课教师身份
+            if (user.subjectTeacherOf && user.subjectTeacherOf.length > 0) {
+                user.subjectTeacherOf.forEach(subj => {
+                    // 从任课身份中提取班级（如"一年级1班语文" -> "一年级1班"）
+                    const match = subj.match(/^(.+?)(语文|数学|英语|物理|化学|生物|历史|地理|政治|体育|音乐|美术|信息技术|科学|道德与法治|劳动)/);
+                    if (match && match[1]) {
+                        const className = match[1];
+                        if (!classes.some(c => c.className === className)) {
+                            classes.push({ className: className, type: 'subject' });
+                        }
                     }
                 });
-                
-                const students = await response.json();
-                const tbody = document.getElementById('studentList');
-                
-                if (students.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="5" class="empty-state">
-                                <div class="icon">📭</div>
-                                <p>暂无学生数据</p>
-                            </td>
-                        </tr>
-                    `;
-                } else {
-                    tbody.innerHTML = students.map(student => `
-                        <tr>
-                            <td>${student.name || '未设置'}</td>
-                            <td>${student.username || '未设置'}</td>
-                            <td>${student.class || '未分班'}</td>
-                            <td>${new Date(student.createdAt).toLocaleDateString()}</td>
-                            <td>
-                                <button class="btn-edit" onclick="editStudent('${student.studentId}')">编辑</button>
-                                <button class="btn-delete" onclick="deleteStudent('${student.studentId}')">删除</button>
-                            </td>
-                        </tr>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('加载学生失败:', error);
+            }
+            
+            // 兼容旧数据
+            if (classes.length === 0 && user.className) {
+                classes.push({ className: user.className, type: 'class' });
+            }
+            
+            return classes;
+        }
+        
+        // 加载班级下拉框
+        function loadClassSelector() {
+            const classSelect = document.getElementById('classSelect');
+            const classes = getTeacherClasses();
+            
+            let options = '<option value="">请选择班级</option>';
+            
+            classes.forEach(cls => {
+                options += `<option value="${cls.className}">${cls.className}</option>`;
+            });
+            
+            classSelect.innerHTML = options;
+            
+            // 如果有班级，默认选择第一个
+            if (classes.length > 0) {
+                classSelect.value = classes[0].className;
+                currentClass = classes[0].className;
+                updateClassInfo();
             }
         }
         
-        // ========== 添加学生 ==========
-        document.getElementById('addStudentForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        // 切换班级
+        function changeCurrentClass() {
+            const classSelect = document.getElementById('classSelect');
+            currentClass = classSelect.value;
+            updateClassInfo();
             
-            const name = document.getElementById('newStudentName').value;
-            const username = document.getElementById('newStudentUsername').value;
-            const className = document.getElementById('newStudentClass').value;
-            
-            try {
-                const response = await fetch(API_BASE + '/students', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
-                    },
-                    body: JSON.stringify({ name, username, class: className })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    alert('学生添加成功！');
-                    closeModal('addStudentModal');
-                    this.reset();
-                    loadStudents();
-                } else {
-                    alert(data.error || '添加失败');
-                }
-            } catch (error) {
-                alert('网络错误');
-            }
-        });
+            // 重新加载数据
+            loadStudentsForScore();
+            loadStudentsList();
+        }
         
-        // ========== 删除学生 ==========
-        async function deleteStudent(studentId) {
-            if (!confirm('确定要删除这个学生吗？')) return;
+        // 更新班级信息显示
+        function updateClassInfo() {
+            const classNameElement = document.getElementById('currentClassName');
+            const studentCountElement = document.getElementById('currentClassStudentCount');
+            const studentClassNameElement = document.getElementById('studentCurrentClassName');
+            const studentClassCountElement = document.getElementById('studentClassStudentCount');
             
-            try {
-                const response = await fetch(API_BASE + '/students/' + studentId, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': 'Bearer ' + getToken()
-                    }
-                });
+            if (currentClass) {
+                classNameElement.textContent = currentClass;
+                studentClassNameElement.textContent = currentClass;
                 
+                // 统计该班级学生数量
+                const classStudents = allStudents.filter(s => s.class === currentClass);
+                const count = classStudents.length;
+                studentCountElement.textContent = count;
+                studentClassCountElement.textContent = count;
+            } else {
+                classNameElement.textContent = '未选择';
+                studentCountElement.textContent = '0';
+                studentClassNameElement.textContent = '未选择';
+                studentClassCountElement.textContent = '0';
+            }
+        }
+        
+        // 加载所有学生数据
+        async function loadAllStudentsData() {
+            try {
+                const token = getToken();
+                const response = await fetch(API_BASE + '/students', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
                 if (response.ok) {
-                    alert('删除成功！');
-                    loadStudents();
+                    allStudents = await response.json();
                 }
             } catch (error) {
-                alert('删除失败');
+                console.error('加载学生数据失败:', error);
             }
         }
         
-        // ========== 加载班级 ==========
-        async function loadClasses() {
-            try {
-                const response = await fetch(API_BASE + '/classes', {
-                    headers: {
-                        'Authorization': 'Bearer ' + getToken()
-                    }
-                });
-                
-                const classes = await response.json();
-                const tbody = document.getElementById('classList');
-                
-                if (classes.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="4" class="empty-state">
-                                <div class="icon">📭</div>
-                                <p>暂无班级数据</p>
-                            </td>
-                        </tr>
-                    `;
-                } else {
-                    tbody.innerHTML = classes.map(cls => `
-                        <tr>
-                            <td>${cls.className}</td>
-                            <td>${cls.grade}</td>
-                            <td>${cls.students ? cls.students.length : 0}</td>
-                            <td>${new Date(cls.createdAt).toLocaleDateString()}</td>
-                        </tr>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('加载班级失败:', error);
-            }
-        }
-        
-        // ========== 创建班级 ==========
-        document.getElementById('addClassForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const className = document.getElementById('newClassName').value;
-            const grade = document.getElementById('newClassGrade').value;
-            
-            try {
-                const response = await fetch(API_BASE + '/classes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
-                    },
-                    body: JSON.stringify({ className, grade })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    alert('班级创建成功！');
-                    closeModal('addClassModal');
-                    this.reset();
-                    loadClasses();
-                } else {
-                    alert(data.error || '创建失败');
-                }
-            } catch (error) {
-                alert('网络错误');
-            }
-        });
-        
-        // ========== 成绩录入 ==========
+        // 加载学生到成绩表单下拉框
         async function loadStudentsForScore() {
-            try {
-                const response = await fetch(API_BASE + '/students', {
-                    headers: {
-                        'Authorization': 'Bearer ' + getToken()
-                    }
-                });
-                
-                const students = await response.json();
-                const select = document.getElementById('scoreStudentId');
-                
+            const select = document.getElementById('scoreStudentId');
+            
+            if (!currentClass) {
+                select.innerHTML = '<option value="">请先选择班级</option>';
+                return;
+            }
+            
+            const classStudents = allStudents.filter(s => s.class === currentClass);
+            
+            if (classStudents.length === 0) {
+                select.innerHTML = '<option value="">该班级暂无学生</option>';
+            } else {
                 select.innerHTML = '<option value="">请选择学生</option>' + 
-                    students.map(student => `
-                        <option value="${student.studentId}">${student.name}</option>
-                    `).join('');
-            } catch (error) {
-                console.error('加载学生失败:', error);
+                    classStudents.map(s => `<option value="${s.studentId}">${s.name}</option>`).join('');
             }
         }
         
+        // 加载学生列表
+        async function loadStudentsList() {
+            const tbody = document.getElementById('studentList');
+            
+            if (!currentClass) {
+                tbody.innerHTML = '<tr><td colspan="4" class="loading">请选择班级</td></tr>';
+                return;
+            }
+            
+            const classStudents = allStudents.filter(s => s.class === currentClass);
+            
+            if (classStudents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">该班级暂无学生</td></tr>';
+            } else {
+                tbody.innerHTML = classStudents.map(s => `
+                    <tr>
+                        <td>${s.name}</td>
+                        <td>${s.username}</td>
+                        <td>${s.class || '未分班'}</td>
+                        <td>${s.enrollmentDate ? new Date(s.enrollmentDate).toLocaleDateString() : '-'}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+        
+        // 加载个人信息
+        function loadProfile() {
+            const user = getUser();
+            
+            document.getElementById('profileName').textContent = user.realName || '-';
+            document.getElementById('profileUsername').textContent = user.username || '-';
+            document.getElementById('profileEmail').textContent = user.email || '未设置';
+            document.getElementById('profilePhone').textContent = user.phone || '未设置';
+            
+            // 显示身份
+            const identities = [];
+            if (user.classTeacherOf && user.classTeacherOf.length > 0) {
+                user.classTeacherOf.forEach(cls => {
+                    identities.push(`${cls}班主任`);
+                });
+            }
+            if (user.subjectTeacherOf && user.subjectTeacherOf.length > 0) {
+                user.subjectTeacherOf.forEach(subj => {
+                    identities.push(`${subj}教师`);
+                });
+            }
+            
+            document.getElementById('profileIdentities').textContent = identities.length > 0 ? identities.join('、') : '未设置';
+        }
+        
+        // 提交成绩
         document.getElementById('scoreForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const studentId = document.getElementById('scoreStudentId').value;
-            const subject = document.getElementById('scoreSubject').value;
+            const subject = document.getElementById('scoreSubject').value.trim();
             const score = document.getElementById('scoreValue').value;
             const examType = document.getElementById('scoreType').value;
             
@@ -618,21 +516,33 @@
                 return;
             }
             
+            if (!subject) {
+                alert('请输入科目');
+                return;
+            }
+            
+            if (!score) {
+                alert('请输入分数');
+                return;
+            }
+            
             try {
+                const token = getToken();
                 const response = await fetch(API_BASE + '/scores', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({ studentId, subject, score, examType })
                 });
                 
                 const data = await response.json();
                 
-                if (response.ok && data.success) {
+                if (response.ok) {
                     alert('成绩录入成功！');
                     this.reset();
+                    loadStudentsForScore();
                 } else {
                     alert(data.error || '录入失败');
                 }
@@ -641,25 +551,35 @@
             }
         });
         
-        // ========== 初始化 ==========
-        function init() {
-            // 显示用户信息
+        // 初始化
+        async function init() {
             const user = getUser();
-            if (user.realName) {
-                document.getElementById('userName').textContent = user.realName;
-            }
+            const token = getToken();
             
-            // 检查登录状态
-            if (!getToken()) {
+            if (!token || !user.userId) {
                 window.location.href = '/login.html';
                 return;
             }
             
-            // 加载学生列表
-            loadStudents();
+            if (user.role !== 'teacher') {
+                alert('无权限访问');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            document.getElementById('userName').textContent = user.realName || '教师';
+            document.getElementById('welcomeName').textContent = user.realName || '教师';
+            
+            // 加载学生数据
+            await loadAllStudentsData();
+            
+            // 加载班级下拉框
+            loadClassSelector();
+            
+            // 加载学生到成绩表单
+            loadStudentsForScore();
         }
         
-        // 页面加载完成后初始化
         init();
     </script>
 </body>
