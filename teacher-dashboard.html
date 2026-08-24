@@ -16,18 +16,20 @@
         /* 侧边栏 */
         .sidebar {
             width: 260px;
-            min-height: 100vh;
+            height: 100vh;
             background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
             color: white;
             position: fixed;
             left: 0;
             top: 0;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
             z-index: 100;
         }
         .sidebar-header {
             padding: 20px;
             border-bottom: 1px solid rgba(255,255,255,0.2);
+            flex-shrink: 0;
         }
         .sidebar-header h2 {
             font-size: 20px;
@@ -48,6 +50,7 @@
             align-items: center;
             justify-content: center;
             font-size: 20px;
+            flex-shrink: 0;
         }
         .sidebar-user .user-name {
             font-weight: bold;
@@ -70,50 +73,99 @@
             color: #333;
         }
         
+        /* 侧边栏导航 - 可滚动 */
         .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
             padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
         }
+        .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        
+        /* 下拉菜单组 */
         .nav-group {
             margin-bottom: 5px;
         }
-        .nav-group-title {
-            padding: 10px 20px;
-            font-size: 13px;
-            font-weight: bold;
-            color: rgba(255,255,255,0.7);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .nav-item {
-            padding: 10px 20px;
+        .nav-group-header {
+            padding: 12px 20px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+        .nav-group-header:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .nav-group-header .arrow {
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+        .nav-group-header .arrow.open {
+            transform: rotate(90deg);
+        }
+        .nav-group-header .group-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-group-header .group-title .icon {
+            font-size: 16px;
+        }
+        
+        /* 下拉子菜单 */
+        .nav-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .nav-submenu.open {
+            max-height: 500px;
+        }
+        .nav-submenu .nav-item {
+            padding: 8px 20px 8px 40px;
+            cursor: pointer;
+            font-size: 13px;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .nav-item:hover {
+        .nav-submenu .nav-item:hover {
             background: rgba(255,255,255,0.1);
         }
-        .nav-item.active {
+        .nav-submenu .nav-item.active {
             background: rgba(255,255,255,0.2);
             border-left: 3px solid white;
         }
-        .nav-item .icon {
-            font-size: 16px;
+        .nav-submenu .nav-item .icon {
+            font-size: 14px;
         }
+        
         .btn-logout {
-            margin: 20px;
+            margin: 15px 20px;
             padding: 10px;
             background: rgba(255,255,255,0.2);
             color: white;
             border: 1px solid rgba(255,255,255,0.3);
             border-radius: 5px;
             cursor: pointer;
-            width: calc(100% - 40px);
             font-size: 14px;
             transition: background 0.3s;
+            flex-shrink: 0;
         }
         .btn-logout:hover {
             background: rgba(255,255,255,0.3);
@@ -124,6 +176,7 @@
             flex: 1;
             margin-left: 260px;
             padding: 20px;
+            min-height: 100vh;
         }
         .welcome-banner {
             background: white;
@@ -207,7 +260,8 @@
         @media (max-width: 768px) {
             .sidebar { width: 200px; }
             .main-content { margin-left: 200px; padding: 10px; }
-            .nav-item { padding: 8px 15px; font-size: 12px; }
+            .nav-group-header { padding: 10px 15px; font-size: 12px; }
+            .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; }
         }
     </style>
 </head>
@@ -230,186 +284,266 @@
         <div class="sidebar-nav">
             <!-- 学生管理 -->
             <div class="nav-group">
-                <div class="nav-group-title">学生管理</div>
-                <div class="nav-item active" data-tab="roster" onclick="showModule('roster')">
-                    <span class="icon">📋</span> 学生花名册
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">👨‍🎓</span> 学生管理</span>
+                    <span class="arrow">▶</span>
                 </div>
-                <div class="nav-item" data-tab="import-roster" onclick="showModule('import-roster')">
-                    <span class="icon">📥</span> 导入学生花名册
+                <div class="nav-submenu">
+                    <div class="nav-item active" data-tab="roster" onclick="showModule('roster')">
+                        <span class="icon">📋</span> 学生花名册
+                    </div>
+                    <div class="nav-item" data-tab="import-roster" onclick="showModule('import-roster')">
+                        <span class="icon">📥</span> 导入学生花名册
+                    </div>
                 </div>
             </div>
             
             <!-- 班委管理 -->
             <div class="nav-group">
-                <div class="nav-group-title">班委管理</div>
-                <div class="nav-item" data-tab="committee-list" onclick="showModule('committee-list')">
-                    <span class="icon">👥</span> 班委名单
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">👥</span> 班委管理</span>
+                    <span class="arrow">▶</span>
                 </div>
-                <div class="nav-item" data-tab="committee-assessment" onclick="showModule('committee-assessment')">
-                    <span class="icon">📊</span> 班委考核
-                </div>
-                <div class="nav-item" data-tab="committee-changes" onclick="showModule('committee-changes')">
-                    <span class="icon">🔄</span> 更换记录
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="committee-list" onclick="showModule('committee-list')">
+                        <span class="icon">📋</span> 班委名单
+                    </div>
+                    <div class="nav-item" data-tab="committee-assessment" onclick="showModule('committee-assessment')">
+                        <span class="icon">📊</span> 班委考核
+                    </div>
+                    <div class="nav-item" data-tab="committee-changes" onclick="showModule('committee-changes')">
+                        <span class="icon">🔄</span> 更换记录
+                    </div>
                 </div>
             </div>
             
             <!-- 班级卫生 -->
             <div class="nav-group">
-                <div class="nav-group-title">班级卫生</div>
-                <div class="nav-item" data-tab="cleaning" onclick="showModule('cleaning')">
-                    <span class="icon">🧹</span> 卫生安排表
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">🧹</span> 班级卫生</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="cleaning" onclick="showModule('cleaning')">
+                        <span class="icon">📋</span> 卫生安排表
+                    </div>
                 </div>
             </div>
             
             <!-- 排座位 -->
             <div class="nav-group">
-                <div class="nav-group-title">排座位</div>
-                <div class="nav-item" data-tab="seating" onclick="showModule('seating')">
-                    <span class="icon">💺</span> 排座位
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">💺</span> 排座位</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="seating" onclick="showModule('seating')">
+                        <span class="icon">💺</span> 排座位
+                    </div>
                 </div>
             </div>
             
             <!-- 班级活动 -->
             <div class="nav-group">
-                <div class="nav-group-title">班级活动</div>
-                <div class="nav-item" data-tab="activities" onclick="showModule('activities')">
-                    <span class="icon">🎉</span> 班级活动
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">🎉</span> 班级活动</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="activities" onclick="showModule('activities')">
+                        <span class="icon">🎉</span> 班级活动
+                    </div>
                 </div>
             </div>
             
             <!-- 班级记账 -->
             <div class="nav-group">
-                <div class="nav-group-title">班级记账</div>
-                <div class="nav-item" data-tab="finance-overview" onclick="showModule('finance-overview')">
-                    <span class="icon">💰</span> 收支总览
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">💰</span> 班级记账</span>
+                    <span class="arrow">▶</span>
                 </div>
-                <div class="nav-item" data-tab="finance-income" onclick="showModule('finance-income')">
-                    <span class="icon">📈</span> 收入详情
-                </div>
-                <div class="nav-item" data-tab="finance-expense" onclick="showModule('finance-expense')">
-                    <span class="icon">📉</span> 支出详情
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="finance-overview" onclick="showModule('finance-overview')">
+                        <span class="icon">💰</span> 收支总览
+                    </div>
+                    <div class="nav-item" data-tab="finance-income" onclick="showModule('finance-income')">
+                        <span class="icon">📈</span> 收入详情
+                    </div>
+                    <div class="nav-item" data-tab="finance-expense" onclick="showModule('finance-expense')">
+                        <span class="icon">📉</span> 支出详情
+                    </div>
                 </div>
             </div>
             
             <!-- 成绩分析 -->
             <div class="nav-group">
-                <div class="nav-group-title">成绩分析</div>
-                <div class="nav-item" data-tab="exam-list" onclick="showModule('exam-list')">
-                    <span class="icon">📝</span> 考试列表
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">📊</span> 成绩分析</span>
+                    <span class="arrow">▶</span>
                 </div>
-                <div class="nav-item" data-tab="score-entry" onclick="showModule('score-entry')">
-                    <span class="icon">✏️</span> 成绩录入
-                </div>
-                <div class="nav-item" data-tab="exam-analysis" onclick="showModule('exam-analysis')">
-                    <span class="icon">📊</span> 单次分析
-                </div>
-                <div class="nav-item" data-tab="trend-analysis" onclick="showModule('trend-analysis')">
-                    <span class="icon">📈</span> 个人趋势
-                </div>
-                <div class="nav-item" data-tab="subject-settings" onclick="showModule('subject-settings')">
-                    <span class="icon">⚙️</span> 科目设置
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="exam-list" onclick="showModule('exam-list')">
+                        <span class="icon">📝</span> 考试列表
+                    </div>
+                    <div class="nav-item" data-tab="score-entry" onclick="showModule('score-entry')">
+                        <span class="icon">✏️</span> 成绩录入
+                    </div>
+                    <div class="nav-item" data-tab="exam-analysis" onclick="showModule('exam-analysis')">
+                        <span class="icon">📊</span> 单次分析
+                    </div>
+                    <div class="nav-item" data-tab="trend-analysis" onclick="showModule('trend-analysis')">
+                        <span class="icon">📈</span> 个人趋势
+                    </div>
+                    <div class="nav-item" data-tab="subject-settings" onclick="showModule('subject-settings')">
+                        <span class="icon">⚙️</span> 科目设置
+                    </div>
                 </div>
             </div>
             
             <!-- 作业管理 -->
             <div class="nav-group">
-                <div class="nav-group-title">作业管理</div>
-                <div class="nav-item" data-tab="homework-list" onclick="showModule('homework-list')">
-                    <span class="icon">📚</span> 作业列表
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">📚</span> 作业管理</span>
+                    <span class="arrow">▶</span>
                 </div>
-                <div class="nav-item" data-tab="homework-stats" onclick="showModule('homework-stats')">
-                    <span class="icon">📊</span> 作业统计看板
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="homework-list" onclick="showModule('homework-list')">
+                        <span class="icon">📚</span> 作业列表
+                    </div>
+                    <div class="nav-item" data-tab="homework-stats" onclick="showModule('homework-stats')">
+                        <span class="icon">📊</span> 作业统计看板
+                    </div>
                 </div>
             </div>
             
             <!-- 违纪情况 -->
             <div class="nav-group">
-                <div class="nav-group-title">违纪情况</div>
-                <div class="nav-item" data-tab="discipline-dashboard" onclick="showModule('discipline-dashboard')">
-                    <span class="icon">⚠️</span> 违纪数据看板
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">⚠️</span> 违纪情况</span>
+                    <span class="arrow">▶</span>
                 </div>
-                <div class="nav-item" data-tab="discipline-records" onclick="showModule('discipline-records')">
-                    <span class="icon">📋</span> 违纪记录明细
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="discipline-dashboard" onclick="showModule('discipline-dashboard')">
+                        <span class="icon">⚠️</span> 违纪数据看板
+                    </div>
+                    <div class="nav-item" data-tab="discipline-records" onclick="showModule('discipline-records')">
+                        <span class="icon">📋</span> 违纪记录明细
+                    </div>
                 </div>
             </div>
             
             <!-- 请假管理 -->
             <div class="nav-group">
-                <div class="nav-group-title">请假管理</div>
-                <div class="nav-item" data-tab="leave" onclick="showModule('leave')">
-                    <span class="icon">🏥</span> 请假管理
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">🏥</span> 请假管理</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="leave" onclick="showModule('leave')">
+                        <span class="icon">🏥</span> 请假管理
+                    </div>
                 </div>
             </div>
             
             <!-- 风险预警 -->
             <div class="nav-group">
-                <div class="nav-group-title">风险预警</div>
-                <div class="nav-item" data-tab="risk-home" onclick="showModule('risk-home')">
-                    <span class="icon">🚨</span> 风险预警首页
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">🚨</span> 风险预警</span>
+                    <span class="arrow">▶</span>
                 </div>
-                <div class="nav-item" data-tab="emotion-warning" onclick="showModule('emotion-warning')">
-                    <span class="icon">😟</span> 学生情绪预警
-                </div>
-                <div class="nav-item" data-tab="special-constitution" onclick="showModule('special-constitution')">
-                    <span class="icon">🏥</span> 特殊体质登记
-                </div>
-                <div class="nav-item" data-tab="dropout-risk" onclick="showModule('dropout-risk')">
-                    <span class="icon">🚫</span> 辍学风险预警
-                </div>
-                <div class="nav-item" data-tab="return-tracking" onclick="showModule('return-tracking')">
-                    <span class="icon">🔍</span> 未返校跟踪
-                </div>
-                <div class="nav-item" data-tab="conflict-resolution" onclick="showModule('conflict-resolution')">
-                    <span class="icon">🤝</span> 矛盾排查
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="risk-home" onclick="showModule('risk-home')">
+                        <span class="icon">🚨</span> 风险预警首页
+                    </div>
+                    <div class="nav-item" data-tab="emotion-warning" onclick="showModule('emotion-warning')">
+                        <span class="icon">😟</span> 学生情绪预警
+                    </div>
+                    <div class="nav-item" data-tab="special-constitution" onclick="showModule('special-constitution')">
+                        <span class="icon">🏥</span> 特殊体质登记
+                    </div>
+                    <div class="nav-item" data-tab="dropout-risk" onclick="showModule('dropout-risk')">
+                        <span class="icon">🚫</span> 辍学风险预警
+                    </div>
+                    <div class="nav-item" data-tab="return-tracking" onclick="showModule('return-tracking')">
+                        <span class="icon">🔍</span> 未返校跟踪
+                    </div>
+                    <div class="nav-item" data-tab="conflict-resolution" onclick="showModule('conflict-resolution')">
+                        <span class="icon">🤝</span> 矛盾排查
+                    </div>
                 </div>
             </div>
             
             <!-- 谈话记录 -->
             <div class="nav-group">
-                <div class="nav-group-title">谈话记录</div>
-                <div class="nav-item" data-tab="conversations" onclick="showModule('conversations')">
-                    <span class="icon">💬</span> 谈话记录
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">💬</span> 谈话记录</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="conversations" onclick="showModule('conversations')">
+                        <span class="icon">💬</span> 谈话记录
+                    </div>
                 </div>
             </div>
             
             <!-- 家校沟通 -->
             <div class="nav-group">
-                <div class="nav-group-title">家校沟通</div>
-                <div class="nav-item" data-tab="parent-communication" onclick="showModule('parent-communication')">
-                    <span class="icon">📞</span> 家校沟通
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">📞</span> 家校沟通</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="parent-communication" onclick="showModule('parent-communication')">
+                        <span class="icon">📞</span> 家校沟通
+                    </div>
                 </div>
             </div>
             
             <!-- 工作留痕 -->
             <div class="nav-group">
-                <div class="nav-group-title">工作留痕</div>
-                <div class="nav-item" data-tab="work-traces" onclick="showModule('work-traces')">
-                    <span class="icon">📁</span> 工作留痕
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">📁</span> 工作留痕</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="work-traces" onclick="showModule('work-traces')">
+                        <span class="icon">📁</span> 工作留痕
+                    </div>
                 </div>
             </div>
             
             <!-- 班主任培训 -->
             <div class="nav-group">
-                <div class="nav-group-title">班主任培训</div>
-                <div class="nav-item" data-tab="training-records" onclick="showModule('training-records')">
-                    <span class="icon">📝</span> 培训记录
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">🎓</span> 班主任培训</span>
+                    <span class="arrow">▶</span>
                 </div>
-                <div class="nav-item" data-tab="lecture-records" onclick="showModule('lecture-records')">
-                    <span class="icon">🎤</span> 讲座记录
-                </div>
-                <div class="nav-item" data-tab="activity-participation" onclick="showModule('activity-participation')">
-                    <span class="icon">🎯</span> 活动参与
-                </div>
-                <div class="nav-item" data-tab="hours-stats" onclick="showModule('hours-stats')">
-                    <span class="icon">⏱️</span> 学时统计
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="training-records" onclick="showModule('training-records')">
+                        <span class="icon">📝</span> 培训记录
+                    </div>
+                    <div class="nav-item" data-tab="lecture-records" onclick="showModule('lecture-records')">
+                        <span class="icon">🎤</span> 讲座记录
+                    </div>
+                    <div class="nav-item" data-tab="activity-participation" onclick="showModule('activity-participation')">
+                        <span class="icon">🎯</span> 活动参与
+                    </div>
+                    <div class="nav-item" data-tab="hours-stats" onclick="showModule('hours-stats')">
+                        <span class="icon">⏱️</span> 学时统计
+                    </div>
                 </div>
             </div>
             
             <!-- 其他内容 -->
             <div class="nav-group">
-                <div class="nav-group-title">其他内容</div>
-                <div class="nav-item" data-tab="others" onclick="showModule('others')">
-                    <span class="icon">📌</span> 其他内容
+                <div class="nav-group-header" onclick="toggleGroup(this)">
+                    <span class="group-title"><span class="icon">📌</span> 其他内容</span>
+                    <span class="arrow">▶</span>
+                </div>
+                <div class="nav-submenu">
+                    <div class="nav-item" data-tab="others" onclick="showModule('others')">
+                        <span class="icon">📌</span> 其他内容
+                    </div>
                 </div>
             </div>
         </div>
@@ -476,6 +610,29 @@
             window.location.href = '/login.html';
         }
         
+        // 折叠/展开下拉菜单
+        function toggleGroup(headerElement) {
+            const submenu = headerElement.nextElementSibling;
+            const arrow = headerElement.querySelector('.arrow');
+            
+            if (submenu.classList.contains('open')) {
+                submenu.classList.remove('open');
+                arrow.classList.remove('open');
+            } else {
+                // 关闭其他打开的菜单
+                document.querySelectorAll('.nav-submenu.open').forEach(menu => {
+                    if (menu !== submenu) {
+                        menu.classList.remove('open');
+                        const otherArrow = menu.previousElementSibling.querySelector('.arrow');
+                        if (otherArrow) otherArrow.classList.remove('open');
+                    }
+                });
+                
+                submenu.classList.add('open');
+                arrow.classList.add('open');
+            }
+        }
+        
         // 获取教师的所有班级身份
         function getTeacherClasses() {
             const user = getUser();
@@ -532,7 +689,6 @@
             currentClass = classSelect.value;
             updateClassInfo();
             
-            // 重新加载当前模块数据
             const activeModule = document.querySelector('.nav-item.active');
             if (activeModule) {
                 const moduleName = activeModule.getAttribute('data-tab');
@@ -610,7 +766,6 @@
             
             const content = document.getElementById('mainContent');
             
-            // 模块标题映射
             const moduleTitles = {
                 'roster': '📋 学生花名册',
                 'import-roster': '📥 导入学生花名册',
@@ -703,6 +858,12 @@
             await loadAllStudentsData();
             loadClassSelector();
             loadRosterData();
+            
+            // 默认展开学生管理菜单
+            const firstGroup = document.querySelector('.nav-group-header');
+            if (firstGroup) {
+                toggleGroup(firstGroup);
+            }
         }
         
         init();
