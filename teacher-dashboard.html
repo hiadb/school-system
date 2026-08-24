@@ -10,97 +10,142 @@
             font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
             background: #f5f5f5;
             min-height: 100vh;
+            display: flex;
         }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        
+        /* 侧边栏 */
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px 30px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .sidebar-header h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .sidebar-user {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            flex-wrap: wrap;
             gap: 10px;
+            margin-bottom: 10px;
         }
-        .header h1 { font-size: 24px; }
-        .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .user-name-display { font-weight: bold; }
-        .class-selector {
+        .sidebar-user .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            font-size: 20px;
         }
-        .class-selector label {
-            font-size: 14px;
-            white-space: nowrap;
+        .sidebar-user .user-name {
+            font-weight: bold;
+        }
+        .class-selector {
+            margin-bottom: 10px;
         }
         .class-selector select {
-            padding: 8px 12px;
+            width: 100%;
+            padding: 8px;
             border: 2px solid rgba(255,255,255,0.5);
             border-radius: 5px;
             background: rgba(255,255,255,0.2);
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
-            min-width: 150px;
         }
         .class-selector select option {
             background: white;
             color: #333;
         }
+        
+        .sidebar-nav {
+            padding: 10px 0;
+        }
+        .nav-group {
+            margin-bottom: 5px;
+        }
+        .nav-group-title {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid white;
+        }
+        .nav-item .icon {
+            font-size: 16px;
+        }
         .btn-logout {
+            margin: 20px;
+            padding: 10px;
             background: rgba(255,255,255,0.2);
             color: white;
             border: 1px solid rgba(255,255,255,0.3);
-            padding: 8px 16px;
             border-radius: 5px;
             cursor: pointer;
+            width: calc(100% - 40px);
+            font-size: 14px;
             transition: background 0.3s;
         }
         .btn-logout:hover {
             background: rgba(255,255,255,0.3);
         }
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 20px;
+        }
         .welcome-banner {
             background: white;
-            padding: 30px;
+            padding: 20px 30px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
         }
-        .welcome-text h2 { color: #333; margin-bottom: 10px; }
-        .welcome-text p { color: #666; }
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            flex-wrap: wrap;
-        }
-        .nav-tab {
-            padding: 12px 24px;
-            background: transparent;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 15px;
-            transition: all 0.3s;
-        }
-        .nav-tab:hover { background: #f0f0f0; }
-        .nav-tab.active { background: #667eea; color: white; }
+        .welcome-text h2 { color: #333; margin-bottom: 5px; font-size: 20px; }
+        .welcome-text p { color: #666; font-size: 14px; }
+        
         .content {
             background: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 500px;
         }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
@@ -115,8 +160,6 @@
             margin-right: 5px;
             white-space: nowrap;
         }
-        .btn-edit { background: #ffc107; color: white; }
-        .btn-delete { background: #f44336; color: white; }
         .btn-add { background: #4CAF50; color: white; padding: 10px 20px; margin-bottom: 20px; }
         .btn-submit {
             width: 100%;
@@ -128,21 +171,18 @@
             font-size: 16px;
             cursor: pointer;
         }
-        .score-high { color: #4CAF50; font-weight: bold; }
-        .score-medium { color: #ff9800; font-weight: bold; }
-        .score-low { color: #f44336; font-weight: bold; }
-        .empty-state { text-align: center; padding: 40px; color: #999; }
-        .empty-state .icon { font-size: 48px; margin-bottom: 20px; }
-        .loading { text-align: center; padding: 20px; color: #666; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 10px;
             border: 2px solid #e0e0e0;
             border-radius: 5px;
             font-size: 14px;
         }
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .empty-state .icon { font-size: 48px; margin-bottom: 20px; }
+        .loading { text-align: center; padding: 20px; color: #666; }
         .class-info-banner {
             background: #f0f0ff;
             border: 2px solid #667eea;
@@ -160,86 +200,240 @@
             color: #667eea;
             font-size: 16px;
         }
+        .score-high { color: #4CAF50; font-weight: bold; }
+        .score-medium { color: #ff9800; font-weight: bold; }
+        .score-low { color: #f44336; font-weight: bold; }
+        
         @media (max-width: 768px) {
-            .header { flex-direction: column; align-items: flex-start; }
-            .user-info { width: 100%; justify-content: space-between; }
-            .class-selector select { min-width: 120px; }
+            .sidebar { width: 200px; }
+            .main-content { margin-left: 200px; padding: 10px; }
+            .nav-item { padding: 8px 15px; font-size: 12px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>👨‍🏫 教师工作台</h1>
-        <div class="user-info">
-            <span class="user-name-display" id="userName">教师</span>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>👨‍🏫 教师工作台</h2>
+            <div class="sidebar-user">
+                <div class="avatar">👨‍🏫</div>
+                <div class="user-name" id="sidebarUserName">教师</div>
+            </div>
             <div class="class-selector">
-                <label for="classSelect">当前班级：</label>
                 <select id="classSelect" onchange="changeCurrentClass()">
                     <option value="">请选择班级</option>
                 </select>
             </div>
-            <button class="btn-logout" onclick="logout()">退出登录</button>
         </div>
+        
+        <div class="sidebar-nav">
+            <!-- 学生管理 -->
+            <div class="nav-group">
+                <div class="nav-group-title">学生管理</div>
+                <div class="nav-item active" data-tab="roster" onclick="showModule('roster')">
+                    <span class="icon">📋</span> 学生花名册
+                </div>
+                <div class="nav-item" data-tab="import-roster" onclick="showModule('import-roster')">
+                    <span class="icon">📥</span> 导入学生花名册
+                </div>
+            </div>
+            
+            <!-- 班委管理 -->
+            <div class="nav-group">
+                <div class="nav-group-title">班委管理</div>
+                <div class="nav-item" data-tab="committee-list" onclick="showModule('committee-list')">
+                    <span class="icon">👥</span> 班委名单
+                </div>
+                <div class="nav-item" data-tab="committee-assessment" onclick="showModule('committee-assessment')">
+                    <span class="icon">📊</span> 班委考核
+                </div>
+                <div class="nav-item" data-tab="committee-changes" onclick="showModule('committee-changes')">
+                    <span class="icon">🔄</span> 更换记录
+                </div>
+            </div>
+            
+            <!-- 班级卫生 -->
+            <div class="nav-group">
+                <div class="nav-group-title">班级卫生</div>
+                <div class="nav-item" data-tab="cleaning" onclick="showModule('cleaning')">
+                    <span class="icon">🧹</span> 卫生安排表
+                </div>
+            </div>
+            
+            <!-- 排座位 -->
+            <div class="nav-group">
+                <div class="nav-group-title">排座位</div>
+                <div class="nav-item" data-tab="seating" onclick="showModule('seating')">
+                    <span class="icon">💺</span> 排座位
+                </div>
+            </div>
+            
+            <!-- 班级活动 -->
+            <div class="nav-group">
+                <div class="nav-group-title">班级活动</div>
+                <div class="nav-item" data-tab="activities" onclick="showModule('activities')">
+                    <span class="icon">🎉</span> 班级活动
+                </div>
+            </div>
+            
+            <!-- 班级记账 -->
+            <div class="nav-group">
+                <div class="nav-group-title">班级记账</div>
+                <div class="nav-item" data-tab="finance-overview" onclick="showModule('finance-overview')">
+                    <span class="icon">💰</span> 收支总览
+                </div>
+                <div class="nav-item" data-tab="finance-income" onclick="showModule('finance-income')">
+                    <span class="icon">📈</span> 收入详情
+                </div>
+                <div class="nav-item" data-tab="finance-expense" onclick="showModule('finance-expense')">
+                    <span class="icon">📉</span> 支出详情
+                </div>
+            </div>
+            
+            <!-- 成绩分析 -->
+            <div class="nav-group">
+                <div class="nav-group-title">成绩分析</div>
+                <div class="nav-item" data-tab="exam-list" onclick="showModule('exam-list')">
+                    <span class="icon">📝</span> 考试列表
+                </div>
+                <div class="nav-item" data-tab="score-entry" onclick="showModule('score-entry')">
+                    <span class="icon">✏️</span> 成绩录入
+                </div>
+                <div class="nav-item" data-tab="exam-analysis" onclick="showModule('exam-analysis')">
+                    <span class="icon">📊</span> 单次分析
+                </div>
+                <div class="nav-item" data-tab="trend-analysis" onclick="showModule('trend-analysis')">
+                    <span class="icon">📈</span> 个人趋势
+                </div>
+                <div class="nav-item" data-tab="subject-settings" onclick="showModule('subject-settings')">
+                    <span class="icon">⚙️</span> 科目设置
+                </div>
+            </div>
+            
+            <!-- 作业管理 -->
+            <div class="nav-group">
+                <div class="nav-group-title">作业管理</div>
+                <div class="nav-item" data-tab="homework-list" onclick="showModule('homework-list')">
+                    <span class="icon">📚</span> 作业列表
+                </div>
+                <div class="nav-item" data-tab="homework-stats" onclick="showModule('homework-stats')">
+                    <span class="icon">📊</span> 作业统计看板
+                </div>
+            </div>
+            
+            <!-- 违纪情况 -->
+            <div class="nav-group">
+                <div class="nav-group-title">违纪情况</div>
+                <div class="nav-item" data-tab="discipline-dashboard" onclick="showModule('discipline-dashboard')">
+                    <span class="icon">⚠️</span> 违纪数据看板
+                </div>
+                <div class="nav-item" data-tab="discipline-records" onclick="showModule('discipline-records')">
+                    <span class="icon">📋</span> 违纪记录明细
+                </div>
+            </div>
+            
+            <!-- 请假管理 -->
+            <div class="nav-group">
+                <div class="nav-group-title">请假管理</div>
+                <div class="nav-item" data-tab="leave" onclick="showModule('leave')">
+                    <span class="icon">🏥</span> 请假管理
+                </div>
+            </div>
+            
+            <!-- 风险预警 -->
+            <div class="nav-group">
+                <div class="nav-group-title">风险预警</div>
+                <div class="nav-item" data-tab="risk-home" onclick="showModule('risk-home')">
+                    <span class="icon">🚨</span> 风险预警首页
+                </div>
+                <div class="nav-item" data-tab="emotion-warning" onclick="showModule('emotion-warning')">
+                    <span class="icon">😟</span> 学生情绪预警
+                </div>
+                <div class="nav-item" data-tab="special-constitution" onclick="showModule('special-constitution')">
+                    <span class="icon">🏥</span> 特殊体质登记
+                </div>
+                <div class="nav-item" data-tab="dropout-risk" onclick="showModule('dropout-risk')">
+                    <span class="icon">🚫</span> 辍学风险预警
+                </div>
+                <div class="nav-item" data-tab="return-tracking" onclick="showModule('return-tracking')">
+                    <span class="icon">🔍</span> 未返校跟踪
+                </div>
+                <div class="nav-item" data-tab="conflict-resolution" onclick="showModule('conflict-resolution')">
+                    <span class="icon">🤝</span> 矛盾排查
+                </div>
+            </div>
+            
+            <!-- 谈话记录 -->
+            <div class="nav-group">
+                <div class="nav-group-title">谈话记录</div>
+                <div class="nav-item" data-tab="conversations" onclick="showModule('conversations')">
+                    <span class="icon">💬</span> 谈话记录
+                </div>
+            </div>
+            
+            <!-- 家校沟通 -->
+            <div class="nav-group">
+                <div class="nav-group-title">家校沟通</div>
+                <div class="nav-item" data-tab="parent-communication" onclick="showModule('parent-communication')">
+                    <span class="icon">📞</span> 家校沟通
+                </div>
+            </div>
+            
+            <!-- 工作留痕 -->
+            <div class="nav-group">
+                <div class="nav-group-title">工作留痕</div>
+                <div class="nav-item" data-tab="work-traces" onclick="showModule('work-traces')">
+                    <span class="icon">📁</span> 工作留痕
+                </div>
+            </div>
+            
+            <!-- 班主任培训 -->
+            <div class="nav-group">
+                <div class="nav-group-title">班主任培训</div>
+                <div class="nav-item" data-tab="training-records" onclick="showModule('training-records')">
+                    <span class="icon">📝</span> 培训记录
+                </div>
+                <div class="nav-item" data-tab="lecture-records" onclick="showModule('lecture-records')">
+                    <span class="icon">🎤</span> 讲座记录
+                </div>
+                <div class="nav-item" data-tab="activity-participation" onclick="showModule('activity-participation')">
+                    <span class="icon">🎯</span> 活动参与
+                </div>
+                <div class="nav-item" data-tab="hours-stats" onclick="showModule('hours-stats')">
+                    <span class="icon">⏱️</span> 学时统计
+                </div>
+            </div>
+            
+            <!-- 其他内容 -->
+            <div class="nav-group">
+                <div class="nav-group-title">其他内容</div>
+                <div class="nav-item" data-tab="others" onclick="showModule('others')">
+                    <span class="icon">📌</span> 其他内容
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn-logout" onclick="logout()">退出登录</button>
     </div>
     
-    <div class="container">
+    <!-- 主内容区 -->
+    <div class="main-content">
         <div class="welcome-banner">
             <div class="welcome-text">
                 <h2>欢迎回来，<span id="welcomeName">教师</span>！</h2>
                 <p>今天是美好的一天，继续加油！</p>
             </div>
-            <div style="font-size: 48px;">📚</div>
+            <div style="font-size: 36px;">📚</div>
         </div>
         
-        <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showTab('scores')">📊 成绩管理</button>
-            <button class="nav-tab" onclick="showTab('students')">👨‍🎓 学生管理</button>
-            <button class="nav-tab" onclick="showTab('profile')">👤 个人信息</button>
-        </div>
-        
-        <div class="content">
-            <!-- 成绩管理 -->
-            <div id="scoresTab">
-                <h2 style="margin-bottom: 20px;">📊 成绩管理</h2>
-                <div class="class-info-banner" id="classInfoBanner">
-                    <span>当前班级：<span class="current-class" id="currentClassName">未选择</span></span>
-                    <span>学生数量：<span id="currentClassStudentCount">0</span> 人</span>
-                </div>
-                <form id="scoreForm">
-                    <div class="form-group">
-                        <label>选择学生</label>
-                        <select id="scoreStudentId" required>
-                            <option value="">请选择学生</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>科目</label>
-                        <input type="text" id="scoreSubject" placeholder="如：语文、数学" required>
-                    </div>
-                    <div class="form-group">
-                        <label>分数</label>
-                        <input type="number" id="scoreValue" min="0" max="100" placeholder="0-100" required>
-                    </div>
-                    <div class="form-group">
-                        <label>考试类型</label>
-                        <select id="scoreType">
-                            <option value="期中考试">期中考试</option>
-                            <option value="期末考试">期末考试</option>
-                            <option value="月考">月考</option>
-                            <option value="测验">测验</option>
-                            <option value="作业">作业</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-submit">提交成绩</button>
-                </form>
-            </div>
-            
-            <!-- 学生管理 -->
-            <div id="studentsTab" style="display: none;">
-                <h2 style="margin-bottom: 20px;">👨‍🎓 学生管理</h2>
-                <div class="class-info-banner" id="studentClassInfoBanner">
-                    <span>当前班级：<span class="current-class" id="studentCurrentClassName">未选择</span></span>
-                    <span>学生数量：<span id="studentClassStudentCount">0</span> 人</span>
+        <div class="content" id="mainContent">
+            <!-- 默认显示学生花名册 -->
+            <div id="module-roster">
+                <h2 style="margin-bottom: 20px;">📋 学生花名册</h2>
+                <div class="class-info-banner">
+                    <span>当前班级：<span class="current-class" id="rosterClassName">未选择</span></span>
+                    <span>学生数量：<span id="rosterStudentCount">0</span> 人</span>
                 </div>
                 <table>
                     <thead>
@@ -250,35 +444,10 @@
                             <th>注册时间</th>
                         </tr>
                     </thead>
-                    <tbody id="studentList">
+                    <tbody id="rosterStudentList">
                         <tr><td colspan="4" class="loading">请选择班级</td></tr>
                     </tbody>
                 </table>
-            </div>
-            
-            <!-- 个人信息 -->
-            <div id="profileTab" style="display: none;">
-                <h2 style="margin-bottom: 20px;">👤 个人信息</h2>
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                    <div style="margin-bottom: 15px;">
-                        <strong>姓名：</strong><span id="profileName">-</span>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <strong>用户名：</strong><span id="profileUsername">-</span>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <strong>角色：</strong><span>教师</span>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <strong>身份：</strong><span id="profileIdentities">-</span>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <strong>邮箱：</strong><span id="profileEmail">未设置</span>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <strong>手机号：</strong><span id="profilePhone">未设置</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -290,7 +459,6 @@
         
         let currentClass = '';
         let allStudents = [];
-        let teacherIdentities = [];
         
         function getToken() {
             return localStorage.getItem('token');
@@ -300,26 +468,6 @@
             const userStr = localStorage.getItem('user');
             if (!userStr) return {};
             try { return JSON.parse(userStr); } catch { return {}; }
-        }
-        
-        function showTab(tabName) {
-            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            document.getElementById('scoresTab').style.display = 'none';
-            document.getElementById('studentsTab').style.display = 'none';
-            document.getElementById('profileTab').style.display = 'none';
-            
-            if (tabName === 'scores') {
-                document.getElementById('scoresTab').style.display = 'block';
-                loadStudentsForScore();
-            } else if (tabName === 'students') {
-                document.getElementById('studentsTab').style.display = 'block';
-                loadStudentsList();
-            } else if (tabName === 'profile') {
-                document.getElementById('profileTab').style.display = 'block';
-                loadProfile();
-            }
         }
         
         function logout() {
@@ -333,30 +481,26 @@
             const user = getUser();
             const classes = [];
             
-            // 班主任身份
             if (user.classTeacherOf && user.classTeacherOf.length > 0) {
                 user.classTeacherOf.forEach(cls => {
-                    classes.push({ className: cls, type: 'class' });
+                    classes.push(cls);
                 });
             }
             
-            // 任课教师身份
             if (user.subjectTeacherOf && user.subjectTeacherOf.length > 0) {
                 user.subjectTeacherOf.forEach(subj => {
-                    // 从任课身份中提取班级（如"一年级1班语文" -> "一年级1班"）
                     const match = subj.match(/^(.+?)(语文|数学|英语|物理|化学|生物|历史|地理|政治|体育|音乐|美术|信息技术|科学|道德与法治|劳动)/);
                     if (match && match[1]) {
                         const className = match[1];
-                        if (!classes.some(c => c.className === className)) {
-                            classes.push({ className: className, type: 'subject' });
+                        if (!classes.includes(className)) {
+                            classes.push(className);
                         }
                     }
                 });
             }
             
-            // 兼容旧数据
             if (classes.length === 0 && user.className) {
-                classes.push({ className: user.className, type: 'class' });
+                classes.push(user.className);
             }
             
             return classes;
@@ -368,18 +512,17 @@
             const classes = getTeacherClasses();
             
             let options = '<option value="">请选择班级</option>';
-            
             classes.forEach(cls => {
-                options += `<option value="${cls.className}">${cls.className}</option>`;
+                options += `<option value="${cls}">${cls}</option>`;
             });
             
             classSelect.innerHTML = options;
             
-            // 如果有班级，默认选择第一个
             if (classes.length > 0) {
-                classSelect.value = classes[0].className;
-                currentClass = classes[0].className;
+                classSelect.value = classes[0];
+                currentClass = classes[0];
                 updateClassInfo();
+                loadRosterData();
             }
         }
         
@@ -389,32 +532,28 @@
             currentClass = classSelect.value;
             updateClassInfo();
             
-            // 重新加载数据
-            loadStudentsForScore();
-            loadStudentsList();
+            // 重新加载当前模块数据
+            const activeModule = document.querySelector('.nav-item.active');
+            if (activeModule) {
+                const moduleName = activeModule.getAttribute('data-tab');
+                if (moduleName === 'roster') {
+                    loadRosterData();
+                }
+            }
         }
         
         // 更新班级信息显示
         function updateClassInfo() {
-            const classNameElement = document.getElementById('currentClassName');
-            const studentCountElement = document.getElementById('currentClassStudentCount');
-            const studentClassNameElement = document.getElementById('studentCurrentClassName');
-            const studentClassCountElement = document.getElementById('studentClassStudentCount');
+            const classNameElement = document.getElementById('rosterClassName');
+            const studentCountElement = document.getElementById('rosterStudentCount');
             
             if (currentClass) {
                 classNameElement.textContent = currentClass;
-                studentClassNameElement.textContent = currentClass;
-                
-                // 统计该班级学生数量
                 const classStudents = allStudents.filter(s => s.class === currentClass);
-                const count = classStudents.length;
-                studentCountElement.textContent = count;
-                studentClassCountElement.textContent = count;
+                studentCountElement.textContent = classStudents.length;
             } else {
                 classNameElement.textContent = '未选择';
                 studentCountElement.textContent = '0';
-                studentClassNameElement.textContent = '未选择';
-                studentClassCountElement.textContent = '0';
             }
         }
         
@@ -433,28 +572,9 @@
             }
         }
         
-        // 加载学生到成绩表单下拉框
-        async function loadStudentsForScore() {
-            const select = document.getElementById('scoreStudentId');
-            
-            if (!currentClass) {
-                select.innerHTML = '<option value="">请先选择班级</option>';
-                return;
-            }
-            
-            const classStudents = allStudents.filter(s => s.class === currentClass);
-            
-            if (classStudents.length === 0) {
-                select.innerHTML = '<option value="">该班级暂无学生</option>';
-            } else {
-                select.innerHTML = '<option value="">请选择学生</option>' + 
-                    classStudents.map(s => `<option value="${s.studentId}">${s.name}</option>`).join('');
-            }
-        }
-        
-        // 加载学生列表
-        async function loadStudentsList() {
-            const tbody = document.getElementById('studentList');
+        // 加载学生花名册
+        function loadRosterData() {
+            const tbody = document.getElementById('rosterStudentList');
             
             if (!currentClass) {
                 tbody.innerHTML = '<tr><td colspan="4" class="loading">请选择班级</td></tr>';
@@ -477,79 +597,89 @@
             }
         }
         
-        // 加载个人信息
-        function loadProfile() {
-            const user = getUser();
-            
-            document.getElementById('profileName').textContent = user.realName || '-';
-            document.getElementById('profileUsername').textContent = user.username || '-';
-            document.getElementById('profileEmail').textContent = user.email || '未设置';
-            document.getElementById('profilePhone').textContent = user.phone || '未设置';
-            
-            // 显示身份
-            const identities = [];
-            if (user.classTeacherOf && user.classTeacherOf.length > 0) {
-                user.classTeacherOf.forEach(cls => {
-                    identities.push(`${cls}班主任`);
-                });
-            }
-            if (user.subjectTeacherOf && user.subjectTeacherOf.length > 0) {
-                user.subjectTeacherOf.forEach(subj => {
-                    identities.push(`${subj}教师`);
-                });
+        // 显示模块
+        function showModule(moduleName) {
+            // 更新导航高亮
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const activeItem = document.querySelector(`.nav-item[data-tab="${moduleName}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
             }
             
-            document.getElementById('profileIdentities').textContent = identities.length > 0 ? identities.join('、') : '未设置';
+            const content = document.getElementById('mainContent');
+            
+            // 模块标题映射
+            const moduleTitles = {
+                'roster': '📋 学生花名册',
+                'import-roster': '📥 导入学生花名册',
+                'committee-list': '👥 班委名单',
+                'committee-assessment': '📊 班委考核',
+                'committee-changes': '🔄 更换记录',
+                'cleaning': '🧹 卫生安排表',
+                'seating': '💺 排座位',
+                'activities': '🎉 班级活动',
+                'finance-overview': '💰 收支总览',
+                'finance-income': '📈 收入详情',
+                'finance-expense': '📉 支出详情',
+                'exam-list': '📝 考试列表',
+                'score-entry': '✏️ 成绩录入',
+                'exam-analysis': '📊 单次分析',
+                'trend-analysis': '📈 个人趋势',
+                'subject-settings': '⚙️ 科目设置',
+                'homework-list': '📚 作业列表',
+                'homework-stats': '📊 作业统计看板',
+                'discipline-dashboard': '⚠️ 违纪数据看板',
+                'discipline-records': '📋 违纪记录明细',
+                'leave': '🏥 请假管理',
+                'risk-home': '🚨 风险预警首页',
+                'emotion-warning': '😟 学生情绪预警',
+                'special-constitution': '🏥 特殊体质登记',
+                'dropout-risk': '🚫 辍学风险预警',
+                'return-tracking': '🔍 未返校跟踪',
+                'conflict-resolution': '🤝 矛盾排查',
+                'conversations': '💬 谈话记录',
+                'parent-communication': '📞 家校沟通',
+                'work-traces': '📁 工作留痕',
+                'training-records': '📝 培训记录',
+                'lecture-records': '🎤 讲座记录',
+                'activity-participation': '🎯 活动参与',
+                'hours-stats': '⏱️ 学时统计',
+                'others': '📌 其他内容'
+            };
+            
+            const title = moduleTitles[moduleName] || '模块';
+            
+            if (moduleName === 'roster') {
+                content.innerHTML = `
+                    <div id="module-roster">
+                        <h2 style="margin-bottom: 20px;">${title}</h2>
+                        <div class="class-info-banner">
+                            <span>当前班级：<span class="current-class" id="rosterClassName">${currentClass || '未选择'}</span></span>
+                            <span>学生数量：<span id="rosterStudentCount">0</span> 人</span>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr><th>姓名</th><th>用户名</th><th>班级</th><th>注册时间</th></tr>
+                            </thead>
+                            <tbody id="rosterStudentList">
+                                <tr><td colspan="4" class="loading">加载中...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                loadRosterData();
+            } else {
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🚧</div>
+                        <h2 style="margin-bottom: 10px;">${title}</h2>
+                        <p style="color: #999;">该功能正在开发中，敬请期待...</p>
+                    </div>
+                `;
+            }
         }
-        
-        // 提交成绩
-        document.getElementById('scoreForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const studentId = document.getElementById('scoreStudentId').value;
-            const subject = document.getElementById('scoreSubject').value.trim();
-            const score = document.getElementById('scoreValue').value;
-            const examType = document.getElementById('scoreType').value;
-            
-            if (!studentId) {
-                alert('请选择学生');
-                return;
-            }
-            
-            if (!subject) {
-                alert('请输入科目');
-                return;
-            }
-            
-            if (!score) {
-                alert('请输入分数');
-                return;
-            }
-            
-            try {
-                const token = getToken();
-                const response = await fetch(API_BASE + '/scores', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ studentId, subject, score, examType })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert('成绩录入成功！');
-                    this.reset();
-                    loadStudentsForScore();
-                } else {
-                    alert(data.error || '录入失败');
-                }
-            } catch (error) {
-                alert('网络错误');
-            }
-        });
         
         // 初始化
         async function init() {
@@ -567,17 +697,12 @@
                 return;
             }
             
-            document.getElementById('userName').textContent = user.realName || '教师';
+            document.getElementById('sidebarUserName').textContent = user.realName || '教师';
             document.getElementById('welcomeName').textContent = user.realName || '教师';
             
-            // 加载学生数据
             await loadAllStudentsData();
-            
-            // 加载班级下拉框
             loadClassSelector();
-            
-            // 加载学生到成绩表单
-            loadStudentsForScore();
+            loadRosterData();
         }
         
         init();
