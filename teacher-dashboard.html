@@ -220,8 +220,6 @@
         .btn-import { background: #00bcd4; color: white; padding: 10px 20px; margin-bottom: 20px; }
         .btn-confirm { background: #4CAF50; color: white; padding: 3px 8px; font-size: 10px; }
         .btn-cancel-inline { background: #999; color: white; padding: 3px 8px; font-size: 10px; }
-        .btn-add-period { background: #4CAF50; color: white; padding: 3px 8px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; }
-        .btn-remove-period { background: #f44336; color: white; padding: 3px 8px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; }
         .btn-submit {
             width: 100%;
             padding: 12px;
@@ -314,10 +312,10 @@
         }
         .schedule-table .time-slot-header {
             background: #5a67d8;
-            width: 50px;
+            width: 60px;
         }
         .schedule-table .period-time-header {
-            width: 80px;
+            width: 90px;
         }
         .schedule-table .day-header {
             min-width: 100px;
@@ -328,13 +326,31 @@
             color: #333;
             writing-mode: vertical-lr;
             text-orientation: mixed;
-            width: 40px;
+            width: 50px;
+            position: relative;
+        }
+        .schedule-table .period-group-header .add-period-btn {
+            writing-mode: horizontal-tb;
+            display: block;
+            margin-top: 5px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            line-height: 20px;
+            text-align: center;
+            padding: 0;
         }
         .schedule-table .period-time-cell {
             background: #f0f0ff;
             font-weight: bold;
             color: #333;
             cursor: pointer;
+            position: relative;
         }
         .schedule-table .period-time-cell:hover {
             background: #e0e0ff;
@@ -351,6 +367,21 @@
             color: #666;
             display: block;
             cursor: pointer;
+        }
+        .schedule-table .delete-period-btn {
+            display: inline-block;
+            margin-top: 4px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            cursor: pointer;
+            line-height: 18px;
+            text-align: center;
+            padding: 0;
         }
         .schedule-table .course-cell {
             cursor: pointer;
@@ -913,8 +944,9 @@
                     html += `<tr>`;
                     
                     if (index === 0) {
-                        html += `<td class="period-group-header" rowspan="${periods.length}">${timeSlot}
-                            <button class="btn-add-period" onclick="addPeriod('${timeSlot}')" style="display:block; margin-top:5px;">+</button>
+                        html += `<td class="period-group-header" rowspan="${periods.length}">
+                            ${timeSlot}
+                            <button class="add-period-btn" onclick="addPeriod('${timeSlot}')" title="添加节数">+</button>
                         </td>`;
                     }
                     
@@ -922,7 +954,7 @@
                         <td class="period-time-cell">
                             <span class="period-label" onclick="editPeriodLabel(${period.period})" title="点击修改节数名称">${period.periodLabel || '第' + period.period + '节'}</span>
                             <span class="period-time" onclick="editPeriodTime(${period.period})" title="点击修改时间">${period.startTime}-${period.endTime}</span>
-                            <button class="btn-remove-period" onclick="removePeriod(${period.period})" style="display:block; margin: 3px auto 0;">删除</button>
+                            <button class="delete-period-btn" onclick="removePeriod(${period.period})" title="删除这一节">×</button>
                         </td>
                     `;
                     
@@ -958,9 +990,16 @@
         function addPeriod(timeSlot) {
             const currentSchedule = allSchedules[currentScheduleName];
             const periods = currentSchedule.periodTimes.filter(p => p.timeSlot === timeSlot);
-            const maxPeriod = periods.length > 0 ? Math.max(...periods.map(p => p.period)) : 0;
-            const newPeriod = maxPeriod + 1;
             
+            // 找到该时间段的最大节数编号
+            let maxPeriodNum = 0;
+            currentSchedule.periodTimes.forEach(p => {
+                if (p.period > maxPeriodNum) maxPeriodNum = p.period;
+            });
+            
+            const newPeriod = maxPeriodNum + 1;
+            
+            // 计算时间
             let startTime = '08:00';
             let endTime = '08:45';
             
@@ -968,6 +1007,16 @@
                 const lastPeriod = periods[periods.length - 1];
                 startTime = lastPeriod.endTime;
                 endTime = addMinutes(lastPeriod.endTime, 45);
+            } else {
+                // 根据时间段设置默认时间
+                const defaultTimes = {
+                    '早上': { start: '07:30', end: '08:15' },
+                    '上午': { start: '09:30', end: '10:15' },
+                    '下午': { start: '14:00', end: '14:45' },
+                    '晚上': { start: '19:00', end: '19:45' }
+                };
+                startTime = defaultTimes[timeSlot].start;
+                endTime = defaultTimes[timeSlot].end;
             }
             
             currentSchedule.periodTimes.push({
@@ -979,12 +1028,13 @@
             });
             
             currentSchedule.periodTimes.sort((a, b) => a.period - b.period);
+            scheduleData = currentSchedule.courses;
             renderMainSchedule();
         }
         
         // 删除节数
         function removePeriod(period) {
-            if (!confirm('确定要删除这一节吗？该节的所有课程也会被删除！')) return;
+            if (!confirm('确定要删除这一节吗？该节的所有课程安排也会被删除！')) return;
             
             const currentSchedule = allSchedules[currentScheduleName];
             currentSchedule.periodTimes = currentSchedule.periodTimes.filter(p => p.period !== period);
@@ -1224,7 +1274,6 @@
                         return;
                     }
                     
-                    // 导入后新建课程表
                     let newName = importData.scheduleName || '导入的课表';
                     let nameIndex = 1;
                     while (allSchedules[newName]) {
