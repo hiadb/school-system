@@ -1034,7 +1034,7 @@
             renderMainSchedule();
         }
         
-        // 删除节数（直接删除，不弹对话框）
+        // 删除节数（直接删除，无对话框）
         function removePeriod(period) {
             const currentSchedule = allSchedules[currentScheduleName];
             currentSchedule.periodTimes = currentSchedule.periodTimes.filter(p => p.period !== period);
