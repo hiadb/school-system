@@ -337,11 +337,11 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 14px;
+            width: 22px;
+            height: 22px;
+            font-size: 16px;
             cursor: pointer;
-            line-height: 20px;
+            line-height: 22px;
             text-align: center;
             padding: 0;
         }
@@ -375,13 +375,18 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 12px;
+            width: 20px;
+            height: 20px;
+            font-size: 14px;
             cursor: pointer;
-            line-height: 18px;
+            line-height: 20px;
             text-align: center;
             padding: 0;
+            transition: all 0.3s;
+        }
+        .schedule-table .delete-period-btn:hover {
+            background: #d32f2f;
+            transform: scale(1.1);
         }
         .schedule-table .course-cell {
             cursor: pointer;
@@ -991,7 +996,6 @@
             const currentSchedule = allSchedules[currentScheduleName];
             const periods = currentSchedule.periodTimes.filter(p => p.timeSlot === timeSlot);
             
-            // 找到该时间段的最大节数编号
             let maxPeriodNum = 0;
             currentSchedule.periodTimes.forEach(p => {
                 if (p.period > maxPeriodNum) maxPeriodNum = p.period;
@@ -999,7 +1003,6 @@
             
             const newPeriod = maxPeriodNum + 1;
             
-            // 计算时间
             let startTime = '08:00';
             let endTime = '08:45';
             
@@ -1008,7 +1011,6 @@
                 startTime = lastPeriod.endTime;
                 endTime = addMinutes(lastPeriod.endTime, 45);
             } else {
-                // 根据时间段设置默认时间
                 const defaultTimes = {
                     '早上': { start: '07:30', end: '08:15' },
                     '上午': { start: '09:30', end: '10:15' },
@@ -1032,10 +1034,8 @@
             renderMainSchedule();
         }
         
-        // 删除节数
+        // 删除节数（直接删除，不弹对话框）
         function removePeriod(period) {
-            if (!confirm('确定要删除这一节吗？该节的所有课程安排也会被删除！')) return;
-            
             const currentSchedule = allSchedules[currentScheduleName];
             currentSchedule.periodTimes = currentSchedule.periodTimes.filter(p => p.period !== period);
             currentSchedule.courses = currentSchedule.courses.filter(c => c.period !== period);
