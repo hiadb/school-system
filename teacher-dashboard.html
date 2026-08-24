@@ -214,6 +214,9 @@
             white-space: nowrap;
         }
         .btn-add { background: #4CAF50; color: white; padding: 10px 20px; margin-bottom: 20px; }
+        .btn-save { background: #667eea; color: white; padding: 10px 20px; margin-bottom: 20px; }
+        .btn-edit { background: #ffc107; color: white; }
+        .btn-delete { background: #f44336; color: white; }
         .btn-submit {
             width: 100%;
             padding: 12px;
@@ -257,11 +260,50 @@
         .score-medium { color: #ff9800; font-weight: bold; }
         .score-low { color: #f44336; font-weight: bold; }
         
+        /* 课表样式 */
+        .schedule-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .schedule-form select, .schedule-form input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .schedule-table th, .schedule-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .schedule-table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        .schedule-table .period-number {
+            font-weight: bold;
+            color: #667eea;
+        }
+        .schedule-table .time-cell {
+            color: #666;
+        }
+        
         @media (max-width: 768px) {
             .sidebar { width: 200px; }
             .main-content { margin-left: 200px; padding: 10px; }
             .nav-group-header { padding: 10px 15px; font-size: 12px; }
             .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; }
+            .schedule-form { flex-direction: column; }
+            .schedule-form select, .schedule-form input { width: 100%; }
         }
     </style>
 </head>
@@ -534,15 +576,15 @@
                 </div>
             </div>
             
-            <!-- 其他内容 -->
+            <!-- 自定义课表 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
-                    <span class="group-title"><span class="icon">📌</span> 其他内容</span>
+                    <span class="group-title"><span class="icon">📅</span> 自定义课表</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="others" onclick="showModule('others')">
-                        <span class="icon">📌</span> 其他内容
+                    <div class="nav-item" data-tab="schedule" onclick="showModule('schedule')">
+                        <span class="icon">📅</span> 自定义课表
                     </div>
                 </div>
             </div>
@@ -593,6 +635,7 @@
         
         let currentClass = '';
         let allStudents = [];
+        let scheduleData = [];
         
         function getToken() {
             return localStorage.getItem('token');
@@ -619,7 +662,6 @@
                 submenu.classList.remove('open');
                 arrow.classList.remove('open');
             } else {
-                // 关闭其他打开的菜单
                 document.querySelectorAll('.nav-submenu.open').forEach(menu => {
                     if (menu !== submenu) {
                         menu.classList.remove('open');
@@ -694,6 +736,8 @@
                 const moduleName = activeModule.getAttribute('data-tab');
                 if (moduleName === 'roster') {
                     loadRosterData();
+                } else if (moduleName === 'schedule') {
+                    loadScheduleData();
                 }
             }
         }
@@ -753,9 +797,210 @@
             }
         }
         
+        // 加载课表数据
+        function loadScheduleData() {
+            // 从 localStorage 读取课表数据
+            const savedSchedule = localStorage.getItem('schedule_' + currentClass);
+            if (savedSchedule) {
+                scheduleData = JSON.parse(savedSchedule);
+            } else {
+                scheduleData = [];
+            }
+            renderSchedule();
+        }
+        
+        // 渲染课表
+        function renderSchedule() {
+            const content = document.getElementById('mainContent');
+            const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            
+            // 自动更新日期
+            const today = new Date();
+            const currentDay = today.getDay(); // 0=周日, 1=周一...
+            const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + mondayOffset);
+            
+            let scheduleHtml = `
+                <h2 style="margin-bottom: 20px;">📅 自定义课表</h2>
+                <div class="class-info-banner">
+                    <span>当前班级：<span class="current-class">${currentClass || '未选择'}</span></span>
+                    <span>课表设置</span>
+                </div>
+                
+                <!-- 添加课表项表单 -->
+                <div class="schedule-form">
+                    <select id="scheduleDay">
+                        <option value="">选择周几</option>
+                        ${weekDays.map((day, index) => `<option value="${index + 1}">${day}</option>`).join('')}
+                    </select>
+                    <input type="number" id="schedulePeriod" min="1" max="12" placeholder="节数（1-12）">
+                    <input type="time" id="scheduleStartTime" placeholder="开始时间">
+                    <input type="time" id="scheduleEndTime" placeholder="结束时间">
+                    <input type="text" id="scheduleSubject" placeholder="科目名称">
+                    <button class="btn-add" onclick="addScheduleItem()">➕ 添加</button>
+                    <button class="btn-save" onclick="saveSchedule()">💾 保存课表</button>
+                </div>
+                
+                <!-- 课表显示 -->
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>节数</th>
+                            ${weekDays.map(day => `<th>${day}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            // 找到最大节数
+            let maxPeriod = 0;
+            scheduleData.forEach(item => {
+                if (item.period > maxPeriod) maxPeriod = item.period;
+            });
+            
+            if (maxPeriod === 0) maxPeriod = 8; // 默认8节课
+            
+            for (let period = 1; period <= maxPeriod; period++) {
+                scheduleHtml += `<tr><td class="period-number">第${period}节</td>`;
+                
+                for (let day = 1; day <= 7; day++) {
+                    const item = scheduleData.find(s => s.day === day && s.period === period);
+                    
+                    if (item) {
+                        scheduleHtml += `
+                            <td>
+                                <strong>${item.subject}</strong><br>
+                                <span class="time-cell">${item.startTime} - ${item.endTime}</span>
+                            </td>
+                        `;
+                    } else {
+                        scheduleHtml += '<td></td>';
+                    }
+                }
+                
+                scheduleHtml += '</tr>';
+            }
+            
+            scheduleHtml += '</tbody></table>';
+            
+            // 时间安排列表
+            scheduleHtml += `
+                <h3 style="margin: 20px 0 10px;">📋 时间安排列表</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>周几</th>
+                            <th>节数</th>
+                            <th>时间</th>
+                            <th>科目</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            if (scheduleData.length === 0) {
+                scheduleHtml += '<tr><td colspan="5" class="empty-state">暂无课表，请添加</td></tr>';
+            } else {
+                scheduleData.sort((a, b) => a.day - b.day || a.period - b.period);
+                scheduleData.forEach((item, index) => {
+                    const dayName = weekDays[item.day - 1] || '未知';
+                    scheduleHtml += `
+                        <tr>
+                            <td>${dayName}</td>
+                            <td>第${item.period}节</td>
+                            <td>${item.startTime} - ${item.endTime}</td>
+                            <td>${item.subject}</td>
+                            <td>
+                                <button class="btn btn-edit" onclick="editScheduleItem(${index})">修改</button>
+                                <button class="btn btn-delete" onclick="deleteScheduleItem(${index})">删除</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            scheduleHtml += '</tbody></table>';
+            
+            content.innerHTML = scheduleHtml;
+        }
+        
+        // 添加课表项
+        function addScheduleItem() {
+            const day = parseInt(document.getElementById('scheduleDay').value);
+            const period = parseInt(document.getElementById('schedulePeriod').value);
+            const startTime = document.getElementById('scheduleStartTime').value;
+            const endTime = document.getElementById('scheduleEndTime').value;
+            const subject = document.getElementById('scheduleSubject').value.trim();
+            
+            if (!day) { alert('请选择周几'); return; }
+            if (!period) { alert('请输入节数'); return; }
+            if (!startTime || !endTime) { alert('请输入时间'); return; }
+            if (!subject) { alert('请输入科目名称'); return; }
+            
+            // 检查是否重复
+            const exists = scheduleData.some(s => s.day === day && s.period === period);
+            if (exists) {
+                alert('该时间已有课程安排');
+                return;
+            }
+            
+            scheduleData.push({ day, period, startTime, endTime, subject });
+            renderSchedule();
+        }
+        
+        // 修改课表项
+        function editScheduleItem(index) {
+            const item = scheduleData[index];
+            if (!item) return;
+            
+            const newDay = prompt('请输入周几（1-7）：', item.day);
+            if (newDay === null) return;
+            
+            const newPeriod = prompt('请输入节数（1-12）：', item.period);
+            if (newPeriod === null) return;
+            
+            const newStartTime = prompt('请输入开始时间（如08:00）：', item.startTime);
+            if (newStartTime === null) return;
+            
+            const newEndTime = prompt('请输入结束时间（如08:45）：', item.endTime);
+            if (newEndTime === null) return;
+            
+            const newSubject = prompt('请输入科目名称：', item.subject);
+            if (newSubject === null) return;
+            
+            scheduleData[index] = {
+                day: parseInt(newDay),
+                period: parseInt(newPeriod),
+                startTime: newStartTime,
+                endTime: newEndTime,
+                subject: newSubject.trim()
+            };
+            
+            renderSchedule();
+        }
+        
+        // 删除课表项
+        function deleteScheduleItem(index) {
+            if (!confirm('确定要删除这个课表项吗？')) return;
+            scheduleData.splice(index, 1);
+            renderSchedule();
+        }
+        
+        // 保存课表
+        function saveSchedule() {
+            if (!currentClass) {
+                alert('请先选择班级');
+                return;
+            }
+            
+            localStorage.setItem('schedule_' + currentClass, JSON.stringify(scheduleData));
+            alert('课表保存成功！');
+        }
+        
         // 显示模块
         function showModule(moduleName) {
-            // 更新导航高亮
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
@@ -801,7 +1046,7 @@
                 'lecture-records': '🎤 讲座记录',
                 'activity-participation': '🎯 活动参与',
                 'hours-stats': '⏱️ 学时统计',
-                'others': '📌 其他内容'
+                'schedule': '📅 自定义课表'
             };
             
             const title = moduleTitles[moduleName] || '模块';
@@ -825,6 +1070,8 @@
                     </div>
                 `;
                 loadRosterData();
+            } else if (moduleName === 'schedule') {
+                loadScheduleData();
             } else {
                 content.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px;">
