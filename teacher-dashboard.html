@@ -279,6 +279,14 @@
             font-weight: bold;
             min-width: 200px;
         }
+        .schedule-selector {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 150px;
+        }
         .schedule-actions {
             display: flex;
             gap: 10px;
@@ -290,7 +298,7 @@
             table-layout: fixed;
         }
         .schedule-table th, .schedule-table td {
-            padding: 10px;
+            padding: 8px;
             text-align: center;
             border: 1px solid #ddd;
             font-size: 13px;
@@ -303,40 +311,13 @@
         }
         .schedule-table .time-slot-header {
             background: #5a67d8;
-            width: 60px;
-        }
-        .schedule-table .period-header {
             width: 50px;
+        }
+        .schedule-table .period-time-header {
+            width: 70px;
         }
         .schedule-table .day-header {
             min-width: 100px;
-        }
-        .schedule-table .period-number {
-            font-weight: bold;
-            color: #667eea;
-            background: #f0f0ff;
-        }
-        .schedule-table .time-cell {
-            color: #666;
-            font-size: 11px;
-            display: block;
-        }
-        .schedule-table .course-cell {
-            cursor: pointer;
-            transition: background 0.3s;
-            min-height: 60px;
-        }
-        .schedule-table .course-cell:hover {
-            background: #f0f0ff;
-        }
-        .schedule-table .course-cell .course-name {
-            font-weight: bold;
-            display: block;
-        }
-        .schedule-table .course-cell .class-name {
-            font-size: 11px;
-            color: #666;
-            display: block;
         }
         .schedule-table .period-group-header {
             background: #f8f9fa;
@@ -345,6 +326,65 @@
             writing-mode: vertical-lr;
             text-orientation: mixed;
             width: 40px;
+        }
+        .schedule-table .period-time-cell {
+            background: #f0f0ff;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+        }
+        .schedule-table .period-time-cell:hover {
+            background: #e0e0ff;
+        }
+        .schedule-table .period-number {
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+            font-size: 14px;
+        }
+        .schedule-table .period-time {
+            font-size: 11px;
+            color: #666;
+            display: block;
+        }
+        .schedule-table .course-cell {
+            cursor: pointer;
+            transition: background 0.3s;
+            min-height: 60px;
+            position: relative;
+        }
+        .schedule-table .course-cell:hover {
+            background: #f0f0ff;
+        }
+        .schedule-table .course-cell .course-name {
+            font-weight: bold;
+            display: block;
+            font-size: 14px;
+        }
+        .schedule-table .course-cell .class-name {
+            font-size: 11px;
+            color: #666;
+            display: block;
+            margin-top: 3px;
+        }
+        .schedule-table .course-cell .edit-hint {
+            font-size: 10px;
+            color: #ccc;
+            display: block;
+            margin-top: 3px;
+        }
+        /* 内联编辑样式 */
+        .inline-editor {
+            width: 100%;
+            border: 2px solid #667eea;
+            border-radius: 3px;
+            padding: 5px;
+            font-size: 13px;
+            text-align: center;
+        }
+        .inline-editor:focus {
+            outline: none;
+            border-color: #764ba2;
         }
         
         @media (max-width: 768px) {
@@ -657,9 +697,10 @@
         let allStudents = [];
         let scheduleData = [];
         let currentScheduleName = '';
+        let allSchedules = {}; // 存储所有课表 { scheduleName: { periodTimes: [], courses: [] } }
         
         // 默认课表模板（8节课，含时间段分类）
-        const defaultScheduleTemplate = [
+        const defaultPeriodTimes = [
             { period: 1, timeSlot: '早上', startTime: '07:30', endTime: '08:15' },
             { period: 2, timeSlot: '早上', startTime: '08:25', endTime: '09:10' },
             { period: 3, timeSlot: '上午', startTime: '09:30', endTime: '10:15' },
@@ -671,6 +712,7 @@
         ];
         
         const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        const timeSlots = ['早上', '上午', '下午', '晚上'];
         
         function getToken() {
             return localStorage.getItem('token');
@@ -688,7 +730,6 @@
             window.location.href = '/login.html';
         }
         
-        // 折叠/展开下拉菜单
         function toggleGroup(headerElement) {
             const submenu = headerElement.nextElementSibling;
             const arrow = headerElement.querySelector('.arrow');
@@ -709,7 +750,6 @@
             }
         }
         
-        // 获取教师的所有班级身份
         function getTeacherClasses() {
             const user = getUser();
             const classes = [];
@@ -739,7 +779,6 @@
             return classes;
         }
         
-        // 加载班级下拉框
         function loadClassSelector() {
             const classSelect = document.getElementById('classSelect');
             const classes = getTeacherClasses();
@@ -754,15 +793,26 @@
             if (classes.length > 0) {
                 classSelect.value = classes[0];
                 currentClass = classes[0];
+                loadAllSchedules();
                 loadMainSchedule();
             }
         }
         
-        // 切换班级
         function changeCurrentClass() {
             const classSelect = document.getElementById('classSelect');
             currentClass = classSelect.value;
+            loadAllSchedules();
             loadMainSchedule();
+        }
+        
+        // 加载所有课表
+        function loadAllSchedules() {
+            const savedSchedules = localStorage.getItem('all_schedules_' + currentClass);
+            if (savedSchedules) {
+                allSchedules = JSON.parse(savedSchedules);
+            } else {
+                allSchedules = {};
+            }
         }
         
         // 加载主课程表
@@ -773,17 +823,21 @@
                 return;
             }
             
-            // 从 localStorage 读取课表数据
-            const savedSchedule = localStorage.getItem('schedule_' + currentClass);
-            if (savedSchedule) {
-                const parsed = JSON.parse(savedSchedule);
-                scheduleData = parsed.courses || [];
-                currentScheduleName = parsed.name || currentClass + '课程表';
-            } else {
-                scheduleData = [];
+            // 获取所有课表名称
+            const scheduleNames = Object.keys(allSchedules);
+            
+            if (scheduleNames.length === 0) {
+                // 创建默认课表
                 currentScheduleName = currentClass + '课程表';
+                allSchedules[currentScheduleName] = {
+                    periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)),
+                    courses: []
+                };
+            } else {
+                currentScheduleName = scheduleNames[0];
             }
             
+            scheduleData = allSchedules[currentScheduleName].courses || [];
             renderMainSchedule();
         }
         
@@ -791,17 +845,30 @@
         function renderMainSchedule() {
             const container = document.getElementById('module-schedule-main');
             
-            // 按时间段分组
-            const timeSlots = ['早上', '上午', '下午', '晚上'];
+            const currentSchedule = allSchedules[currentScheduleName] || {
+                periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)),
+                courses: []
+            };
+            
+            const periodTimes = currentSchedule.periodTimes || defaultPeriodTimes;
+            
+            // 获取所有课表名称用于下拉框
+            const scheduleNames = Object.keys(allSchedules);
             
             let html = `
                 <div class="schedule-header">
                     <input type="text" class="schedule-title-input" id="scheduleTitleInput" 
                            value="${currentScheduleName}" placeholder="课程表名称">
+                    <select class="schedule-selector" id="scheduleSelector" onchange="switchSchedule(this.value)">
+                        <option value="">切换课表</option>
+                        ${scheduleNames.map(name => 
+                            `<option value="${name}" ${name === currentScheduleName ? 'selected' : ''}>${name}</option>`
+                        ).join('')}
+                    </select>
                     <div class="schedule-actions">
                         <button class="btn-save" onclick="saveSchedule()">💾 保存</button>
                         <button class="btn-clear" onclick="clearSchedule()">🗑️ 清空</button>
-                        <button class="btn-new" onclick="newSchedule()">📄 新建（另存为）</button>
+                        <button class="btn-new" onclick="newSchedule()">📄 新建</button>
                     </div>
                 </div>
                 <div class="schedule-container">
@@ -809,8 +876,7 @@
                         <thead>
                             <tr>
                                 <th class="time-slot-header">时间段</th>
-                                <th class="period-header">节数</th>
-                                <th class="day-header" colspan="2">时间</th>
+                                <th class="period-time-header">节数/时间</th>
                                 ${weekDays.map(day => `<th class="day-header">${day}</th>`).join('')}
                             </tr>
                         </thead>
@@ -818,21 +884,22 @@
             `;
             
             timeSlots.forEach(timeSlot => {
-                const periods = defaultScheduleTemplate.filter(p => p.timeSlot === timeSlot);
+                const periods = periodTimes.filter(p => p.timeSlot === timeSlot);
                 
                 periods.forEach((period, index) => {
                     html += `<tr>`;
                     
-                    // 时间段列（只在每组的第一个显示）
                     if (index === 0) {
                         html += `<td class="period-group-header" rowspan="${periods.length}">${timeSlot}</td>`;
                     }
                     
-                    // 节数列
-                    html += `<td class="period-number">第${period.period}节</td>`;
-                    
-                    // 时间列
-                    html += `<td colspan="2" style="font-size: 11px; color: #666;">${period.startTime}<br>${period.endTime}</td>`;
+                    // 节数和时间合并单元格
+                    html += `
+                        <td class="period-time-cell" onclick="editPeriodTime(${period.period})" title="点击修改节数和时间">
+                            <span class="period-number">第${period.period}节</span>
+                            <span class="period-time">${period.startTime}-${period.endTime}</span>
+                        </td>
+                    `;
                     
                     // 每天的课程
                     for (let day = 1; day <= 7; day++) {
@@ -840,15 +907,15 @@
                         
                         if (course) {
                             html += `
-                                <td class="course-cell" onclick="editCourse(${day}, ${period.period})" title="点击编辑">
+                                <td class="course-cell" onclick="editCourseInline(${day}, ${period.period})" title="点击编辑课程">
                                     <span class="course-name">${course.courseName || ''}</span>
                                     <span class="class-name">${course.className || ''}</span>
                                 </td>
                             `;
                         } else {
                             html += `
-                                <td class="course-cell" onclick="editCourse(${day}, ${period.period})" title="点击添加课程">
-                                    <span style="color: #ccc;">+</span>
+                                <td class="course-cell" onclick="editCourseInline(${day}, ${period.period})" title="点击添加课程">
+                                    <span class="edit-hint">+ 添加</span>
                                 </td>
                             `;
                         }
@@ -863,36 +930,117 @@
             container.innerHTML = html;
         }
         
-        // 编辑课程
-        function editCourse(day, period) {
-            const periodInfo = defaultScheduleTemplate.find(p => p.period === period);
+        // 切换课表
+        function switchSchedule(scheduleName) {
+            if (!scheduleName) return;
+            
+            currentScheduleName = scheduleName;
+            scheduleData = allSchedules[scheduleName].courses || [];
+            
+            // 更新标题输入框
+            const titleInput = document.getElementById('scheduleTitleInput');
+            if (titleInput) {
+                titleInput.value = scheduleName;
+            }
+            
+            renderMainSchedule();
+        }
+        
+        // 编辑节数时间（内联编辑）
+        function editPeriodTime(period) {
+            const currentSchedule = allSchedules[currentScheduleName];
+            if (!currentSchedule) return;
+            
+            const periodInfo = currentSchedule.periodTimes.find(p => p.period === period);
             if (!periodInfo) return;
+            
+            // 使用内联编辑
+            const cell = event.target;
+            const currentHtml = cell.innerHTML;
+            
+            cell.innerHTML = `
+                <input type="number" class="inline-editor" id="editPeriodInput" value="${period}" min="1" max="12" style="width: 50px; margin-bottom: 3px;">
+                <input type="time" class="inline-editor" id="editStartTime" value="${periodInfo.startTime}" style="width: 80px; margin-bottom: 3px;">
+                <input type="time" class="inline-editor" id="editEndTime" value="${periodInfo.endTime}" style="width: 80px; margin-bottom: 3px;">
+                <button class="btn btn-save" onclick="savePeriodTime(${period})" style="font-size: 10px; padding: 3px 8px;">确定</button>
+            `;
+        }
+        
+        // 保存节数时间
+        function savePeriodTime(oldPeriod) {
+            const newPeriod = parseInt(document.getElementById('editPeriodInput').value);
+            const newStartTime = document.getElementById('editStartTime').value;
+            const newEndTime = document.getElementById('editEndTime').value;
+            
+            if (!newPeriod || !newStartTime || !newEndTime) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            const currentSchedule = allSchedules[currentScheduleName];
+            const periodInfo = currentSchedule.periodTimes.find(p => p.period === oldPeriod);
+            
+            if (periodInfo) {
+                periodInfo.period = newPeriod;
+                periodInfo.startTime = newStartTime;
+                periodInfo.endTime = newEndTime;
+                
+                // 更新课程数据中的节数
+                scheduleData.forEach(course => {
+                    if (course.period === oldPeriod) {
+                        course.period = newPeriod;
+                    }
+                });
+            }
+            
+            renderMainSchedule();
+        }
+        
+        // 内联编辑课程
+        function editCourseInline(day, period) {
+            const cell = event.target.closest('.course-cell');
+            if (!cell) return;
             
             const existingCourse = scheduleData.find(c => c.day === day && c.period === period);
             
-            const courseName = prompt(
-                `请输入课程名称（${weekDays[day-1]} 第${period}节 ${periodInfo.startTime}-${periodInfo.endTime}）：`,
-                existingCourse ? existingCourse.courseName : ''
-            );
+            cell.innerHTML = `
+                <input type="text" class="inline-editor" id="editCourseName" 
+                       value="${existingCourse ? existingCourse.courseName : ''}" 
+                       placeholder="课程名" style="margin-bottom: 3px;">
+                <input type="text" class="inline-editor" id="editClassName" 
+                       value="${existingCourse ? existingCourse.className : currentClass}" 
+                       placeholder="班级" style="margin-bottom: 3px;">
+                <button class="btn btn-save" onclick="saveCourseInline(${day}, ${period})" style="font-size: 10px; padding: 3px 8px;">确定</button>
+            `;
             
-            if (courseName === null) return;
+            // 聚焦到课程名输入框
+            setTimeout(() => {
+                const input = document.getElementById('editCourseName');
+                if (input) input.focus();
+            }, 50);
+        }
+        
+        // 保存课程内联编辑
+        function saveCourseInline(day, period) {
+            const courseName = document.getElementById('editCourseName').value.trim();
+            const className = document.getElementById('editClassName').value.trim();
             
-            const className = prompt(
-                '请输入班级名称（如：一年级1班）：',
-                existingCourse ? existingCourse.className : currentClass
-            );
+            if (!courseName) {
+                alert('请输入课程名称');
+                return;
+            }
             
-            if (className === null) return;
+            const existingCourse = scheduleData.find(c => c.day === day && c.period === period);
             
             if (existingCourse) {
-                existingCourse.courseName = courseName.trim();
-                existingCourse.className = className.trim();
+                existingCourse.courseName = courseName;
+                existingCourse.className = className || currentClass;
             } else {
                 scheduleData.push({
                     day: day,
                     period: period,
-                    courseName: courseName.trim(),
-                    className: className.trim()
+                    courseName: courseName,
+                    className: className || currentClass
                 });
             }
             
@@ -907,42 +1055,62 @@
             }
             
             const titleInput = document.getElementById('scheduleTitleInput');
-            currentScheduleName = titleInput ? titleInput.value.trim() : currentClass + '课程表';
+            const newName = titleInput ? titleInput.value.trim() : currentScheduleName;
             
-            const data = {
-                name: currentScheduleName,
-                courses: scheduleData
-            };
+            if (!newName) {
+                alert('请输入课程表名称');
+                return;
+            }
             
-            localStorage.setItem('schedule_' + currentClass, JSON.stringify(data));
+            // 如果名称改变了，更新 key
+            if (newName !== currentScheduleName) {
+                const oldData = allSchedules[currentScheduleName];
+                delete allSchedules[currentScheduleName];
+                allSchedules[newName] = oldData;
+                currentScheduleName = newName;
+            }
+            
+            allSchedules[currentScheduleName].courses = scheduleData;
+            
+            localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules));
             alert('课程表保存成功！');
+            renderMainSchedule();
         }
         
         // 清空课程表
         function clearSchedule() {
-            if (!confirm('确定要清空当前课程表吗？此操作不可撤销！')) return;
+            if (!confirm('确定要清空当前课程表的所有课程吗？')) return;
             
             scheduleData = [];
-            currentScheduleName = currentClass + '课程表';
+            allSchedules[currentScheduleName].courses = [];
+            localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules));
             renderMainSchedule();
             alert('课程表已清空！');
         }
         
-        // 新建课程表（另存为）
+        // 新建课程表
         function newSchedule() {
             const newName = prompt('请输入新课程表名称：', currentScheduleName + '_副本');
             if (newName === null || !newName.trim()) return;
             
-            currentScheduleName = newName.trim();
+            const trimmedName = newName.trim();
             
-            const data = {
-                name: currentScheduleName,
+            if (allSchedules[trimmedName]) {
+                alert('该课表名称已存在');
+                return;
+            }
+            
+            allSchedules[trimmedName] = {
+                periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)),
                 courses: JSON.parse(JSON.stringify(scheduleData))
             };
             
-            localStorage.setItem('schedule_' + currentClass, JSON.stringify(data));
+            currentScheduleName = trimmedName;
+            scheduleData = allSchedules[trimmedName].courses;
+            
+            localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules));
             renderMainSchedule();
-            alert('新课程表已创建并保存！');
+            alert('新课程表已创建！');
         }
         
         // 显示模块
@@ -1026,7 +1194,6 @@
             }
         }
         
-        // 加载学生花名册
         function loadRosterData() {
             const tbody = document.getElementById('rosterStudentList');
             
@@ -1051,7 +1218,6 @@
             }
         }
         
-        // 加载所有学生数据
         async function loadAllStudentsData() {
             try {
                 const token = getToken();
@@ -1066,7 +1232,6 @@
             }
         }
         
-        // 初始化
         async function init() {
             const user = getUser();
             const token = getToken();
@@ -1088,7 +1253,6 @@
             await loadAllStudentsData();
             loadClassSelector();
             
-            // 默认展开学生管理菜单
             const firstGroup = document.querySelector('.nav-group-header');
             if (firstGroup) {
                 toggleGroup(firstGroup);
