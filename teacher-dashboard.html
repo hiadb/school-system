@@ -320,6 +320,22 @@
             padding: 20px;
             margin-bottom: 20px;
             display: none;
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #e0e0e0;
+        }
+        .student-form-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .student-form-container::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-radius: 4px;
+        }
+        .student-form-container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
         }
         .student-form-container.show {
             display: block;
@@ -341,6 +357,17 @@
             padding: 6px 8px;
             font-size: 12px;
             border: 1px solid #ddd;
+            border-radius: 3px;
+            width: 100%;
+        }
+        .student-form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            position: sticky;
+            bottom: -20px;
+            background: #f8f9fa;
+            padding: 10px 0;
         }
         
         /* 课程表样式 */
@@ -834,6 +861,14 @@
         let allSchedules = {};
         let editingStudentId = null;
         
+        // 年级映射表
+        const gradeMap = {
+            '一': '01', '二': '02', '三': '03', '四': '04', '五': '05', '六': '06',
+            '七': '07', '八': '08', '九': '09',
+            '初一': '07', '初二': '08', '初三': '09',
+            '高一': '10', '高二': '11', '高三': '12'
+        };
+        
         // 默认课表模板
         const defaultPeriodTimes = [
             { period: 1, periodLabel: '第1节', timeSlot: '早上', startTime: '07:30', endTime: '08:15' },
@@ -951,6 +986,49 @@
             loadMainSchedule();
         }
         
+        // ============ 学号自动生成 ============
+        
+        function generateStudentId() {
+            // 从班级名称中提取年级和班级号
+            // 例如：一年级1班 -> 0101, 七年级3班 -> 0703
+            let gradeCode = '';
+            let classCode = '';
+            
+            // 提取年级
+            for (const [key, value] of Object.entries(gradeMap)) {
+                if (currentClass.includes(key)) {
+                    gradeCode = value;
+                    break;
+                }
+            }
+            
+            // 如果没有找到年级，尝试提取数字
+            if (!gradeCode) {
+                const gradeMatch = currentClass.match(/(\d+)/);
+                if (gradeMatch) {
+                    gradeCode = gradeMatch[1].padStart(2, '0');
+                }
+            }
+            
+            // 提取班级号
+            const classMatch = currentClass.match(/(\d+)班/);
+            if (classMatch) {
+                classCode = classMatch[1].padStart(2, '0');
+            }
+            
+            // 如果还是没找到，使用默认值
+            if (!gradeCode) gradeCode = '01';
+            if (!classCode) classCode = '01';
+            
+            // 获取当前班级已有学生数量
+            const existingCount = rosterStudents.filter(s => s.studentId && s.studentId.startsWith(gradeCode + classCode)).length;
+            
+            // 生成序号（从01开始）
+            const sequenceNum = String(existingCount + 1).padStart(2, '0');
+            
+            return gradeCode + classCode + sequenceNum;
+        }
+        
         // ============ 学生花名册功能 ============
         
         function loadRosterStudents() {
@@ -958,13 +1036,11 @@
             if (savedRoster) {
                 rosterStudents = JSON.parse(savedRoster);
             } else {
-                // 从 allStudents 中筛选该班级学生
                 rosterStudents = allStudents.filter(s => s.class === currentClass).map(s => ({
-                    studentId: s.studentId || s.id || ('student_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
+                    studentId: s.studentId || s.id || generateStudentId(),
                     name: s.name || '',
                     username: s.username || '',
                     class: s.class || currentClass,
-                    // 以下为新增字段，默认空
                     gender: '',
                     ethnicity: '',
                     idCard: '',
@@ -1023,20 +1099,15 @@
                         <span>学生数量：${rosterStudents.length} 人</span>
                     </div>
                     
-                    <!-- 操作按钮 -->
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
                         <button class="btn-add" onclick="showAddStudentForm()">➕ 添加学生</button>
                         <button class="btn-export" onclick="exportRoster()">📤 导出花名册</button>
                         <button class="btn-import" onclick="showImportRosterForm()">📥 导入花名册</button>
                     </div>
                     
-                    <!-- 导入表单 -->
                     <div id="importRosterContainer"></div>
-                    
-                    <!-- 学生添加/编辑表单 -->
                     <div id="studentFormContainer" class="student-form-container"></div>
                     
-                    <!-- 学生表格 -->
                     <div class="roster-table-container">
                         <table class="roster-table">
                             <thead>
@@ -1146,7 +1217,8 @@
         function showAddStudentForm() {
             editingStudentId = null;
             const formContainer = document.getElementById('studentFormContainer');
-            formContainer.innerHTML = generateStudentFormHTML({});
+            const autoStudentId = generateStudentId();
+            formContainer.innerHTML = generateStudentFormHTML({ studentId: autoStudentId });
             formContainer.classList.add('show');
         }
         
@@ -1165,8 +1237,8 @@
                 <h3 style="margin-bottom: 15px;">${editingStudentId ? '编辑学生' : '添加学生'}</h3>
                 <div class="student-form-grid">
                     <div class="form-group">
-                        <label>学号</label>
-                        <input type="text" id="f_studentId" value="${student.studentId || ''}" placeholder="学号">
+                        <label>学号（自动生成）</label>
+                        <input type="text" id="f_studentId" value="${student.studentId || ''}" readonly style="background:#e9ecef;">
                     </div>
                     <div class="form-group">
                         <label>姓名 *</label>
@@ -1371,7 +1443,7 @@
                         </select>
                     </div>
                 </div>
-                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <div class="student-form-actions">
                     <button class="btn-save" onclick="saveStudentForm()">💾 保存</button>
                     <button class="btn-cancel-inline" onclick="cancelStudentForm()" style="padding: 10px 20px; font-size: 14px;">取消</button>
                 </div>
@@ -1386,7 +1458,7 @@
             }
             
             const studentData = {
-                studentId: document.getElementById('f_studentId').value.trim() || ('student_' + Date.now()),
+                studentId: document.getElementById('f_studentId').value.trim(),
                 name: name,
                 gender: document.getElementById('f_gender').value,
                 ethnicity: document.getElementById('f_ethnicity').value.trim(),
@@ -1438,7 +1510,6 @@
             
             saveRosterStudents();
             showRosterModule();
-            alert('保存成功！');
         }
         
         function cancelStudentForm() {
@@ -1515,7 +1586,7 @@
             document.getElementById('importRosterContainer').innerHTML = '';
         }
         
-        // ============ 课程表功能 ============
+        // ============ 课程表功能（保持不变） ============
         
         function loadAllSchedules() {
             const savedSchedules = localStorage.getItem('all_schedules_' + currentClass);
