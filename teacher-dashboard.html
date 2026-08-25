@@ -195,10 +195,16 @@
             transition: transform 0.3s;
             background: none;
             border: none;
-            padding: 5px;
+            padding: 10px;
+            line-height: 1;
+            display: inline-block;
+            text-decoration: none;
+            color: inherit;
         }
         .home-btn:hover {
             transform: scale(1.2);
+            background: #f0f0ff;
+            border-radius: 50%;
         }
         .home-btn:active {
             transform: scale(0.9);
@@ -469,7 +475,7 @@
             .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; }
             .schedule-title-input { font-size: 14px; }
             .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; }
-            .home-btn { font-size: 24px; }
+            .home-btn { font-size: 24px; padding: 5px; }
         }
     </style>
 </head>
@@ -753,7 +759,7 @@
                 <h2>欢迎回来，<span id="welcomeName">教师</span>！</h2>
                 <p>今天是美好的一天，继续加油！</p>
             </div>
-            <button class="home-btn" onclick="goHome()" title="返回课程表首页">📚</button>
+            <button class="home-btn" id="homeBtn" onclick="goHome()" title="返回课程表首页">📚</button>
         </div>
         
         <div class="content" id="mainContent">
@@ -808,6 +814,8 @@
         
         // 返回首页（课程表）
         function goHome() {
+            console.log('goHome clicked');
+            
             // 清除所有导航高亮
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
@@ -906,8 +914,11 @@
         }
         
         function loadMainSchedule() {
+            const scheduleContainer = document.getElementById('module-schedule-main');
+            if (!scheduleContainer) return;
+            
             if (!currentClass) {
-                document.getElementById('module-schedule-main').innerHTML = 
+                scheduleContainer.innerHTML = 
                     '<div class="empty-state"><div class="icon">📅</div><p>请选择班级查看课程表</p></div>';
                 return;
             }
@@ -930,6 +941,7 @@
         
         function renderMainSchedule() {
             const container = document.getElementById('module-schedule-main');
+            if (!container) return;
             
             const currentSchedule = allSchedules[currentScheduleName] || {
                 periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)),
