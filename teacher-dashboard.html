@@ -193,6 +193,7 @@
             font-size: 36px;
             cursor: pointer;
             transition: transform 0.3s;
+            text-decoration: none;
         }
         .home-icon:hover {
             transform: scale(1.2);
@@ -423,6 +424,47 @@
             margin-top: 3px;
         }
         
+        /* 学生花名册样式 */
+        .roster-table-container {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .roster-table {
+            min-width: 3000px;
+        }
+        .roster-table th, .roster-table td {
+            padding: 8px 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+        .roster-table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .roster-table td {
+            background: white;
+        }
+        .roster-table .student-name-cell {
+            font-weight: bold;
+            color: #333;
+        }
+        .roster-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
         /* 内联编辑样式 */
         .inline-editor {
             width: 90%;
@@ -455,38 +497,6 @@
             border: 2px solid #e0e0e0;
             border-radius: 5px;
             font-size: 13px;
-        }
-        
-        /* 学生花名册表格 */
-        .roster-table-container {
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: 600px;
-        }
-        .roster-table {
-            min-width: 3000px;
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .roster-table th, .roster-table td {
-            padding: 8px;
-            text-align: center;
-            border: 1px solid #ddd;
-            font-size: 12px;
-            white-space: nowrap;
-            min-width: 80px;
-        }
-        .roster-table th {
-            background: #667eea;
-            color: white;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .roster-table .warning-red {
-            color: red;
-            font-weight: bold;
         }
         
         @media (max-width: 768px) {
@@ -776,7 +786,7 @@
                 <h2>欢迎回来，<span id="welcomeName">教师</span>！</h2>
                 <p>今天是美好的一天，继续加油！</p>
             </div>
-            <div class="home-icon" onclick="goHome()" title="返回首页（课程表）">📚</div>
+            <a class="home-icon" onclick="returnToHome()" title="返回课程表">📚</a>
         </div>
         
         <div class="content" id="mainContent">
@@ -797,6 +807,7 @@
         let scheduleData = [];
         let currentScheduleName = '';
         let allSchedules = {};
+        let rosterData = [];
         
         // 默认课表模板
         const defaultPeriodTimes = [
@@ -813,15 +824,47 @@
         const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
         const timeSlots = ['早上', '上午', '下午', '晚上'];
         
-        // 学生花名册字段
+        // 学生花名册字段定义
         const rosterFields = [
-            '学号', '学生姓名', '性别', '民族', '身份证号码', '生日', '户口性质', '现住址', '户籍所在地',
-            '是否农村留守儿童', '是否孤儿/事实无人抚养', '是否独生子女', '是否烈士/优抚对象子女', '残疾类型及等级',
-            '政治面貌', '入队时间', '入团时间', '入党时间', '团/队内职务', '入学年份', '是否享受资助',
-            '上下学交通方式', '第一联系人姓名', '第一联系人电话', '第一联系人身份证号码', '第二联系人姓名',
-            '第二联系人电话', '第二联系人身份证号码', '紧急备用联系人及电话', '家庭详细住址', '是否住校',
-            '血型', '重大疾病史', '药物/食物过敏史', '特殊体质/禁忌', '上下学方式及接送人', '是否需在校服药及服用方法',
-            '心理预警等级', '是否留守儿童'
+            { key: 'studentId', label: '学号', type: 'text' },
+            { key: 'name', label: '学生姓名', type: 'text' },
+            { key: 'gender', label: '性别', type: 'select', options: ['男', '女'] },
+            { key: 'ethnicity', label: '民族', type: 'text' },
+            { key: 'idCard', label: '身份证号码', type: 'text' },
+            { key: 'birthday', label: '生日', type: 'text' },
+            { key: 'householdType', label: '户口性质', type: 'select', options: ['农业', '非农业', '居民户'] },
+            { key: 'currentAddress', label: '现住址', type: 'text' },
+            { key: 'registeredAddress', label: '户籍所在地', type: 'text' },
+            { key: 'isLeftBehind', label: '是否农村留守儿童', type: 'select', options: ['是', '否'] },
+            { key: 'isOrphan', label: '是否孤儿/事实无人抚养', type: 'select', options: ['是', '否'] },
+            { key: 'isOnlyChild', label: '是否独生子女', type: 'select', options: ['是', '否'] },
+            { key: 'isMartyrChild', label: '是否烈士/优抚对象子女', type: 'select', options: ['是', '否'] },
+            { key: 'disability', label: '残疾类型及等级', type: 'text' },
+            { key: 'politicalStatus', label: '政治面貌', type: 'select', options: ['群众', '少先队员', '共青团员', '中共党员'] },
+            { key: 'joinTeamDate', label: '入队时间', type: 'text' },
+            { key: 'joinLeagueDate', label: '入团时间', type: 'text' },
+            { key: 'joinPartyDate', label: '入党时间', type: 'text' },
+            { key: 'teamPosition', label: '团/队内职务', type: 'text' },
+            { key: 'enrollmentYear', label: '入学年份', type: 'text' },
+            { key: 'financialAid', label: '是否享受资助', type: 'text' },
+            { key: 'transportation', label: '上下学交通方式', type: 'select', options: ['步行', '公交', '家长接送', '校车', '拼车'] },
+            { key: 'firstContactName', label: '第一联系人姓名', type: 'text' },
+            { key: 'firstContactPhone', label: '第一联系人电话', type: 'text' },
+            { key: 'firstContactIdCard', label: '第一联系人身份证', type: 'text' },
+            { key: 'secondContactName', label: '第二联系人姓名', type: 'text' },
+            { key: 'secondContactPhone', label: '第二联系人电话', type: 'text' },
+            { key: 'secondContactIdCard', label: '第二联系人身份证', type: 'text' },
+            { key: 'emergencyContact', label: '紧急备用联系人及电话', type: 'text' },
+            { key: 'familyAddress', label: '家庭详细住址', type: 'text' },
+            { key: 'isBoarding', label: '是否住校', type: 'select', options: ['住校', '走读'] },
+            { key: 'bloodType', label: '血型', type: 'text' },
+            { key: 'majorDiseases', label: '重大疾病史', type: 'text' },
+            { key: 'allergies', label: '药物/食物过敏史', type: 'text' },
+            { key: 'specialConstitution', label: '特殊体质/禁忌', type: 'text' },
+            { key: 'commuteDetail', label: '上下学方式及接送人', type: 'text' },
+            { key: 'schoolMedication', label: '是否需在校服药及服用方法', type: 'text' },
+            { key: 'psychAlertLevel', label: '心理预警等级', type: 'select', options: ['一般', '重点关注', '预警'] },
+            { key: 'isLeftBehind2', label: '是否留守儿童', type: 'select', options: ['是', '否'] }
         ];
         
         function getToken() {
@@ -841,14 +884,12 @@
         }
         
         // 返回首页（课程表）
-        function goHome() {
-            // 清除所有导航高亮
+        function returnToHome() {
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
-            // 显示课程表
             document.getElementById('mainContent').innerHTML = '<div id="module-schedule-main"></div>';
-            loadMainSchedule();
+            renderMainSchedule();
         }
         
         function toggleGroup(headerElement) {
@@ -915,7 +956,8 @@
                 classSelect.value = classes[0];
                 currentClass = classes[0];
                 loadAllSchedules();
-                loadMainSchedule();
+                loadRosterDataFromStorage();
+                renderMainSchedule();
             }
         }
         
@@ -923,7 +965,8 @@
             const classSelect = document.getElementById('classSelect');
             currentClass = classSelect.value;
             loadAllSchedules();
-            loadMainSchedule();
+            loadRosterDataFromStorage();
+            renderMainSchedule();
         }
         
         function loadAllSchedules() {
@@ -933,6 +976,21 @@
             } else {
                 allSchedules = {};
             }
+        }
+        
+        // 加载花名册数据
+        function loadRosterDataFromStorage() {
+            const savedRoster = localStorage.getItem('roster_' + currentClass);
+            if (savedRoster) {
+                rosterData = JSON.parse(savedRoster);
+            } else {
+                rosterData = [];
+            }
+        }
+        
+        // 保存花名册数据
+        function saveRosterData() {
+            localStorage.setItem('roster_' + currentClass, JSON.stringify(rosterData));
         }
         
         function loadMainSchedule() {
@@ -960,6 +1018,7 @@
         
         function renderMainSchedule() {
             const container = document.getElementById('module-schedule-main');
+            if (!container) return;
             
             const currentSchedule = allSchedules[currentScheduleName] || {
                 periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)),
@@ -1426,6 +1485,225 @@
             document.getElementById('newScheduleFormContainer').innerHTML = '';
         }
         
+        // 显示学生花名册
+        function showRoster() {
+            const content = document.getElementById('mainContent');
+            
+            content.innerHTML = `
+                <div id="module-roster">
+                    <h2 style="margin-bottom: 20px;">📋 学生花名册</h2>
+                    <div class="class-info-banner">
+                        <span>当前班级：<span class="current-class">${currentClass || '未选择'}</span></span>
+                        <span>学生数量：<span id="rosterStudentCount">${rosterData.length}</span> 人</span>
+                    </div>
+                    <div class="roster-actions">
+                        <button class="btn-add" onclick="showAddStudentForm()">➕ 添加学生</button>
+                        <button class="btn-import" onclick="showRosterImportForm()">📥 导入</button>
+                        <button class="btn-export" onclick="exportRoster()">📤 导出</button>
+                    </div>
+                    <div id="rosterFormContainer"></div>
+                    <div class="roster-table-container">
+                        <table class="roster-table">
+                            <thead>
+                                <tr>
+                                    ${rosterFields.map(f => `<th>${f.label}</th>`).join('')}
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rosterTableBody">
+                                ${rosterData.length === 0 ? 
+                                    '<tr><td colspan="' + (rosterFields.length + 1) + '" class="empty-state">暂无学生数据</td></tr>' 
+                                    : ''
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            renderRosterTable();
+        }
+        
+        // 渲染花名册表格
+        function renderRosterTable() {
+            const tbody = document.getElementById('rosterTableBody');
+            if (!tbody) return;
+            
+            if (rosterData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="' + (rosterFields.length + 1) + '" class="empty-state">暂无学生数据</td></tr>';
+            } else {
+                tbody.innerHTML = rosterData.map((student, index) => `
+                    <tr>
+                        ${rosterFields.map(f => `<td>${student[f.key] || ''}</td>`).join('')}
+                        <td>
+                            <button class="btn btn-edit" onclick="editStudent(${index})">编辑</button>
+                            <button class="btn btn-delete" onclick="deleteStudent(${index})">删除</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+        
+        // 显示添加学生表单
+        function showAddStudentForm() {
+            const formContainer = document.getElementById('rosterFormContainer');
+            
+            formContainer.innerHTML = `
+                <div style="background: #f0f0ff; border: 2px solid #667eea; border-radius: 5px; padding: 15px; margin-bottom: 15px;">
+                    <h3 style="margin-bottom: 15px;">添加学生</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        ${rosterFields.map(f => `
+                            <div>
+                                <label style="display: block; font-size: 12px; margin-bottom: 3px;">${f.label}</label>
+                                ${f.type === 'select' ? 
+                                    `<select id="add_${f.key}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;">
+                                        <option value="">请选择</option>
+                                        ${f.options.map(o => `<option value="${o}">${o}</option>`).join('')}
+                                    </select>` 
+                                    : `<input type="text" id="add_${f.key}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;">`
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button class="btn-add" onclick="confirmAddStudent()" style="margin: 0;">确认添加</button>
+                        <button class="btn-cancel-inline" onclick="cancelAddStudent()" style="margin: 0;">取消</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 确认添加学生
+        function confirmAddStudent() {
+            const newStudent = {};
+            rosterFields.forEach(f => {
+                const input = document.getElementById('add_' + f.key);
+                if (input) {
+                    newStudent[f.key] = input.value.trim();
+                }
+            });
+            
+            if (!newStudent.name) {
+                alert('请输入学生姓名');
+                return;
+            }
+            
+            rosterData.push(newStudent);
+            saveRosterData();
+            showRoster();
+        }
+        
+        // 取消添加学生
+        function cancelAddStudent() {
+            document.getElementById('rosterFormContainer').innerHTML = '';
+        }
+        
+        // 编辑学生
+        function editStudent(index) {
+            const student = rosterData[index];
+            if (!student) return;
+            
+            const formContainer = document.getElementById('rosterFormContainer');
+            
+            formContainer.innerHTML = `
+                <div style="background: #fff3e0; border: 2px solid #ff9800; border-radius: 5px; padding: 15px; margin-bottom: 15px;">
+                    <h3 style="margin-bottom: 15px;">编辑学生</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        ${rosterFields.map(f => `
+                            <div>
+                                <label style="display: block; font-size: 12px; margin-bottom: 3px;">${f.label}</label>
+                                ${f.type === 'select' ? 
+                                    `<select id="edit_${f.key}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;">
+                                        <option value="">请选择</option>
+                                        ${f.options.map(o => `<option value="${o}" ${student[f.key] === o ? 'selected' : ''}>${o}</option>`).join('')}
+                                    </select>` 
+                                    : `<input type="text" id="edit_${f.key}" value="${student[f.key] || ''}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;">`
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button class="btn-save" onclick="confirmEditStudent(${index})" style="margin: 0;">保存</button>
+                        <button class="btn-cancel-inline" onclick="cancelAddStudent()" style="margin: 0;">取消</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 确认编辑学生
+        function confirmEditStudent(index) {
+            rosterFields.forEach(f => {
+                const input = document.getElementById('edit_' + f.key);
+                if (input) {
+                    rosterData[index][f.key] = input.value.trim();
+                }
+            });
+            
+            saveRosterData();
+            showRoster();
+        }
+        
+        // 删除学生
+        function deleteStudent(index) {
+            rosterData.splice(index, 1);
+            saveRosterData();
+            showRoster();
+        }
+        
+        // 显示导入花名册表单
+        function showRosterImportForm() {
+            const formContainer = document.getElementById('rosterFormContainer');
+            
+            formContainer.innerHTML = `
+                <div style="background: #e0f7fa; border: 2px solid #00bcd4; border-radius: 5px; padding: 10px; margin-bottom: 15px;">
+                    <div class="new-schedule-form">
+                        <input type="file" id="rosterImportFileInput" accept=".json" onchange="handleRosterImportFile(this)">
+                        <button class="btn btn-cancel-inline" onclick="cancelAddStudent()" style="margin: 0;">取消</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 处理导入花名册文件
+        function handleRosterImportFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importData = JSON.parse(e.target.result);
+                    
+                    if (!Array.isArray(importData)) {
+                        alert('无效的花名册文件');
+                        return;
+                    }
+                    
+                    rosterData = importData;
+                    saveRosterData();
+                    showRoster();
+                    
+                } catch (error) {
+                    alert('文件解析失败，请检查文件格式');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // 导出花名册
+        function exportRoster() {
+            const jsonStr = JSON.stringify(rosterData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '花名册_' + currentClass + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
         // 显示模块
         function showModule(moduleName) {
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -1477,7 +1755,7 @@
             const title = moduleTitles[moduleName] || '模块';
             
             if (moduleName === 'roster') {
-                renderRosterModule(content);
+                showRoster();
             } else {
                 content.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px;">
@@ -1489,186 +1767,6 @@
             }
         }
         
-        // 渲染学生花名册模块
-        function renderRosterModule(content) {
-            const classStudents = allStudents.filter(s => s.class === currentClass);
-            
-            content.innerHTML = `
-                <h2 style="margin-bottom: 20px;">📋 学生花名册</h2>
-                <div class="class-info-banner">
-                    <span>当前班级：<span class="current-class">${currentClass || '未选择'}</span></span>
-                    <span>学生数量：${classStudents.length} 人</span>
-                </div>
-                <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn-add" onclick="showAddStudentForm()">➕ 添加学生</button>
-                    <button class="btn-export" onclick="exportRoster()">📤 导出</button>
-                    <button class="btn-import" onclick="showImportRosterForm()">📥 导入</button>
-                </div>
-                <div id="addStudentFormContainer"></div>
-                <div id="importRosterFormContainer"></div>
-                <div class="roster-table-container">
-                    <table class="roster-table">
-                        <thead>
-                            <tr>
-                                <th>操作</th>
-                                ${rosterFields.map(field => `<th>${field}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody id="rosterTableBody">
-                            ${classStudents.length === 0 ? 
-                                '<tr><td colspan="' + (rosterFields.length + 1) + '" class="empty-state">暂无学生数据</td></tr>' : 
-                                classStudents.map((student, index) => `
-                                    <tr>
-                                        <td>
-                                            <button class="btn btn-delete" onclick="deleteRosterStudent(${index})">删除</button>
-                                        </td>
-                                        ${rosterFields.map(field => {
-                                            const value = student[field] || '';
-                                            const isAllergy = field === '药物/食物过敏史' && value;
-                                            return `<td class="${isAllergy ? 'warning-red' : ''}">${value}</td>`;
-                                        }).join('')}
-                                    </tr>
-                                `).join('')
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-        
-        // 显示添加学生表单
-        function showAddStudentForm() {
-            const formContainer = document.getElementById('addStudentFormContainer');
-            
-            formContainer.innerHTML = `
-                <div style="background: #e8f5e9; border: 2px solid #4CAF50; border-radius: 5px; padding: 15px; margin-bottom: 10px;">
-                    <h3 style="margin-bottom: 15px;">添加学生</h3>
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                        ${rosterFields.map(field => `
-                            <div class="form-group" style="margin-bottom: 10px;">
-                                <label style="font-size: 12px;">${field}</label>
-                                <input type="text" id="add_${field}" class="form-control" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;">
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button class="btn btn-add" onclick="confirmAddStudent()" style="margin: 0;">确定添加</button>
-                        <button class="btn btn-cancel-inline" onclick="cancelAddStudent()" style="margin: 0;">取消</button>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // 确认添加学生
-        function confirmAddStudent() {
-            const newStudent = { class: currentClass };
-            
-            rosterFields.forEach(field => {
-                const input = document.getElementById('add_' + field);
-                if (input) {
-                    newStudent[field] = input.value.trim();
-                }
-            });
-            
-            if (!newStudent['学生姓名']) {
-                alert('请输入学生姓名');
-                return;
-            }
-            
-            allStudents.push(newStudent);
-            localStorage.setItem('all_roster_students_' + currentClass, JSON.stringify(allStudents));
-            
-            document.getElementById('addStudentFormContainer').innerHTML = '';
-            renderRosterModule(document.getElementById('mainContent'));
-        }
-        
-        function cancelAddStudent() {
-            document.getElementById('addStudentFormContainer').innerHTML = '';
-        }
-        
-        // 删除花名册学生
-        function deleteRosterStudent(index) {
-            const classStudents = allStudents.filter(s => s.class === currentClass);
-            const studentToDelete = classStudents[index];
-            if (!studentToDelete) return;
-            
-            allStudents = allStudents.filter(s => s !== studentToDelete);
-            localStorage.setItem('all_roster_students_' + currentClass, JSON.stringify(allStudents));
-            renderRosterModule(document.getElementById('mainContent'));
-        }
-        
-        // 导出花名册
-        function exportRoster() {
-            const classStudents = allStudents.filter(s => s.class === currentClass);
-            
-            const exportData = {
-                className: currentClass,
-                students: classStudents,
-                exportedAt: new Date().toISOString()
-            };
-            
-            const jsonStr = JSON.stringify(exportData, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = '学生花名册_' + currentClass + '.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-        
-        // 显示导入花名册表单
-        function showImportRosterForm() {
-            const formContainer = document.getElementById('importRosterFormContainer');
-            
-            formContainer.innerHTML = `
-                <div style="background: #e0f7fa; border: 2px solid #00bcd4; border-radius: 5px; padding: 10px; margin-bottom: 10px;">
-                    <input type="file" id="importRosterFileInput" accept=".json" onchange="handleImportRosterFile(this)">
-                    <button class="btn btn-cancel-inline" onclick="cancelImportRoster()">取消</button>
-                </div>
-            `;
-        }
-        
-        // 处理导入花名册文件
-        function handleImportRosterFile(input) {
-            const file = input.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importData = JSON.parse(e.target.result);
-                    
-                    if (!importData.students || !Array.isArray(importData.students)) {
-                        alert('无效的花名册文件');
-                        return;
-                    }
-                    
-                    importData.students.forEach(student => {
-                        student.class = currentClass;
-                        if (!allStudents.some(s => s['学号'] === student['学号'] && s['学号'] !== '')) {
-                            allStudents.push(student);
-                        }
-                    });
-                    
-                    localStorage.setItem('all_roster_students_' + currentClass, JSON.stringify(allStudents));
-                    
-                    document.getElementById('importRosterFormContainer').innerHTML = '';
-                    renderRosterModule(document.getElementById('mainContent'));
-                    
-                } catch (error) {
-                    alert('文件解析失败，请检查文件格式');
-                }
-            };
-            reader.readAsText(file);
-        }
-        
-        function cancelImportRoster() {
-            document.getElementById('importRosterFormContainer').innerHTML = '';
-        }
-        
         async function loadAllStudentsData() {
             try {
                 const token = getToken();
@@ -1677,17 +1775,6 @@
                 });
                 if (response.ok) {
                     allStudents = await response.json();
-                }
-                
-                // 加载本地保存的花名册数据
-                const savedRoster = localStorage.getItem('all_roster_students_' + currentClass);
-                if (savedRoster) {
-                    const localStudents = JSON.parse(savedRoster);
-                    localStudents.forEach(localStudent => {
-                        if (!allStudents.some(s => s['学号'] === localStudent['学号'] && s['学号'] !== '')) {
-                            allStudents.push(localStudent);
-                        }
-                    });
                 }
             } catch (error) {
                 console.error('加载学生数据失败:', error);
