@@ -242,6 +242,8 @@
         .btn-import { background: #00bcd4; color: white; padding: 10px 20px; margin-bottom: 20px; }
         .btn-confirm { background: #4CAF50; color: white; padding: 3px 8px; font-size: 10px; }
         .btn-cancel-inline { background: #999; color: white; padding: 3px 8px; font-size: 10px; }
+        .btn-filter { background: #607d8b; color: white; padding: 5px 10px; font-size: 11px; }
+        .btn-filter.active { background: #ff5722; }
         .btn-submit {
             width: 100%;
             padding: 12px;
@@ -282,12 +284,12 @@
             font-size: 16px;
         }
         
-        /* 学生花名册表格滚动 */
+        /* 学生花名册表格滚动和冻结 */
         .roster-table-container {
-            overflow-x: auto;
-            overflow-y: auto;
+            overflow: auto;
             max-height: 600px;
             margin-bottom: 20px;
+            position: relative;
         }
         .roster-table {
             min-width: 3000px;
@@ -310,11 +312,53 @@
             top: 0;
             z-index: 10;
         }
+        /* 冻结序号、学号、姓名列 */
+        .roster-table th:nth-child(1),
+        .roster-table td:nth-child(1) {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: #5a67d8;
+            min-width: 50px;
+        }
+        .roster-table th:nth-child(2),
+        .roster-table td:nth-child(2) {
+            position: sticky;
+            left: 50px;
+            z-index: 5;
+            background: #f0f0ff;
+            min-width: 80px;
+        }
+        .roster-table th:nth-child(3),
+        .roster-table td:nth-child(3) {
+            position: sticky;
+            left: 130px;
+            z-index: 5;
+            background: #f0f0ff;
+            min-width: 80px;
+        }
+        .roster-table th:nth-child(1) { background: #5a67d8; color: white; }
+        .roster-table td:nth-child(1) { background: #f8f9fa; font-weight: bold; }
+        .roster-table td:nth-child(2) { background: #fff; }
+        .roster-table td:nth-child(3) { background: #fff; }
         .roster-table tr:hover {
             background: #f0f0ff;
         }
+        .roster-table tr:hover td:nth-child(1),
+        .roster-table tr:hover td:nth-child(2),
+        .roster-table tr:hover td:nth-child(3) {
+            background: #e8e8ff;
+        }
         
-        /* 学生表单 - 灵活宽度，几个字段一行 */
+        /* 筛选行 */
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        /* 学生表单 */
         .student-form-container {
             background: #f8f9fa;
             border: 2px solid #e0e0e0;
@@ -365,7 +409,6 @@
             border: 1px solid #ddd;
             border-radius: 3px;
         }
-        /* 根据字段类型设置不同宽度 */
         .form-group.width-short { flex: 0 0 80px; }
         .form-group.width-medium { flex: 0 0 120px; }
         .form-group.width-long { flex: 0 0 180px; }
@@ -382,9 +425,7 @@
         }
         
         /* 课程表样式 */
-        .schedule-container {
-            overflow-x: auto;
-        }
+        .schedule-container { overflow-x: auto; }
         .schedule-header {
             display: flex;
             justify-content: space-between;
@@ -431,16 +472,9 @@
             color: white;
             font-weight: bold;
         }
-        .schedule-table .time-slot-header {
-            background: #5a67d8;
-            width: 60px;
-        }
-        .schedule-table .period-time-header {
-            width: 90px;
-        }
-        .schedule-table .day-header {
-            min-width: 100px;
-        }
+        .schedule-table .time-slot-header { background: #5a67d8; width: 60px; }
+        .schedule-table .period-time-header { width: 90px; }
+        .schedule-table .day-header { min-width: 100px; }
         .schedule-table .period-group-header {
             background: #f8f9fa;
             font-weight: bold;
@@ -505,9 +539,7 @@
             transition: background 0.3s;
             min-height: 60px;
         }
-        .schedule-table .course-cell:hover {
-            background: #f0f0ff;
-        }
+        .schedule-table .course-cell:hover { background: #f0f0ff; }
         .schedule-table .course-cell .course-name {
             font-weight: bold;
             display: block;
@@ -525,7 +557,6 @@
             display: block;
             margin-top: 3px;
         }
-        
         .inline-editor {
             width: 90%;
             border: 2px solid #667eea;
@@ -535,17 +566,13 @@
             text-align: center;
             margin-bottom: 3px;
         }
-        .inline-editor:focus {
-            outline: none;
-            border-color: #764ba2;
-        }
+        .inline-editor:focus { outline: none; border-color: #764ba2; }
         .inline-edit-actions {
             display: flex;
             gap: 5px;
             justify-content: center;
             flex-wrap: wrap;
         }
-        
         .new-schedule-form {
             display: inline-flex;
             gap: 8px;
@@ -567,14 +594,12 @@
             .schedule-title-input { font-size: 14px; }
             .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; }
             .home-btn { font-size: 24px; padding: 5px; }
-            .student-form-row .form-group {
-                flex: 1 1 100% !important;
-            }
+            .student-form-row .form-group { flex: 1 1 100% !important; }
         }
     </style>
 </head>
 <body>
-    <!-- 侧边栏 -->
+    <!-- 侧边栏（保持不变） -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h2>👨‍🏫 教师工作台</h2>
@@ -854,17 +879,17 @@
         </div>
         
         <div class="content" id="mainContent">
-            <!-- 默认显示课程表 -->
-            <div id="module-schedule-main">
-                <!-- 课程表内容由 renderMainSchedule 生成 -->
-            </div>
+            <div id="module-schedule-main"></div>
         </div>
     </div>
     
     <script>
-        // 配置 - 请替换为你的 Worker URL
-        const WORKER_URL = 'https://school-api.hru123.workers.dev';
+        // 配置
+        const WORKER_URL = 'https://school-api.https://school-api.hru123.workers.dev';
         const API_BASE = WORKER_URL + '/api';
+        
+        // 加密密钥（用于localStorage加密存储）
+        const ENCRYPTION_KEY = 'SchoolSystem2024SecureKey';
         
         let currentClass = '';
         let allStudents = [];
@@ -873,6 +898,7 @@
         let currentScheduleName = '';
         let allSchedules = {};
         let editingStudentId = null;
+        let activeFilters = {};
         
         // 年级映射表
         const gradeMap = {
@@ -882,7 +908,7 @@
             '高一': '10', '高二': '11', '高三': '12'
         };
         
-        // 学生字段定义（含宽度类型）
+        // 学生字段定义
         const studentFields = [
             { key: 'studentId', label: '学号', width: 'width-medium' },
             { key: 'name', label: '姓名', width: 'width-short' },
@@ -940,35 +966,59 @@
         const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
         const timeSlots = ['早上', '上午', '下午', '晚上'];
         
-        function getToken() {
-            return localStorage.getItem('token');
+        // ============ 加密/解密函数 ============
+        
+        function encryptData(data) {
+            try {
+                const jsonStr = JSON.stringify(data);
+                const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+                // 简单XOR加密
+                let encrypted = '';
+                for (let i = 0; i < encoded.length; i++) {
+                    encrypted += String.fromCharCode(encoded.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length));
+                }
+                return btoa(encrypted);
+            } catch (e) {
+                console.error('加密失败:', e);
+                return '';
+            }
         }
         
+        function decryptData(encryptedStr) {
+            try {
+                const decoded = atob(encryptedStr);
+                let decrypted = '';
+                for (let i = 0; i < decoded.length; i++) {
+                    decrypted += String.fromCharCode(decoded.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length));
+                }
+                const jsonStr = decodeURIComponent(escape(atob(decrypted)));
+                return JSON.parse(jsonStr);
+            } catch (e) {
+                console.error('解密失败:', e);
+                return null;
+            }
+        }
+        
+        function getToken() { return localStorage.getItem('token'); }
         function getUser() {
             const userStr = localStorage.getItem('user');
             if (!userStr) return {};
             try { return JSON.parse(userStr); } catch { return {}; }
         }
-        
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/login.html';
         }
-        
         function goHome() {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             const content = document.getElementById('mainContent');
             content.innerHTML = '<div id="module-schedule-main"></div>';
             loadMainSchedule();
         }
-        
         function toggleGroup(headerElement) {
             const submenu = headerElement.nextElementSibling;
             const arrow = headerElement.querySelector('.arrow');
-            
             if (submenu.classList.contains('open')) {
                 submenu.classList.remove('open');
                 arrow.classList.remove('open');
@@ -984,47 +1034,30 @@
                 arrow.classList.add('open');
             }
         }
-        
         function getTeacherClasses() {
             const user = getUser();
             const classes = [];
-            
             if (user.classTeacherOf && user.classTeacherOf.length > 0) {
-                user.classTeacherOf.forEach(cls => {
-                    classes.push(cls);
-                });
+                user.classTeacherOf.forEach(cls => classes.push(cls));
             }
-            
             if (user.subjectTeacherOf && user.subjectTeacherOf.length > 0) {
                 user.subjectTeacherOf.forEach(subj => {
                     const match = subj.match(/^(.+?)(语文|数学|英语|物理|化学|生物|历史|地理|政治|体育|音乐|美术|信息技术|科学|道德与法治|劳动)/);
                     if (match && match[1]) {
                         const className = match[1];
-                        if (!classes.includes(className)) {
-                            classes.push(className);
-                        }
+                        if (!classes.includes(className)) classes.push(className);
                     }
                 });
             }
-            
-            if (classes.length === 0 && user.className) {
-                classes.push(user.className);
-            }
-            
+            if (classes.length === 0 && user.className) classes.push(user.className);
             return classes;
         }
-        
         function loadClassSelector() {
             const classSelect = document.getElementById('classSelect');
             const classes = getTeacherClasses();
-            
             let options = '<option value="">请选择班级</option>';
-            classes.forEach(cls => {
-                options += `<option value="${cls}">${cls}</option>`;
-            });
-            
+            classes.forEach(cls => options += `<option value="${cls}">${cls}</option>`);
             classSelect.innerHTML = options;
-            
             if (classes.length > 0) {
                 classSelect.value = classes[0];
                 currentClass = classes[0];
@@ -1033,7 +1066,6 @@
                 loadMainSchedule();
             }
         }
-        
         function changeCurrentClass() {
             const classSelect = document.getElementById('classSelect');
             currentClass = classSelect.value;
@@ -1041,109 +1073,90 @@
             loadRosterStudents();
             loadMainSchedule();
         }
-        
-        // ============ 学号自动生成 ============
-        
         function generateStudentId() {
             let gradeCode = '';
             let classCode = '';
-            
             for (const [key, value] of Object.entries(gradeMap)) {
-                if (currentClass.includes(key)) {
-                    gradeCode = value;
-                    break;
-                }
+                if (currentClass.includes(key)) { gradeCode = value; break; }
             }
-            
             if (!gradeCode) {
                 const gradeMatch = currentClass.match(/(\d+)/);
-                if (gradeMatch) {
-                    gradeCode = gradeMatch[1].padStart(2, '0');
-                }
+                if (gradeMatch) gradeCode = gradeMatch[1].padStart(2, '0');
             }
-            
             const classMatch = currentClass.match(/(\d+)班/);
-            if (classMatch) {
-                classCode = classMatch[1].padStart(2, '0');
-            }
-            
+            if (classMatch) classCode = classMatch[1].padStart(2, '0');
             if (!gradeCode) gradeCode = '01';
             if (!classCode) classCode = '01';
-            
             const existingCount = rosterStudents.filter(s => s.studentId && s.studentId.startsWith(gradeCode + classCode)).length;
             const sequenceNum = String(existingCount + 1).padStart(2, '0');
-            
             return gradeCode + classCode + sequenceNum;
         }
         
-        // ============ 学生花名册功能 ============
+        // ============ 学生花名册功能（含加密存储） ============
         
         function loadRosterStudents() {
-            const savedRoster = localStorage.getItem('roster_' + currentClass);
-            if (savedRoster) {
-                rosterStudents = JSON.parse(savedRoster);
+            const encryptedRoster = localStorage.getItem('roster_encrypted_' + currentClass);
+            if (encryptedRoster) {
+                const decrypted = decryptData(encryptedRoster);
+                if (decrypted) {
+                    rosterStudents = decrypted;
+                } else {
+                    rosterStudents = [];
+                }
             } else {
-                rosterStudents = allStudents.filter(s => s.class === currentClass).map(s => ({
-                    studentId: s.studentId || s.id || generateStudentId(),
-                    name: s.name || '',
-                    username: s.username || '',
-                    class: s.class || currentClass,
-                    gender: '',
-                    ethnicity: '',
-                    idCard: '',
-                    birthday: '',
-                    birthdayType: '公历',
-                    householdType: '',
-                    currentAddress: '',
-                    householdAddress: '',
-                    isLeftBehind: '否',
-                    isOrphan: '否',
-                    isOnlyChild: '否',
-                    isMartyrChild: '否',
-                    disabilityType: '无',
-                    politicalStatus: '群众',
-                    joinTeamDate: '',
-                    joinLeagueDate: '',
-                    joinPartyDate: '',
-                    teamPosition: '',
-                    enrollmentYear: '',
-                    subsidyStatus: '无',
-                    transportMode: '',
-                    firstContactName: '',
-                    firstContactPhone: '',
-                    firstContactIdCard: '',
-                    secondContactName: '',
-                    secondContactPhone: '',
-                    secondContactIdCard: '',
-                    emergencyContact: '',
-                    homeAddress: '',
-                    isBoarding: '走读',
-                    bloodType: '',
-                    majorDisease: '',
-                    allergyHistory: '',
-                    specialConstitution: '',
-                    transportDetail: '',
-                    medicationInfo: '',
-                    psychologicalLevel: '一般',
-                    isLeftBehindDuplicate: '否'
-                }));
-                saveRosterStudents();
+                // 尝试读取旧格式
+                const savedRoster = localStorage.getItem('roster_' + currentClass);
+                if (savedRoster) {
+                    try {
+                        rosterStudents = JSON.parse(savedRoster);
+                        // 迁移到加密格式
+                        saveRosterStudents();
+                        localStorage.removeItem('roster_' + currentClass);
+                    } catch(e) {
+                        rosterStudents = [];
+                    }
+                } else {
+                    rosterStudents = allStudents.filter(s => s.class === currentClass).map(s => ({
+                        studentId: s.studentId || s.id || generateStudentId(),
+                        name: s.name || '',
+                        username: s.username || '',
+                        class: s.class || currentClass,
+                        gender: '', ethnicity: '', idCard: '', birthday: '', birthdayType: '公历',
+                        householdType: '', currentAddress: '', householdAddress: '',
+                        isLeftBehind: '否', isOrphan: '否', isOnlyChild: '否', isMartyrChild: '否',
+                        disabilityType: '无', politicalStatus: '群众',
+                        joinTeamDate: '', joinLeagueDate: '', joinPartyDate: '', teamPosition: '',
+                        enrollmentYear: '', subsidyStatus: '无', transportMode: '',
+                        firstContactName: '', firstContactPhone: '', firstContactIdCard: '',
+                        secondContactName: '', secondContactPhone: '', secondContactIdCard: '',
+                        emergencyContact: '', homeAddress: '', isBoarding: '走读', bloodType: '',
+                        majorDisease: '', allergyHistory: '', specialConstitution: '',
+                        transportDetail: '', medicationInfo: '', psychologicalLevel: '一般',
+                        isLeftBehindDuplicate: '否'
+                    }));
+                    saveRosterStudents();
+                }
             }
         }
         
         function saveRosterStudents() {
-            localStorage.setItem('roster_' + currentClass, JSON.stringify(rosterStudents));
+            const encrypted = encryptData(rosterStudents);
+            if (encrypted) {
+                localStorage.setItem('roster_encrypted_' + currentClass, encrypted);
+                localStorage.removeItem('roster_' + currentClass);
+            }
         }
         
         function showRosterModule() {
             const content = document.getElementById('mainContent');
+            const filteredStudents = getFilteredStudents();
             
             let html = `
                 <div id="module-roster">
                     <h2 style="margin-bottom: 20px;">📋 学生花名册</h2>
                     <div class="class-info-banner">
                         <span>当前班级：<span class="current-class">${currentClass || '未选择'}</span></span>
-                        <span>学生数量：${rosterStudents.length} 人</span>
+                        <span>学生数量：${rosterStudents.length} 人（显示 ${filteredStudents.length} 人）</span>
                     </div>
                     
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
@@ -1151,6 +1164,12 @@
                         <button class="btn-export" onclick="exportRosterExcel()">📤 导出Excel</button>
                         <button class="btn-import" onclick="showImportRosterForm()">📥 导入Excel</button>
                         <button class="btn-import" onclick="downloadExcelTemplate()" style="background:#607d8b;">📋 下载模板</button>
+                        <button class="btn-filter" onclick="clearAllFilters()">🔄 清除筛选</button>
+                    </div>
+                    
+                    <!-- 筛选按钮行 -->
+                    <div class="filter-row" id="filterRow">
+                        ${generateFilterButtons()}
                     </div>
                     
                     <div id="importRosterContainer"></div>
@@ -1166,9 +1185,9 @@
                                 </tr>
                             </thead>
                             <tbody id="rosterTableBody">
-                                ${rosterStudents.length === 0 ? 
-                                    '<tr><td colspan="' + (studentFields.length + 2) + '" class="empty-state">暂无学生数据，请添加</td></tr>' : 
-                                    rosterStudents.map((student, index) => `
+                                ${filteredStudents.length === 0 ? 
+                                    '<tr><td colspan="' + (studentFields.length + 2) + '" class="empty-state">暂无学生数据</td></tr>' : 
+                                    filteredStudents.map((student, index) => `
                                         <tr>
                                             <td>${index + 1}</td>
                                             ${studentFields.map(f => {
@@ -1193,6 +1212,55 @@
             content.innerHTML = html;
         }
         
+        function generateFilterButtons() {
+            let buttons = '';
+            // 为关键字段生成筛选按钮
+            const filterableFields = [
+                'gender', 'ethnicity', 'householdType', 'isLeftBehind', 'isOrphan', 
+                'isOnlyChild', 'isMartyrChild', 'politicalStatus', 'transportMode', 
+                'isBoarding', 'bloodType', 'psychologicalLevel', 'birthdayType'
+            ];
+            
+            filterableFields.forEach(fieldKey => {
+                const field = studentFields.find(f => f.key === fieldKey);
+                if (!field) return;
+                
+                const uniqueValues = [...new Set(rosterStudents.map(s => s[fieldKey]).filter(v => v && v.trim()))];
+                if (uniqueValues.length > 0) {
+                    buttons += `<span style="font-weight:bold;font-size:12px;">${field.label}:</span> `;
+                    uniqueValues.forEach(val => {
+                        const isActive = activeFilters[fieldKey] === val;
+                        buttons += `<button class="btn-filter ${isActive ? 'active' : ''}" onclick="toggleFilter('${fieldKey}', '${val}')">${val}</button>`;
+                    });
+                    buttons += ' | ';
+                }
+            });
+            
+            return buttons || '<span style="font-size:12px;color:#999;">暂无可用筛选</span>';
+        }
+        
+        function toggleFilter(fieldKey, value) {
+            if (activeFilters[fieldKey] === value) {
+                delete activeFilters[fieldKey];
+            } else {
+                activeFilters[fieldKey] = value;
+            }
+            showRosterModule();
+        }
+        
+        function clearAllFilters() {
+            activeFilters = {};
+            showRosterModule();
+        }
+        
+        function getFilteredStudents() {
+            let filtered = [...rosterStudents];
+            for (const [fieldKey, value] of Object.entries(activeFilters)) {
+                filtered = filtered.filter(s => s[fieldKey] === value);
+            }
+            return filtered;
+        }
+        
         function showAddStudentForm() {
             editingStudentId = null;
             const formContainer = document.getElementById('studentFormContainer');
@@ -1204,7 +1272,6 @@
         function editStudent(studentId) {
             const student = rosterStudents.find(s => s.studentId === studentId);
             if (!student) return;
-            
             editingStudentId = studentId;
             const formContainer = document.getElementById('studentFormContainer');
             formContainer.innerHTML = generateStudentFormHTML(student);
@@ -1232,70 +1299,28 @@
                 <div class="student-form-row">
             `;
             
-            studentFields.forEach((field, index) => {
+            studentFields.forEach((field) => {
                 const value = student[field.key] || '';
                 const widthClass = field.width || 'width-medium';
                 let fieldHtml = '';
                 
                 if (field.key === 'studentId') {
-                    fieldHtml = `
-                        <div class="form-group ${widthClass}">
-                            <label>${field.label}（自动生成）</label>
-                            <input type="text" id="f_${field.key}" value="${value}" readonly style="background:#e9ecef;width:100%;">
-                        </div>
-                    `;
+                    fieldHtml = `<div class="form-group ${widthClass}"><label>${field.label}（自动生成）</label><input type="text" id="f_${field.key}" value="${value}" readonly style="background:#e9ecef;width:100%;"></div>`;
                 } else if (selectFields[field.key]) {
-                    const options = selectFields[field.key].map(opt => 
-                        `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt || '请选择'}</option>`
-                    ).join('');
-                    fieldHtml = `
-                        <div class="form-group ${widthClass}">
-                            <label>${field.label}</label>
-                            <select id="f_${field.key}" style="width:100%;">${options}</select>
-                        </div>
-                    `;
+                    const options = selectFields[field.key].map(opt => `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt || '请选择'}</option>`).join('');
+                    fieldHtml = `<div class="form-group ${widthClass}"><label>${field.label}</label><select id="f_${field.key}" style="width:100%;">${options}</select></div>`;
                 } else if (field.key === 'birthday') {
-                    fieldHtml = `
-                        <div class="form-group ${widthClass}">
-                            <label>${field.label}</label>
-                            <input type="date" id="f_${field.key}" value="${value}" style="width:100%;">
-                        </div>
-                    `;
+                    fieldHtml = `<div class="form-group ${widthClass}"><label>${field.label}</label><input type="date" id="f_${field.key}" value="${value}" style="width:100%;"></div>`;
                 } else if (field.key === 'joinTeamDate') {
-                    fieldHtml = `
-                        <div class="form-group ${widthClass}">
-                            <label>${field.label}</label>
-                            <input type="month" id="f_${field.key}" value="${value}" style="width:100%;">
-                        </div>
-                    `;
+                    fieldHtml = `<div class="form-group ${widthClass}"><label>${field.label}</label><input type="month" id="f_${field.key}" value="${value}" style="width:100%;"></div>`;
                 } else if (field.key === 'joinLeagueDate' || field.key === 'joinPartyDate') {
-                    fieldHtml = `
-                        <div class="form-group ${widthClass}">
-                            <label>${field.label}</label>
-                            <input type="date" id="f_${field.key}" value="${value}" style="width:100%;">
-                        </div>
-                    `;
+                    fieldHtml = `<div class="form-group ${widthClass}"><label>${field.label}</label><input type="date" id="f_${field.key}" value="${value}" style="width:100%;"></div>`;
                 } else if (field.key === 'allergyHistory') {
-                    fieldHtml = `
-                        <div class="form-group ${widthClass}">
-                            <label>${field.label}（红色加粗）</label>
-                            <input type="text" id="f_${field.key}" value="${value}" style="color: red; font-weight: bold; width:100%;">
-                        </div>
-                    `;
+                    fieldHtml = `<div class="form-group ${widthClass}"><label>${field.label}（红色加粗）</label><input type="text" id="f_${field.key}" value="${value}" style="color: red; font-weight: bold; width:100%;"></div>`;
                 } else if (field.key === 'name') {
-                    fieldHtml = `
-                        <div class="form-group ${widthClass}">
-                            <label>${field.label} *</label>
-                            <input type="text" id="f_${field.key}" value="${value}" required style="width:100%;">
-                        </div>
-                    `;
+                    fieldHtml = `<div class="form-group ${widthClass}"><label>${field.label} *</label><input type="text" id="f_${field.key}" value="${value}" required style="width:100%;"></div>`;
                 } else {
-                    fieldHtml = `
-                        <div class="form-group ${widthClass}">
-                            <label>${field.label}</label>
-                            <input type="text" id="f_${field.key}" value="${value}" style="width:100%;">
-                        </div>
-                    `;
+                    fieldHtml = `<div class="form-group ${widthClass}"><label>${field.label}</label><input type="text" id="f_${field.key}" value="${value}" style="width:100%;"></div>`;
                 }
                 
                 formHtml += fieldHtml;
@@ -1314,26 +1339,18 @@
         
         function saveStudentForm() {
             const name = document.getElementById('f_name').value.trim();
-            if (!name) {
-                alert('请输入学生姓名');
-                return;
-            }
+            if (!name) { alert('请输入学生姓名'); return; }
             
             const studentData = {};
             studentFields.forEach(field => {
                 const element = document.getElementById('f_' + field.key);
-                if (element) {
-                    studentData[field.key] = element.value.trim();
-                }
+                if (element) studentData[field.key] = element.value.trim();
             });
-            
             studentData.class = currentClass;
             
             if (editingStudentId) {
                 const index = rosterStudents.findIndex(s => s.studentId === editingStudentId);
-                if (index !== -1) {
-                    rosterStudents[index] = { ...rosterStudents[index], ...studentData };
-                }
+                if (index !== -1) rosterStudents[index] = { ...rosterStudents[index], ...studentData };
             } else {
                 rosterStudents.push(studentData);
             }
@@ -1352,39 +1369,29 @@
             showRosterModule();
         }
         
-        // 下载Excel模板
         function downloadExcelTemplate() {
             const templateData = [{}];
-            studentFields.forEach(field => {
-                templateData[0][field.label] = '';
-            });
-            
+            studentFields.forEach(field => templateData[0][field.label] = '');
             const ws = XLSX.utils.json_to_sheet(templateData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, '学生花名册模板');
             XLSX.writeFile(wb, currentClass + '_花名册模板.xlsx');
         }
         
-        // 导出Excel
         function exportRosterExcel() {
-            const exportData = rosterStudents.map(student => {
+            const exportData = getFilteredStudents().map(student => {
                 const row = {};
-                studentFields.forEach(field => {
-                    row[field.label] = student[field.key] || '';
-                });
+                studentFields.forEach(field => row[field.label] = student[field.key] || '');
                 return row;
             });
-            
             const ws = XLSX.utils.json_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, '学生花名册');
             XLSX.writeFile(wb, currentClass + '_花名册.xlsx');
         }
         
-        // 显示导入Excel表单
         function showImportRosterForm() {
             const importContainer = document.getElementById('importRosterContainer');
-            
             importContainer.innerHTML = `
                 <div style="background: #e0f7fa; border: 2px solid #00bcd4; border-radius: 5px; padding: 10px; margin-bottom: 10px;">
                     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -1396,11 +1403,9 @@
             `;
         }
         
-        // 处理导入Excel文件
         function handleImportRosterExcel(input) {
             const file = input.files[0];
             if (!file) return;
-            
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -1408,26 +1413,20 @@
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-                    
                     if (!jsonData || jsonData.length === 0) {
                         alert('Excel文件为空或格式不正确');
                         return;
                     }
-                    
                     rosterStudents = jsonData.map(row => {
                         const student = {};
-                        studentFields.forEach(field => {
-                            student[field.key] = row[field.label] || '';
-                        });
+                        studentFields.forEach(field => student[field.key] = row[field.label] || '');
                         student.class = currentClass;
                         return student;
                     });
-                    
                     saveRosterStudents();
                     document.getElementById('importRosterContainer').innerHTML = '';
                     showRosterModule();
                     alert('导入成功！共导入 ' + rosterStudents.length + ' 名学生');
-                    
                 } catch (error) {
                     alert('Excel文件解析失败，请检查文件格式');
                 }
@@ -1443,25 +1442,18 @@
         
         function loadAllSchedules() {
             const savedSchedules = localStorage.getItem('all_schedules_' + currentClass);
-            if (savedSchedules) {
-                allSchedules = JSON.parse(savedSchedules);
-            } else {
-                allSchedules = {};
-            }
+            if (savedSchedules) allSchedules = JSON.parse(savedSchedules);
+            else allSchedules = {};
         }
         
         function loadMainSchedule() {
             const scheduleContainer = document.getElementById('module-schedule-main');
             if (!scheduleContainer) return;
-            
             if (!currentClass) {
-                scheduleContainer.innerHTML = 
-                    '<div class="empty-state"><div class="icon">📅</div><p>请选择班级查看课程表</p></div>';
+                scheduleContainer.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>请选择班级查看课程表</p></div>';
                 return;
             }
-            
             const scheduleNames = Object.keys(allSchedules);
-            
             if (scheduleNames.length === 0) {
                 currentScheduleName = '我的课表';
                 allSchedules[currentScheduleName] = {
@@ -1471,7 +1463,6 @@
             } else {
                 currentScheduleName = scheduleNames[0];
             }
-            
             scheduleData = allSchedules[currentScheduleName].courses || [];
             renderMainSchedule();
         }
@@ -1479,24 +1470,19 @@
         function renderMainSchedule() {
             const container = document.getElementById('module-schedule-main');
             if (!container) return;
-            
             const currentSchedule = allSchedules[currentScheduleName] || {
                 periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)),
                 courses: []
             };
-            
             const periodTimes = currentSchedule.periodTimes || defaultPeriodTimes;
             const scheduleNames = Object.keys(allSchedules);
             
             let html = `
                 <div class="schedule-header">
-                    <input type="text" class="schedule-title-input" id="scheduleTitleInput" 
-                           value="${currentScheduleName}" placeholder="课程表名称">
+                    <input type="text" class="schedule-title-input" id="scheduleTitleInput" value="${currentScheduleName}" placeholder="课程表名称">
                     <select class="schedule-selector" id="scheduleSelector" onchange="switchSchedule(this.value)">
                         <option value="">切换课表</option>
-                        ${scheduleNames.map(name => 
-                            `<option value="${name}" ${name === currentScheduleName ? 'selected' : ''}>${name}</option>`
-                        ).join('')}
+                        ${scheduleNames.map(name => `<option value="${name}" ${name === currentScheduleName ? 'selected' : ''}>${name}</option>`).join('')}
                     </select>
                     <div class="schedule-actions">
                         <button class="btn-save" onclick="saveSchedule()">💾 保存</button>
@@ -1523,17 +1509,11 @@
             
             timeSlots.forEach(timeSlot => {
                 const periods = periodTimes.filter(p => p.timeSlot === timeSlot);
-                
                 periods.forEach((period, index) => {
                     html += `<tr>`;
-                    
                     if (index === 0) {
-                        html += `<td class="period-group-header" rowspan="${periods.length}">
-                            ${timeSlot}
-                            <button class="add-period-btn" onclick="addPeriod('${timeSlot}')" title="添加节数">+</button>
-                        </td>`;
+                        html += `<td class="period-group-header" rowspan="${periods.length}">${timeSlot}<button class="add-period-btn" onclick="addPeriod('${timeSlot}')" title="添加节数">+</button></td>`;
                     }
-                    
                     html += `
                         <td class="period-time-cell">
                             <span class="period-label" onclick="editPeriodLabel(${period.period})" title="点击修改节数名称">${period.periodLabel || '第' + period.period + '节'}</span>
@@ -1541,49 +1521,29 @@
                             <button class="delete-period-btn" onclick="removePeriod(${period.period})" title="删除这一节">×</button>
                         </td>
                     `;
-                    
                     for (let day = 1; day <= 7; day++) {
                         const course = scheduleData.find(c => c.day === day && c.period === period.period);
-                        
                         if (course) {
-                            html += `
-                                <td class="course-cell" onclick="editCourseInline(${day}, ${period.period})" title="点击编辑课程">
-                                    <span class="course-name">${course.courseName || ''}</span>
-                                    <span class="class-name">${course.className || ''}</span>
-                                </td>
-                            `;
+                            html += `<td class="course-cell" onclick="editCourseInline(${day}, ${period.period})" title="点击编辑课程"><span class="course-name">${course.courseName || ''}</span><span class="class-name">${course.className || ''}</span></td>`;
                         } else {
-                            html += `
-                                <td class="course-cell" onclick="editCourseInline(${day}, ${period.period})" title="点击添加课程">
-                                    <span class="edit-hint">+ 添加</span>
-                                </td>
-                            `;
+                            html += `<td class="course-cell" onclick="editCourseInline(${day}, ${period.period})" title="点击添加课程"><span class="edit-hint">+ 添加</span></td>`;
                         }
                     }
-                    
                     html += '</tr>';
                 });
             });
             
             html += '</tbody></table></div>';
-            
             container.innerHTML = html;
         }
         
         function addPeriod(timeSlot) {
             const currentSchedule = allSchedules[currentScheduleName];
             const periods = currentSchedule.periodTimes.filter(p => p.timeSlot === timeSlot);
-            
             let maxPeriodNum = 0;
-            currentSchedule.periodTimes.forEach(p => {
-                if (p.period > maxPeriodNum) maxPeriodNum = p.period;
-            });
-            
+            currentSchedule.periodTimes.forEach(p => { if (p.period > maxPeriodNum) maxPeriodNum = p.period; });
             const newPeriod = maxPeriodNum + 1;
-            
-            let startTime = '08:00';
-            let endTime = '08:45';
-            
+            let startTime = '08:00', endTime = '08:45';
             if (periods.length > 0) {
                 const lastPeriod = periods[periods.length - 1];
                 startTime = lastPeriod.endTime;
@@ -1598,15 +1558,10 @@
                 startTime = defaultTimes[timeSlot].start;
                 endTime = defaultTimes[timeSlot].end;
             }
-            
             currentSchedule.periodTimes.push({
-                period: newPeriod,
-                periodLabel: '第' + newPeriod + '节',
-                timeSlot: timeSlot,
-                startTime: startTime,
-                endTime: endTime
+                period: newPeriod, periodLabel: '第' + newPeriod + '节',
+                timeSlot: timeSlot, startTime: startTime, endTime: endTime
             });
-            
             currentSchedule.periodTimes.sort((a, b) => a.period - b.period);
             scheduleData = currentSchedule.courses;
             renderMainSchedule();
@@ -1616,7 +1571,6 @@
             const currentSchedule = allSchedules[currentScheduleName];
             currentSchedule.periodTimes = currentSchedule.periodTimes.filter(p => p.period !== period);
             currentSchedule.courses = currentSchedule.courses.filter(c => c.period !== period);
-            
             scheduleData = currentSchedule.courses;
             renderMainSchedule();
         }
@@ -1631,15 +1585,10 @@
         
         function switchSchedule(scheduleName) {
             if (!scheduleName) return;
-            
             currentScheduleName = scheduleName;
             scheduleData = allSchedules[scheduleName].courses || [];
-            
             const titleInput = document.getElementById('scheduleTitleInput');
-            if (titleInput) {
-                titleInput.value = scheduleName;
-            }
-            
+            if (titleInput) titleInput.value = scheduleName;
             renderMainSchedule();
         }
         
@@ -1647,34 +1596,18 @@
             const currentSchedule = allSchedules[currentScheduleName];
             const periodInfo = currentSchedule.periodTimes.find(p => p.period === period);
             if (!periodInfo) return;
-            
             const labelSpan = event.target;
             const currentLabel = periodInfo.periodLabel || ('第' + period + '节');
-            
-            labelSpan.innerHTML = `
-                <input type="text" class="inline-editor" id="editPeriodLabelInput" value="${currentLabel}">
-                <div class="inline-edit-actions">
-                    <button class="btn btn-confirm" onclick="savePeriodLabel(${period})">确定</button>
-                    <button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button>
-                </div>
-            `;
-            
-            setTimeout(() => {
-                const input = document.getElementById('editPeriodLabelInput');
-                if (input) { input.focus(); input.select(); }
-            }, 50);
+            labelSpan.innerHTML = `<input type="text" class="inline-editor" id="editPeriodLabelInput" value="${currentLabel}"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="savePeriodLabel(${period})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`;
+            setTimeout(() => { const input = document.getElementById('editPeriodLabelInput'); if (input) { input.focus(); input.select(); } }, 50);
         }
         
         function savePeriodLabel(period) {
             const newLabel = document.getElementById('editPeriodLabelInput').value.trim();
             if (!newLabel) return;
-            
             const currentSchedule = allSchedules[currentScheduleName];
             const periodInfo = currentSchedule.periodTimes.find(p => p.period === period);
-            if (periodInfo) {
-                periodInfo.periodLabel = newLabel;
-            }
-            
+            if (periodInfo) periodInfo.periodLabel = newLabel;
             renderMainSchedule();
         }
         
@@ -1682,127 +1615,63 @@
             const currentSchedule = allSchedules[currentScheduleName];
             const periodInfo = currentSchedule.periodTimes.find(p => p.period === period);
             if (!periodInfo) return;
-            
             const timeSpan = event.target;
-            
-            timeSpan.innerHTML = `
-                <input type="time" class="inline-editor" id="editStartTimeInput" value="${periodInfo.startTime}">
-                <input type="time" class="inline-editor" id="editEndTimeInput" value="${periodInfo.endTime}">
-                <div class="inline-edit-actions">
-                    <button class="btn btn-confirm" onclick="savePeriodTime(${period})">确定</button>
-                    <button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button>
-                </div>
-            `;
-            
-            setTimeout(() => {
-                const input = document.getElementById('editStartTimeInput');
-                if (input) input.focus();
-            }, 50);
+            timeSpan.innerHTML = `<input type="time" class="inline-editor" id="editStartTimeInput" value="${periodInfo.startTime}"><input type="time" class="inline-editor" id="editEndTimeInput" value="${periodInfo.endTime}"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="savePeriodTime(${period})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`;
+            setTimeout(() => { const input = document.getElementById('editStartTimeInput'); if (input) input.focus(); }, 50);
         }
         
         function savePeriodTime(period) {
             const newStartTime = document.getElementById('editStartTimeInput').value;
             const newEndTime = document.getElementById('editEndTimeInput').value;
-            
             if (!newStartTime || !newEndTime) return;
-            
             const currentSchedule = allSchedules[currentScheduleName];
             const periodInfo = currentSchedule.periodTimes.find(p => p.period === period);
-            if (periodInfo) {
-                periodInfo.startTime = newStartTime;
-                periodInfo.endTime = newEndTime;
-            }
-            
+            if (periodInfo) { periodInfo.startTime = newStartTime; periodInfo.endTime = newEndTime; }
             renderMainSchedule();
         }
         
         function editCourseInline(day, period) {
             const cell = event.target.closest('.course-cell');
             if (!cell) return;
-            
             const existingCourse = scheduleData.find(c => c.day === day && c.period === period);
-            
-            cell.innerHTML = `
-                <input type="text" class="inline-editor" id="editCourseNameInput" 
-                       value="${existingCourse ? existingCourse.courseName : ''}" 
-                       placeholder="课程名">
-                <input type="text" class="inline-editor" id="editClassNameInput" 
-                       value="${existingCourse ? existingCourse.className : ''}" 
-                       placeholder="班级">
-                <div class="inline-edit-actions">
-                    <button class="btn btn-confirm" onclick="saveCourseInline(${day}, ${period})">确定</button>
-                    <button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button>
-                </div>
-            `;
-            
-            setTimeout(() => {
-                const input = document.getElementById('editCourseNameInput');
-                if (input) input.focus();
-            }, 50);
+            cell.innerHTML = `<input type="text" class="inline-editor" id="editCourseNameInput" value="${existingCourse ? existingCourse.courseName : ''}" placeholder="课程名"><input type="text" class="inline-editor" id="editClassNameInput" value="${existingCourse ? existingCourse.className : ''}" placeholder="班级"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="saveCourseInline(${day}, ${period})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`;
+            setTimeout(() => { const input = document.getElementById('editCourseNameInput'); if (input) input.focus(); }, 50);
         }
         
         function saveCourseInline(day, period) {
             const courseName = document.getElementById('editCourseNameInput').value.trim();
             const className = document.getElementById('editClassNameInput').value.trim();
-            
             if (!courseName) return;
-            
             const existingCourse = scheduleData.find(c => c.day === day && c.period === period);
-            
-            if (existingCourse) {
-                existingCourse.courseName = courseName;
-                existingCourse.className = className;
-            } else {
-                scheduleData.push({
-                    day: day,
-                    period: period,
-                    courseName: courseName,
-                    className: className
-                });
-            }
-            
+            if (existingCourse) { existingCourse.courseName = courseName; existingCourse.className = className; }
+            else { scheduleData.push({ day: day, period: period, courseName: courseName, className: className }); }
             renderMainSchedule();
         }
         
         function saveSchedule() {
             if (!currentClass) return;
-            
             const titleInput = document.getElementById('scheduleTitleInput');
             const newName = titleInput ? titleInput.value.trim() : currentScheduleName;
-            
             if (!newName) return;
-            
             if (newName !== currentScheduleName) {
                 const oldData = allSchedules[currentScheduleName];
                 delete allSchedules[currentScheduleName];
                 allSchedules[newName] = oldData;
                 currentScheduleName = newName;
             }
-            
             allSchedules[currentScheduleName].courses = scheduleData;
             localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules));
-            
             const saveBtn = event.target;
             const originalText = saveBtn.textContent;
             saveBtn.textContent = '✅ 已保存';
             saveBtn.style.background = '#4CAF50';
-            setTimeout(() => {
-                saveBtn.textContent = originalText;
-                saveBtn.style.background = '';
-            }, 2000);
-            
+            setTimeout(() => { saveBtn.textContent = originalText; saveBtn.style.background = ''; }, 2000);
             renderMainSchedule();
         }
         
         function exportSchedule() {
             const currentSchedule = allSchedules[currentScheduleName];
-            const exportData = {
-                scheduleName: currentScheduleName,
-                periodTimes: currentSchedule.periodTimes,
-                courses: scheduleData,
-                exportedAt: new Date().toISOString()
-            };
-            
+            const exportData = { scheduleName: currentScheduleName, periodTimes: currentSchedule.periodTimes, courses: scheduleData, exportedAt: new Date().toISOString() };
             const jsonStr = JSON.stringify(exportData, null, 2);
             const blob = new Blob([jsonStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -1817,72 +1686,36 @@
         
         function showImportForm() {
             const formContainer = document.getElementById('importFormContainer');
-            
-            formContainer.innerHTML = `
-                <div style="background: #e0f7fa; border: 2px solid #00bcd4; border-radius: 5px; padding: 10px; margin-bottom: 10px;">
-                    <div class="new-schedule-form">
-                        <input type="file" id="importFileInput" accept=".json" onchange="handleImportFile(this)">
-                        <button class="btn btn-cancel-inline" onclick="cancelImport()" style="margin: 0;">取消</button>
-                    </div>
-                </div>
-            `;
+            formContainer.innerHTML = `<div style="background: #e0f7fa; border: 2px solid #00bcd4; border-radius: 5px; padding: 10px; margin-bottom: 10px;"><div class="new-schedule-form"><input type="file" id="importFileInput" accept=".json" onchange="handleImportFile(this)"><button class="btn btn-cancel-inline" onclick="cancelImport()" style="margin: 0;">取消</button></div></div>`;
         }
         
         function handleImportFile(input) {
             const file = input.files[0];
             if (!file) return;
-            
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const importData = JSON.parse(e.target.result);
-                    
-                    if (!importData.periodTimes || !importData.courses) {
-                        alert('无效的课程表文件');
-                        return;
-                    }
-                    
+                    if (!importData.periodTimes || !importData.courses) { alert('无效的课程表文件'); return; }
                     let newName = importData.scheduleName || '导入的课表';
                     let nameIndex = 1;
-                    while (allSchedules[newName]) {
-                        newName = importData.scheduleName + '_' + nameIndex;
-                        nameIndex++;
-                    }
-                    
-                    allSchedules[newName] = {
-                        periodTimes: importData.periodTimes,
-                        courses: importData.courses
-                    };
-                    
+                    while (allSchedules[newName]) { newName = importData.scheduleName + '_' + nameIndex; nameIndex++; }
+                    allSchedules[newName] = { periodTimes: importData.periodTimes, courses: importData.courses };
                     currentScheduleName = newName;
                     scheduleData = importData.courses;
-                    
                     localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules));
-                    
                     document.getElementById('importFormContainer').innerHTML = '';
                     renderMainSchedule();
-                    
-                } catch (error) {
-                    alert('文件解析失败，请检查文件格式');
-                }
+                } catch (error) { alert('文件解析失败，请检查文件格式'); }
             };
             reader.readAsText(file);
         }
         
-        function cancelImport() {
-            document.getElementById('importFormContainer').innerHTML = '';
-        }
+        function cancelImport() { document.getElementById('importFormContainer').innerHTML = ''; }
         
         function showClearConfirm() {
             const confirmContainer = document.getElementById('clearConfirmContainer');
-            
-            confirmContainer.innerHTML = `
-                <div style="background: #fff3e0; border: 2px solid #ff9800; border-radius: 5px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <span style="font-size: 14px;">确定要清空当前课程表的所有课程吗？</span>
-                    <button class="btn btn-clear" onclick="confirmClearSchedule()" style="margin: 0;">确定清空</button>
-                    <button class="btn btn-cancel-inline" onclick="cancelClearConfirm()" style="margin: 0;">取消</button>
-                </div>
-            `;
+            confirmContainer.innerHTML = `<div style="background: #fff3e0; border: 2px solid #ff9800; border-radius: 5px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"><span style="font-size: 14px;">确定要清空当前课程表的所有课程吗？</span><button class="btn btn-clear" onclick="confirmClearSchedule()" style="margin: 0;">确定清空</button><button class="btn btn-cancel-inline" onclick="cancelClearConfirm()" style="margin: 0;">取消</button></div>`;
         }
         
         function confirmClearSchedule() {
@@ -1893,158 +1726,77 @@
             renderMainSchedule();
         }
         
-        function cancelClearConfirm() {
-            document.getElementById('clearConfirmContainer').innerHTML = '';
-        }
+        function cancelClearConfirm() { document.getElementById('clearConfirmContainer').innerHTML = ''; }
         
         function showNewScheduleForm() {
             const formContainer = document.getElementById('newScheduleFormContainer');
-            
-            formContainer.innerHTML = `
-                <div style="background: #e3f2fd; border: 2px solid #2196f3; border-radius: 5px; padding: 10px; margin-bottom: 10px;">
-                    <div class="new-schedule-form">
-                        <input type="text" id="newScheduleNameInput" placeholder="输入新课表名称">
-                        <button class="btn btn-new" onclick="confirmNewSchedule()" style="margin: 0;">创建</button>
-                        <button class="btn btn-cancel-inline" onclick="cancelNewSchedule()" style="margin: 0;">取消</button>
-                    </div>
-                </div>
-            `;
-            
-            setTimeout(() => {
-                const input = document.getElementById('newScheduleNameInput');
-                if (input) input.focus();
-            }, 50);
+            formContainer.innerHTML = `<div style="background: #e3f2fd; border: 2px solid #2196f3; border-radius: 5px; padding: 10px; margin-bottom: 10px;"><div class="new-schedule-form"><input type="text" id="newScheduleNameInput" placeholder="输入新课表名称"><button class="btn btn-new" onclick="confirmNewSchedule()" style="margin: 0;">创建</button><button class="btn btn-cancel-inline" onclick="cancelNewSchedule()" style="margin: 0;">取消</button></div></div>`;
+            setTimeout(() => { const input = document.getElementById('newScheduleNameInput'); if (input) input.focus(); }, 50);
         }
         
         function confirmNewSchedule() {
             const newName = document.getElementById('newScheduleNameInput').value.trim();
-            
             if (!newName) return;
-            
-            if (allSchedules[newName]) {
-                alert('该课表名称已存在');
-                return;
-            }
-            
-            allSchedules[newName] = {
-                periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)),
-                courses: JSON.parse(JSON.stringify(scheduleData))
-            };
-            
+            if (allSchedules[newName]) { alert('该课表名称已存在'); return; }
+            allSchedules[newName] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: JSON.parse(JSON.stringify(scheduleData)) };
             currentScheduleName = newName;
             scheduleData = allSchedules[newName].courses;
-            
             localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules));
             document.getElementById('newScheduleFormContainer').innerHTML = '';
             renderMainSchedule();
         }
         
-        function cancelNewSchedule() {
-            document.getElementById('newScheduleFormContainer').innerHTML = '';
-        }
+        function cancelNewSchedule() { document.getElementById('newScheduleFormContainer').innerHTML = ''; }
         
-        // 显示模块
         function showModule(moduleName) {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             const activeItem = document.querySelector(`.nav-item[data-tab="${moduleName}"]`);
-            if (activeItem) {
-                activeItem.classList.add('active');
-            }
-            
+            if (activeItem) activeItem.classList.add('active');
             const content = document.getElementById('mainContent');
-            
             const moduleTitles = {
-                'roster': '📋 学生花名册',
-                'committee-list': '👥 班委名单',
-                'committee-assessment': '📊 班委考核',
-                'committee-changes': '🔄 更换记录',
-                'cleaning': '🧹 卫生安排表',
-                'seating': '💺 排座位',
-                'activities': '🎉 班级活动',
-                'finance-overview': '💰 收支总览',
-                'finance-income': '📈 收入详情',
-                'finance-expense': '📉 支出详情',
-                'exam-list': '📝 考试列表',
-                'score-entry': '✏️ 成绩录入',
-                'exam-analysis': '📊 单次分析',
-                'trend-analysis': '📈 个人趋势',
-                'subject-settings': '⚙️ 科目设置',
-                'homework-list': '📚 作业列表',
-                'homework-stats': '📊 作业统计看板',
-                'discipline-dashboard': '⚠️ 违纪数据看板',
-                'discipline-records': '📋 违纪记录明细',
-                'leave': '🏥 请假管理',
-                'risk-home': '🚨 风险预警首页',
-                'emotion-warning': '😟 学生情绪预警',
-                'special-constitution': '🏥 特殊体质登记',
-                'dropout-risk': '🚫 辍学风险预警',
-                'return-tracking': '🔍 未返校跟踪',
-                'conflict-resolution': '🤝 矛盾排查',
-                'conversations': '💬 谈话记录',
-                'parent-communication': '📞 家校沟通',
-                'work-traces': '📁 工作留痕',
-                'training-records': '📝 培训记录',
-                'lecture-records': '🎤 讲座记录',
-                'activity-participation': '🎯 活动参与',
+                'roster': '📋 学生花名册', 'committee-list': '👥 班委名单',
+                'committee-assessment': '📊 班委考核', 'committee-changes': '🔄 更换记录',
+                'cleaning': '🧹 卫生安排表', 'seating': '💺 排座位', 'activities': '🎉 班级活动',
+                'finance-overview': '💰 收支总览', 'finance-income': '📈 收入详情', 'finance-expense': '📉 支出详情',
+                'exam-list': '📝 考试列表', 'score-entry': '✏️ 成绩录入', 'exam-analysis': '📊 单次分析',
+                'trend-analysis': '📈 个人趋势', 'subject-settings': '⚙️ 科目设置',
+                'homework-list': '📚 作业列表', 'homework-stats': '📊 作业统计看板',
+                'discipline-dashboard': '⚠️ 违纪数据看板', 'discipline-records': '📋 违纪记录明细',
+                'leave': '🏥 请假管理', 'risk-home': '🚨 风险预警首页', 'emotion-warning': '😟 学生情绪预警',
+                'special-constitution': '🏥 特殊体质登记', 'dropout-risk': '🚫 辍学风险预警',
+                'return-tracking': '🔍 未返校跟踪', 'conflict-resolution': '🤝 矛盾排查',
+                'conversations': '💬 谈话记录', 'parent-communication': '📞 家校沟通',
+                'work-traces': '📁 工作留痕', 'training-records': '📝 培训记录',
+                'lecture-records': '🎤 讲座记录', 'activity-participation': '🎯 活动参与',
                 'hours-stats': '⏱️ 学时统计'
             };
-            
             const title = moduleTitles[moduleName] || '模块';
-            
             if (moduleName === 'roster') {
                 showRosterModule();
             } else {
-                content.innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px;">
-                        <div style="font-size: 48px; margin-bottom: 20px;">🚧</div>
-                        <h2 style="margin-bottom: 10px;">${title}</h2>
-                        <p style="color: #999;">该功能正在开发中，敬请期待...</p>
-                    </div>
-                `;
+                content.innerHTML = `<div style="text-align: center; padding: 60px 20px;"><div style="font-size: 48px; margin-bottom: 20px;">🚧</div><h2 style="margin-bottom: 10px;">${title}</h2><p style="color: #999;">该功能正在开发中，敬请期待...</p></div>`;
             }
         }
         
         async function loadAllStudentsData() {
             try {
                 const token = getToken();
-                const response = await fetch(API_BASE + '/students', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (response.ok) {
-                    allStudents = await response.json();
-                }
-            } catch (error) {
-                console.error('加载学生数据失败:', error);
-            }
+                const response = await fetch(API_BASE + '/students', { headers: { 'Authorization': 'Bearer ' + token } });
+                if (response.ok) allStudents = await response.json();
+            } catch (error) { console.error('加载学生数据失败:', error); }
         }
         
         async function init() {
             const user = getUser();
             const token = getToken();
-            
-            if (!token || !user.userId) {
-                window.location.href = '/login.html';
-                return;
-            }
-            
-            if (user.role !== 'teacher') {
-                alert('无权限访问');
-                window.location.href = '/login.html';
-                return;
-            }
-            
+            if (!token || !user.userId) { window.location.href = '/login.html'; return; }
+            if (user.role !== 'teacher') { alert('无权限访问'); window.location.href = '/login.html'; return; }
             document.getElementById('sidebarUserName').textContent = user.realName || '教师';
             document.getElementById('welcomeName').textContent = user.realName || '教师';
-            
             await loadAllStudentsData();
             loadClassSelector();
-            
             const firstGroup = document.querySelector('.nav-group-header');
-            if (firstGroup) {
-                toggleGroup(firstGroup);
-            }
+            if (firstGroup) toggleGroup(firstGroup);
         }
         
         init();
