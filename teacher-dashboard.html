@@ -312,7 +312,7 @@
             background: #f0f0ff;
         }
         
-        /* 学生表单 */
+        /* 学生表单 - 上下结构 */
         .student-form-container {
             background: #f8f9fa;
             border: 2px solid #e0e0e0;
@@ -341,24 +341,31 @@
             display: block;
         }
         .student-form-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
         .student-form-grid .form-group {
-            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0;
         }
         .student-form-grid .form-group label {
-            font-size: 12px;
-            margin-bottom: 3px;
+            width: 200px;
+            min-width: 200px;
+            font-size: 13px;
+            margin-bottom: 0;
+            text-align: right;
         }
         .student-form-grid .form-group input,
         .student-form-grid .form-group select {
-            padding: 6px 8px;
-            font-size: 12px;
+            flex: 1;
+            max-width: 400px;
+            padding: 8px 10px;
+            font-size: 13px;
             border: 1px solid #ddd;
             border-radius: 3px;
-            width: 100%;
         }
         .student-form-actions {
             display: flex;
@@ -556,7 +563,20 @@
             .schedule-title-input { font-size: 14px; }
             .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; }
             .home-btn { font-size: 24px; padding: 5px; }
-            .student-form-grid { grid-template-columns: 1fr; }
+            .student-form-grid .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .student-form-grid .form-group label {
+                width: 100%;
+                text-align: left;
+                margin-bottom: 3px;
+            }
+            .student-form-grid .form-group input,
+            .student-form-grid .form-group select {
+                max-width: 100%;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -989,12 +1009,9 @@
         // ============ 学号自动生成 ============
         
         function generateStudentId() {
-            // 从班级名称中提取年级和班级号
-            // 例如：一年级1班 -> 0101, 七年级3班 -> 0703
             let gradeCode = '';
             let classCode = '';
             
-            // 提取年级
             for (const [key, value] of Object.entries(gradeMap)) {
                 if (currentClass.includes(key)) {
                     gradeCode = value;
@@ -1002,7 +1019,6 @@
                 }
             }
             
-            // 如果没有找到年级，尝试提取数字
             if (!gradeCode) {
                 const gradeMatch = currentClass.match(/(\d+)/);
                 if (gradeMatch) {
@@ -1010,20 +1026,15 @@
                 }
             }
             
-            // 提取班级号
             const classMatch = currentClass.match(/(\d+)班/);
             if (classMatch) {
                 classCode = classMatch[1].padStart(2, '0');
             }
             
-            // 如果还是没找到，使用默认值
             if (!gradeCode) gradeCode = '01';
             if (!classCode) classCode = '01';
             
-            // 获取当前班级已有学生数量
             const existingCount = rosterStudents.filter(s => s.studentId && s.studentId.startsWith(gradeCode + classCode)).length;
-            
-            // 生成序号（从01开始）
             const sequenceNum = String(existingCount + 1).padStart(2, '0');
             
             return gradeCode + classCode + sequenceNum;
