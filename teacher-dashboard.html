@@ -314,7 +314,6 @@
             top: 0;
             z-index: 20;
         }
-        /* 冻结列 */
         .roster-table th.col-frozen,
         .roster-table td.col-frozen {
             position: sticky;
@@ -344,7 +343,6 @@
             background: #e0e0ff;
         }
         
-        /* 筛选按钮 */
         .filter-btn {
             background: none;
             border: none;
@@ -620,7 +618,7 @@
     </style>
 </head>
 <body>
-    <!-- 侧边栏（保持不变） -->
+    <!-- 侧边栏 -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h2>👨‍🏫 教师工作台</h2>
@@ -649,21 +647,24 @@
                 </div>
             </div>
             
-            <!-- 班委管理 -->
+            <!-- 积分管理 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
-                    <span class="group-title"><span class="icon">👥</span> 班委管理</span>
+                    <span class="group-title"><span class="icon">⭐</span> 积分管理</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="committee-list" onclick="showModule('committee-list')">
-                        <span class="icon">📋</span> 班委名单
+                    <div class="nav-item" data-tab="points-list" onclick="showModule('points-list')">
+                        <span class="icon">📋</span> 积分清单
                     </div>
-                    <div class="nav-item" data-tab="committee-assessment" onclick="showModule('committee-assessment')">
-                        <span class="icon">📊</span> 班委考核
+                    <div class="nav-item" data-tab="points-assessment" onclick="showModule('points-assessment')">
+                        <span class="icon">📊</span> 积分考核
                     </div>
-                    <div class="nav-item" data-tab="committee-changes" onclick="showModule('committee-changes')">
-                        <span class="icon">🔄</span> 更换记录
+                    <div class="nav-item" data-tab="points-details" onclick="showModule('points-details')">
+                        <span class="icon">📝</span> 积分明细
+                    </div>
+                    <div class="nav-item" data-tab="committee-roster" onclick="showModule('committee-roster')">
+                        <span class="icon">👥</span> 班委清单
                     </div>
                 </div>
             </div>
@@ -912,7 +913,6 @@
         const WORKER_URL = 'https://school-api.hru123.workers.dev';
         const API_BASE = WORKER_URL + '/api';
         
-        // 加密密钥（生产环境应从环境变量获取）
         const ENCRYPTION_KEY = 'school-management-system-2024';
         
         let currentClass = '';
@@ -924,6 +924,7 @@
         let allSchedules = {};
         let editingStudentId = null;
         let activeFilters = {};
+        let committeeRosterData = [];
         
         // 年级映射表
         const gradeMap = {
@@ -933,7 +934,7 @@
             '高一': '10', '高二': '11', '高三': '12'
         };
         
-        // 学生字段定义（含宽度类型）
+        // 学生字段定义
         const studentFields = [
             { key: 'studentId', label: '学号', width: 'width-medium' },
             { key: 'name', label: '姓名', width: 'width-short' },
@@ -974,6 +975,84 @@
             { key: 'transportDetail', label: '上下学方式及接送人', width: 'width-xlong' },
             { key: 'medicationInfo', label: '在校服药情况', width: 'width-long' },
             { key: 'psychologicalLevel', label: '心理预警等级', width: 'width-short' }
+        ];
+        
+        // 班委职务数据
+        const committeePositions = [
+            {
+                category: '第一类：主要班委（8个）',
+                points: 2,
+                positions: [
+                    { name: '班长', alias: '班主任助理', duty: '统筹全局，记录班级日志，老师不在时协调各委员。' },
+                    { name: '副班长', alias: '纪律督导', duty: '主抓课间、自习、路队纪律，负责"静"的文化。' },
+                    { name: '学习委员', alias: '', duty: '汇总各科作业情况，组织早读领读，对接课代表。' },
+                    { name: '卫生委员', alias: '劳动部长', duty: '安排值日表，检查卫生死角，对接学校卫生评比。' },
+                    { name: '体育委员', alias: '领操员', duty: '整队、带操、组织体育课集合，运动会报名。' },
+                    { name: '文艺委员', alias: '文娱总监', duty: '负责班级文化布置、黑板报、节日联欢节目编排。' },
+                    { name: '生活委员', alias: '后勤总管', duty: '管理班费、发放牛奶点心、关注同学吃没吃饱、桌椅损坏报修。' },
+                    { name: '心理委员', alias: '暖心大使', duty: '男女生各一个，观察同学情绪，填写"晴雨表"，发现异常悄悄报告老师。' }
+                ]
+            },
+            {
+                category: '第二类：学科专业岗（12个）',
+                points: 1,
+                positions: [
+                    { name: '语文课代表', alias: '诵读领航员', duty: '' },
+                    { name: '数学课代表', alias: '逻辑先锋', duty: '' },
+                    { name: '英语课代表', alias: '外交官', duty: '' },
+                    { name: '科学课代表', alias: '实验员', duty: '负责科学课器材的准备和整理。' },
+                    { name: '道德与法治课代表', alias: '文明观察员', duty: '' },
+                    { name: '音乐课代表', alias: '金嗓子领唱', duty: '' },
+                    { name: '美术课代表', alias: '色彩总监', duty: '' },
+                    { name: '信息技术课代表', alias: '机房管理员', duty: '负责开关电脑、收发鞋套。' },
+                    { name: '书法课代表', alias: '墨香督导', duty: '' },
+                    { name: '劳动/综合实践课代表', alias: '工具管家', duty: '' },
+                    { name: '校本/地方课程课代表', alias: '资料收发员', duty: '' },
+                    { name: '阅读课代表', alias: '图书银行行长', duty: '' }
+                ]
+            },
+            {
+                category: '第三类：日常事务服务岗（20个）',
+                points: 1,
+                positions: [
+                    { name: '门窗管理员', alias: '光明使者/安全哨兵', duty: '负责开关灯、关窗锁门。' },
+                    { name: '电教设备管理员', alias: '电脑小管家', duty: '负责开关投影仪、电脑，提醒老师及时关闭。' },
+                    { name: '空调/风扇管理员', alias: '温度调控师', duty: '控制温度，节能环保。' },
+                    { name: '饮水机管理员', alias: '水长', duty: '负责接水、断电、保持饮水机清洁。' },
+                    { name: '绿植养护员', alias: '护花使者', duty: '浇花、摘黄叶、观察植物生长。' },
+                    { name: '图书角管理员', alias: '图书银行行长', duty: '负责借阅登记、修补图书、摆放整齐。' },
+                    { name: '讲台整理员', alias: '讲桌美容师', duty: '每节课后擦讲台，把粉笔盒、教具摆整齐。' },
+                    { name: '黑板保洁员', alias: '黑板美容师', duty: '每节课间擦黑板，负责黑板槽粉笔灰清理。' },
+                    { name: '粉笔管理员', alias: '粉笔司令', duty: '领取粉笔，管理彩色粉笔的使用。' },
+                    { name: '桌椅摆放员', alias: '直线规划师', duty: '每节课后或放学时提醒并检查桌椅是否对齐地砖线。' },
+                    { name: '窗帘管理员', alias: '光线调节师', duty: '根据强光、投影需求调节窗帘。' },
+                    { name: '失物招领员', alias: '失物招领处处长', duty: '保管捡到的铅笔、橡皮，帮助同学找回失物。' },
+                    { name: '雨具管理员', alias: '雨天向导', duty: '下雨天提醒大家把伞放桶里、叠好雨衣，避免滴水。' },
+                    { name: '安全监督员', alias: '楼道巡查员', duty: '课间在教室门口和走廊提醒同学不追逐打闹。' },
+                    { name: '眼保健操检查员', alias: '护眼小卫士', duty: '督促大家闭眼、穴位按准。' },
+                    { name: '红领巾/校服检查员', alias: '形象顾问', duty: '早上到校检查红领巾佩戴、校服拉链。' },
+                    { name: '体温登记员', alias: '健康小护士', duty: '晨午检帮老师测体温、发消毒液。' },
+                    { name: '用餐管理员', alias: '光盘监督员', duty: '管好打饭排队、检查桌面清理、倡导光盘。' },
+                    { name: '午休管理员', alias: '静音守护者', duty: '管好午休纪律，拉窗帘，营造安静环境。' },
+                    { name: '路队旗手', alias: '领航员', duty: '举班牌，带领放学路队喊口号。' }
+                ]
+            },
+            {
+                category: '第四类：特色创意岗（10个）',
+                points: 1,
+                positions: [
+                    { name: '班级摄影师', alias: '时光记录师', duty: '有相机或手机拍照任务时，负责抓拍班级活动、好人好事。' },
+                    { name: '班级小记者', alias: '通讯员', duty: '负责写班级新闻稿投给学校广播站、公众号。' },
+                    { name: '班级小法官', alias: '矛盾调解员', duty: '同学发生小摩擦时，负责初步调解，引导双方道歉。' },
+                    { name: '节能督察员', alias: '环保卫士', duty: '负责检查课间操、体育课教室是否关灯、关投影。' },
+                    { name: '垃圾分类督导员', alias: '环保局长', duty: '站在垃圾桶旁指导可回收/不可回收/厨余分类。' },
+                    { name: '卫生角管理员', alias: '洁具摆放师', duty: '拖把挂整齐、扫把朝一个方向、垃圾桶套袋。' },
+                    { name: '板报设计师', alias: '美编', duty: '主导黑板报构图、插画、美术字。' },
+                    { name: '班会主持人', alias: '金牌司仪', duty: '轮流主持每周班会，负责写串词。' },
+                    { name: '班级银行行长', alias: '积分管家', duty: '负责统计全班同学的积分币、盖章数、小红花，每周五兑换奖品。' },
+                    { name: '"小老师"帮帮团团长', alias: '互助社社长', duty: '负责安排学优生结对帮扶学困生，记录帮扶进度。' }
+                ]
+            }
         ];
         
         // 默认课表模板
@@ -1081,6 +1160,7 @@
                 currentClass = classes[0];
                 loadAllSchedules();
                 loadRosterStudents();
+                loadCommitteeRosterData();
                 loadMainSchedule();
             }
         }
@@ -1091,6 +1171,7 @@
             activeFilters = {};
             loadAllSchedules();
             loadRosterStudents();
+            loadCommitteeRosterData();
             loadMainSchedule();
         }
         
@@ -1146,12 +1227,11 @@
             return gradeCode + classCode + sequenceNum;
         }
         
-        // ============ 学生花名册功能（加密存储） ============
+        // ============ 学生花名册功能 ============
         
         function loadRosterStudents() {
             const savedRoster = localStorage.getItem('roster_encrypted_' + currentClass);
             if (savedRoster) {
-                // 解密读取
                 const decrypted = decryptData(savedRoster);
                 if (decrypted && Array.isArray(decrypted)) {
                     rosterStudents = decrypted;
@@ -1159,11 +1239,9 @@
                     rosterStudents = [];
                 }
             } else {
-                // 兼容旧数据（未加密）
                 const oldRoster = localStorage.getItem('roster_' + currentClass);
                 if (oldRoster) {
                     rosterStudents = JSON.parse(oldRoster);
-                    // 重新加密存储
                     saveRosterStudents();
                 } else {
                     rosterStudents = allStudents.filter(s => s.class === currentClass).map(s => ({
@@ -1217,14 +1295,11 @@
         }
         
         function saveRosterStudents() {
-            // 加密存储
             const encrypted = encryptData(rosterStudents);
             localStorage.setItem('roster_encrypted_' + currentClass, encrypted);
-            // 同时删除旧数据
             localStorage.removeItem('roster_' + currentClass);
         }
         
-        // 筛选功能
         function applyFilters() {
             filteredRosterStudents = rosterStudents.filter(student => {
                 return Object.entries(activeFilters).every(([fieldKey, filterValue]) => {
@@ -1237,8 +1312,6 @@
         
         function showFilterDropdown(fieldKey, event) {
             event.stopPropagation();
-            
-            // 关闭其他筛选下拉框
             document.querySelectorAll('.filter-dropdown').forEach(el => el.remove());
             
             const btn = event.target;
@@ -1251,7 +1324,6 @@
             dropdown.style.left = rect.left + 'px';
             dropdown.style.zIndex = '1000';
             
-            // 获取该字段的所有唯一值
             const uniqueValues = [...new Set(rosterStudents.map(s => s[fieldKey] || '').filter(v => v !== ''))];
             
             let dropdownHtml = `
@@ -1272,7 +1344,6 @@
             dropdown.innerHTML = dropdownHtml;
             document.body.appendChild(dropdown);
             
-            // 点击其他地方关闭
             setTimeout(() => {
                 document.addEventListener('click', function closeDropdown(e) {
                     if (!dropdown.contains(e.target)) {
@@ -1297,7 +1368,6 @@
             delete activeFilters[fieldKey];
             applyFilters();
             renderRosterTable();
-            // 关闭下拉框
             document.querySelectorAll('.filter-dropdown').forEach(el => el.remove());
         }
         
@@ -1315,6 +1385,7 @@
         
         function renderRosterTable() {
             const tbody = document.getElementById('rosterTableBody');
+            if (!tbody) return;
             
             if (filteredRosterStudents.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="' + (studentFields.length + 2) + '" class="empty-state">暂无学生数据</td></tr>';
@@ -1545,7 +1616,6 @@
             showRosterModule();
         }
         
-        // 下载Excel模板
         function downloadExcelTemplate() {
             const templateData = [{}];
             studentFields.forEach(field => {
@@ -1558,7 +1628,6 @@
             XLSX.writeFile(wb, currentClass + '_花名册模板.xlsx');
         }
         
-        // 导出Excel（解密后导出）
         function exportRosterExcel() {
             const exportData = filteredRosterStudents.map(student => {
                 const row = {};
@@ -1574,7 +1643,6 @@
             XLSX.writeFile(wb, currentClass + '_花名册.xlsx');
         }
         
-        // 显示导入Excel表单
         function showImportRosterForm() {
             const importContainer = document.getElementById('importRosterContainer');
             
@@ -1589,7 +1657,6 @@
             `;
         }
         
-        // 处理导入Excel文件
         function handleImportRosterExcel(input) {
             const file = input.files[0];
             if (!file) return;
@@ -1631,6 +1698,346 @@
         
         function cancelImportRoster() {
             document.getElementById('importRosterContainer').innerHTML = '';
+        }
+        
+        // ============ 积分管理功能 ============
+        
+        function loadCommitteeRosterData() {
+            const savedData = localStorage.getItem('committee_roster_encrypted_' + currentClass);
+            if (savedData) {
+                const decrypted = decryptData(savedData);
+                if (decrypted && Array.isArray(decrypted)) {
+                    committeeRosterData = decrypted;
+                } else {
+                    committeeRosterData = [];
+                }
+            } else {
+                committeeRosterData = [];
+            }
+        }
+        
+        function saveCommitteeRosterData() {
+            const encrypted = encryptData(committeeRosterData);
+            localStorage.setItem('committee_roster_encrypted_' + currentClass, encrypted);
+        }
+        
+        function showPointsModule(moduleType) {
+            const titles = {
+                'points-list': '📋 积分清单',
+                'points-assessment': '📊 积分考核',
+                'points-details': '📝 积分明细',
+                'committee-roster': '👥 班委清单'
+            };
+            
+            if (moduleType === 'committee-roster') {
+                showCommitteeRosterModule();
+            } else if (moduleType === 'points-list') {
+                showPointsListModule();
+            } else if (moduleType === 'points-assessment') {
+                showPointsAssessmentModule();
+            } else if (moduleType === 'points-details') {
+                showPointsDetailsModule();
+            }
+        }
+        
+        function showCommitteeRosterModule() {
+            loadCommitteeRosterData();
+            const content = document.getElementById('mainContent');
+            
+            let html = `
+                <div id="module-committee-roster">
+                    <h2 style="margin-bottom: 20px;">👥 班委清单</h2>
+                    <div class="class-info-banner">
+                        <span>当前班级：<span class="current-class">${currentClass || '未选择'}</span></span>
+                        <span>班委数量：${committeeRosterData.length} 人</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                        <button class="btn-add" onclick="addCommitteeMember()">➕ 添加班委</button>
+                        <button class="btn-export" onclick="exportCommitteeRoster()">📤 导出</button>
+                        <button class="btn-import" onclick="importCommitteeRoster()">📥 导入</button>
+                    </div>
+                    
+                    <div class="roster-table-container">
+                        <table class="roster-table" style="min-width: 800px;">
+                            <thead>
+                                <tr>
+                                    <th class="col-frozen col-frozen-1">序号</th>
+                                    <th class="col-frozen col-frozen-2">姓名</th>
+                                    <th>职务</th>
+                                    <th>职务别名</th>
+                                    <th>工作内容</th>
+                                    <th>积分</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="committeeRosterBody">
+                                ${committeeRosterData.length === 0 ? 
+                                    '<tr><td colspan="7" class="empty-state">暂无班委数据，请添加</td></tr>' : 
+                                    committeeRosterData.map((member, index) => `
+                                        <tr>
+                                            <td class="col-frozen col-frozen-1">${index + 1}</td>
+                                            <td class="col-frozen col-frozen-2">${member.studentName || ''}</td>
+                                            <td>${member.position || ''}</td>
+                                            <td>${member.alias || ''}</td>
+                                            <td>${member.duty || ''}</td>
+                                            <td>${member.points || 0}</td>
+                                            <td>
+                                                <button class="btn btn-edit" onclick="editCommitteeMember('${index}')">编辑</button>
+                                                <button class="btn btn-delete" onclick="deleteCommitteeMember('${index}')">删除</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3 style="margin: 20px 0 10px;">📋 职务设置参考</h3>
+                    ${committeePositions.map(cat => `
+                        <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin-bottom: 10px;">
+                            <strong>${cat.category}（积分+${cat.points}）</strong>
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+                                ${cat.positions.map(p => `
+                                    <span style="background: white; border: 1px solid #ddd; border-radius: 3px; padding: 3px 8px; font-size: 12px;">${p.name}${p.alias ? '（' + p.alias + '）' : ''}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+        
+        function addCommitteeMember() {
+            const studentNames = rosterStudents.map(s => s.name).filter(n => n);
+            
+            let optionsHtml = '<option value="">请选择学生</option>' + 
+                studentNames.map(name => `<option value="${name}">${name}</option>`).join('');
+            
+            let positionOptionsHtml = '<option value="">请选择职务</option>';
+            committeePositions.forEach(cat => {
+                positionOptionsHtml += `<optgroup label="${cat.category}（+${cat.points}分）">`;
+                cat.positions.forEach(p => {
+                    positionOptionsHtml += `<option value="${p.name}" data-alias="${p.alias}" data-duty="${p.duty.replace(/"/g, '&quot;')}" data-points="${cat.points}">${p.name}${p.alias ? '（' + p.alias + '）' : ''}</option>`;
+                });
+                positionOptionsHtml += '</optgroup>';
+            });
+            
+            const formContainer = document.createElement('div');
+            formContainer.style.cssText = 'background:#f8f9fa;border:2px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:20px;';
+            formContainer.innerHTML = `
+                <h3 style="margin-bottom: 15px;">添加班委</h3>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+                    <div class="form-group" style="flex:1;min-width:150px;">
+                        <label>学生姓名</label>
+                        <select id="committeeStudentName" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;">${optionsHtml}</select>
+                    </div>
+                    <div class="form-group" style="flex:1;min-width:200px;">
+                        <label>职务</label>
+                        <select id="committeePosition" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;" onchange="autoFillCommitteeInfo()">${positionOptionsHtml}</select>
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+                    <div class="form-group" style="flex:1;min-width:150px;">
+                        <label>职务别名</label>
+                        <input type="text" id="committeeAlias" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;" readonly>
+                    </div>
+                    <div class="form-group" style="flex:1;min-width:100px;">
+                        <label>积分</label>
+                        <input type="number" id="committeePoints" value="1" min="0" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label>工作内容</label>
+                    <textarea id="committeeDuty" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;" readonly></textarea>
+                </div>
+                <div style="display:flex;gap:10px;">
+                    <button class="btn-save" onclick="saveCommitteeMember()">💾 保存</button>
+                    <button class="btn-cancel-inline" onclick="this.closest('div[style]').remove()">取消</button>
+                </div>
+            `;
+            
+            document.getElementById('module-committee-roster').prepend(formContainer);
+        }
+        
+        function autoFillCommitteeInfo() {
+            const select = document.getElementById('committeePosition');
+            const selectedOption = select.options[select.selectedIndex];
+            const alias = selectedOption.getAttribute('data-alias') || '';
+            const duty = selectedOption.getAttribute('data-duty') || '';
+            const points = selectedOption.getAttribute('data-points') || '1';
+            
+            document.getElementById('committeeAlias').value = alias;
+            document.getElementById('committeeDuty').value = duty;
+            document.getElementById('committeePoints').value = points;
+        }
+        
+        function saveCommitteeMember() {
+            const studentName = document.getElementById('committeeStudentName').value;
+            const position = document.getElementById('committeePosition').value;
+            const alias = document.getElementById('committeeAlias').value;
+            const duty = document.getElementById('committeeDuty').value;
+            const points = parseInt(document.getElementById('committeePoints').value) || 0;
+            
+            if (!studentName || !position) {
+                alert('请选择学生和职务');
+                return;
+            }
+            
+            committeeRosterData.push({
+                studentName,
+                position,
+                alias,
+                duty,
+                points
+            });
+            
+            saveCommitteeRosterData();
+            showCommitteeRosterModule();
+        }
+        
+        function editCommitteeMember(index) {
+            const member = committeeRosterData[index];
+            if (!member) return;
+            
+            const newPosition = prompt('职务：', member.position);
+            if (newPosition === null) return;
+            
+            const newPoints = prompt('积分：', member.points);
+            if (newPoints === null) return;
+            
+            committeeRosterData[index] = {
+                ...member,
+                position: newPosition,
+                points: parseInt(newPoints) || 0
+            };
+            
+            saveCommitteeRosterData();
+            showCommitteeRosterModule();
+        }
+        
+        function deleteCommitteeMember(index) {
+            committeeRosterData.splice(index, 1);
+            saveCommitteeRosterData();
+            showCommitteeRosterModule();
+        }
+        
+        function exportCommitteeRoster() {
+            const exportData = committeeRosterData.map(member => ({
+                '姓名': member.studentName,
+                '职务': member.position,
+                '职务别名': member.alias,
+                '工作内容': member.duty,
+                '积分': member.points
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '班委清单');
+            XLSX.writeFile(wb, currentClass + '_班委清单.xlsx');
+        }
+        
+        function importCommitteeRoster() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx,.xls';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                        
+                        committeeRosterData = jsonData.map(row => ({
+                            studentName: row['姓名'] || '',
+                            position: row['职务'] || '',
+                            alias: row['职务别名'] || '',
+                            duty: row['工作内容'] || '',
+                            points: parseInt(row['积分']) || 0
+                        }));
+                        
+                        saveCommitteeRosterData();
+                        showCommitteeRosterModule();
+                        alert('导入成功！');
+                    } catch (error) {
+                        alert('Excel文件解析失败');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            };
+            input.click();
+        }
+        
+        function showPointsListModule() {
+            loadCommitteeRosterData();
+            const content = document.getElementById('mainContent');
+            
+            let html = `
+                <div id="module-points-list">
+                    <h2 style="margin-bottom: 20px;">📋 积分清单</h2>
+                    <div class="class-info-banner">
+                        <span>当前班级：<span class="current-class">${currentClass || '未选择'}</span></span>
+                        <span>积分总额：${committeeRosterData.reduce((sum, m) => sum + (m.points || 0), 0)} 分</span>
+                    </div>
+                    
+                    <div class="roster-table-container">
+                        <table class="roster-table" style="min-width: 600px;">
+                            <thead>
+                                <tr>
+                                    <th class="col-frozen col-frozen-1">序号</th>
+                                    <th class="col-frozen col-frozen-2">姓名</th>
+                                    <th>职务</th>
+                                    <th>积分</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${committeeRosterData.length === 0 ? 
+                                    '<tr><td colspan="4" class="empty-state">暂无积分数据</td></tr>' : 
+                                    committeeRosterData.map((member, index) => `
+                                        <tr>
+                                            <td class="col-frozen col-frozen-1">${index + 1}</td>
+                                            <td class="col-frozen col-frozen-2">${member.studentName}</td>
+                                            <td>${member.position}</td>
+                                            <td>${member.points}</td>
+                                        </tr>
+                                    `).join('')
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+        
+        function showPointsAssessmentModule() {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📊</div>
+                    <h2 style="margin-bottom: 10px;">积分考核</h2>
+                    <p style="color: #999;">该功能正在开发中，敬请期待...</p>
+                </div>
+            `;
+        }
+        
+        function showPointsDetailsModule() {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📝</div>
+                    <h2 style="margin-bottom: 10px;">积分明细</h2>
+                    <p style="color: #999;">该功能正在开发中，敬请期待...</p>
+                </div>
+            `;
         }
         
         // ============ 课程表功能（保持不变） ============
@@ -2151,9 +2558,10 @@
             
             const moduleTitles = {
                 'roster': '📋 学生花名册',
-                'committee-list': '👥 班委名单',
-                'committee-assessment': '📊 班委考核',
-                'committee-changes': '🔄 更换记录',
+                'points-list': '📋 积分清单',
+                'points-assessment': '📊 积分考核',
+                'points-details': '📝 积分明细',
+                'committee-roster': '👥 班委清单',
                 'cleaning': '🧹 卫生安排表',
                 'seating': '💺 排座位',
                 'activities': '🎉 班级活动',
@@ -2189,6 +2597,9 @@
             
             if (moduleName === 'roster') {
                 showRosterModule();
+            } else if (moduleName === 'points-list' || moduleName === 'points-assessment' || 
+                       moduleName === 'points-details' || moduleName === 'committee-roster') {
+                showPointsModule(moduleName);
             } else {
                 content.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px;">
