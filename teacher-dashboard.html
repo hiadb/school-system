@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>教师工作台 - 学校管理系统</title>
+    <!-- SheetJS 用于 Excel 导入导出 -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -312,7 +314,7 @@
             background: #f0f0ff;
         }
         
-        /* 学生表单 - 上下结构 */
+        /* 学生表单 - 几个字段一行，上下结构 */
         .student-form-container {
             background: #f8f9fa;
             border: 2px solid #e0e0e0;
@@ -340,30 +342,27 @@
         .student-form-container.show {
             display: block;
         }
-        .student-form-grid {
+        .student-form-row {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             gap: 10px;
+            margin-bottom: 10px;
         }
-        .student-form-grid .form-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 0;
-        }
-        .student-form-grid .form-group label {
-            width: 200px;
-            min-width: 200px;
-            font-size: 13px;
-            margin-bottom: 0;
-            text-align: right;
-        }
-        .student-form-grid .form-group input,
-        .student-form-grid .form-group select {
+        .student-form-row .form-group {
             flex: 1;
-            max-width: 400px;
-            padding: 8px 10px;
-            font-size: 13px;
+            min-width: 180px;
+            margin-bottom: 0;
+        }
+        .student-form-row .form-group label {
+            font-size: 12px;
+            margin-bottom: 3px;
+            display: block;
+        }
+        .student-form-row .form-group input,
+        .student-form-row .form-group select {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 12px;
             border: 1px solid #ddd;
             border-radius: 3px;
         }
@@ -563,19 +562,8 @@
             .schedule-title-input { font-size: 14px; }
             .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; }
             .home-btn { font-size: 24px; padding: 5px; }
-            .student-form-grid .form-group {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .student-form-grid .form-group label {
-                width: 100%;
-                text-align: left;
-                margin-bottom: 3px;
-            }
-            .student-form-grid .form-group input,
-            .student-form-grid .form-group select {
-                max-width: 100%;
-                width: 100%;
+            .student-form-row .form-group {
+                min-width: 100%;
             }
         }
     </style>
@@ -889,6 +877,49 @@
             '高一': '10', '高二': '11', '高三': '12'
         };
         
+        // 学生字段定义
+        const studentFields = [
+            { key: 'studentId', label: '学号' },
+            { key: 'name', label: '姓名' },
+            { key: 'gender', label: '性别' },
+            { key: 'ethnicity', label: '民族' },
+            { key: 'idCard', label: '身份证号码' },
+            { key: 'birthday', label: '生日' },
+            { key: 'birthdayType', label: '生日类型' },
+            { key: 'householdType', label: '户口性质' },
+            { key: 'currentAddress', label: '现住址' },
+            { key: 'householdAddress', label: '户籍所在地' },
+            { key: 'isLeftBehind', label: '是否农村留守儿童' },
+            { key: 'isOrphan', label: '是否孤儿/事实无人抚养' },
+            { key: 'isOnlyChild', label: '是否独生子女' },
+            { key: 'isMartyrChild', label: '是否烈士/优抚对象子女' },
+            { key: 'disabilityType', label: '残疾类型及等级' },
+            { key: 'politicalStatus', label: '政治面貌' },
+            { key: 'joinTeamDate', label: '入队时间' },
+            { key: 'joinLeagueDate', label: '入团时间' },
+            { key: 'joinPartyDate', label: '入党时间' },
+            { key: 'teamPosition', label: '团/队内职务' },
+            { key: 'enrollmentYear', label: '入学年份' },
+            { key: 'subsidyStatus', label: '资助情况' },
+            { key: 'transportMode', label: '上下学交通方式' },
+            { key: 'firstContactName', label: '第一联系人姓名' },
+            { key: 'firstContactPhone', label: '第一联系人电话' },
+            { key: 'firstContactIdCard', label: '第一联系人身份证号码' },
+            { key: 'secondContactName', label: '第二联系人姓名' },
+            { key: 'secondContactPhone', label: '第二联系人电话' },
+            { key: 'secondContactIdCard', label: '第二联系人身份证号码' },
+            { key: 'emergencyContact', label: '紧急备用联系人及电话' },
+            { key: 'homeAddress', label: '家庭详细住址' },
+            { key: 'isBoarding', label: '是否住校' },
+            { key: 'bloodType', label: '血型' },
+            { key: 'majorDisease', label: '重大疾病史' },
+            { key: 'allergyHistory', label: '药物/食物过敏史' },
+            { key: 'specialConstitution', label: '特殊体质/禁忌' },
+            { key: 'transportDetail', label: '上下学方式及接送人' },
+            { key: 'medicationInfo', label: '在校服药情况' },
+            { key: 'psychologicalLevel', label: '心理预警等级' }
+        ];
+        
         // 默认课表模板
         const defaultPeriodTimes = [
             { period: 1, periodLabel: '第1节', timeSlot: '早上', startTime: '07:30', endTime: '08:15' },
@@ -1112,8 +1143,8 @@
                     
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
                         <button class="btn-add" onclick="showAddStudentForm()">➕ 添加学生</button>
-                        <button class="btn-export" onclick="exportRoster()">📤 导出花名册</button>
-                        <button class="btn-import" onclick="showImportRosterForm()">📥 导入花名册</button>
+                        <button class="btn-export" onclick="exportRosterExcel()">📤 导出Excel</button>
+                        <button class="btn-import" onclick="showImportRosterForm()">📥 导入Excel</button>
                     </div>
                     
                     <div id="importRosterContainer"></div>
@@ -1244,221 +1275,110 @@
         }
         
         function generateStudentFormHTML(student) {
-            return `
+            const selectFields = {
+                'gender': ['', '男', '女'],
+                'birthdayType': ['公历', '农历'],
+                'householdType': ['', '农业', '非农业', '居民户'],
+                'isLeftBehind': ['是', '否'],
+                'isOrphan': ['是', '否'],
+                'isOnlyChild': ['是', '否'],
+                'isMartyrChild': ['是', '否'],
+                'politicalStatus': ['群众', '少先队员', '共青团员', '中共党员'],
+                'transportMode': ['', '步行', '公交', '家长接送', '校车', '拼车'],
+                'isBoarding': ['住校', '走读'],
+                'bloodType': ['', 'A型', 'B型', 'AB型', 'O型', '未知'],
+                'psychologicalLevel': ['一般', '重点关注', '预警']
+            };
+            
+            let formHtml = `
                 <h3 style="margin-bottom: 15px;">${editingStudentId ? '编辑学生' : '添加学生'}</h3>
-                <div class="student-form-grid">
-                    <div class="form-group">
-                        <label>学号（自动生成）</label>
-                        <input type="text" id="f_studentId" value="${student.studentId || ''}" readonly style="background:#e9ecef;">
-                    </div>
-                    <div class="form-group">
-                        <label>姓名 *</label>
-                        <input type="text" id="f_name" value="${student.name || ''}" placeholder="姓名" required>
-                    </div>
-                    <div class="form-group">
-                        <label>性别</label>
-                        <select id="f_gender">
-                            <option value="">请选择</option>
-                            <option value="男" ${student.gender === '男' ? 'selected' : ''}>男</option>
-                            <option value="女" ${student.gender === '女' ? 'selected' : ''}>女</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>民族</label>
-                        <input type="text" id="f_ethnicity" value="${student.ethnicity || ''}" placeholder="如：汉族">
-                    </div>
-                    <div class="form-group">
-                        <label>身份证号码</label>
-                        <input type="text" id="f_idCard" value="${student.idCard || ''}" placeholder="身份证号码">
-                    </div>
-                    <div class="form-group">
-                        <label>生日</label>
-                        <input type="date" id="f_birthday" value="${student.birthday || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>生日类型</label>
-                        <select id="f_birthdayType">
-                            <option value="公历" ${student.birthdayType === '公历' ? 'selected' : ''}>公历</option>
-                            <option value="农历" ${student.birthdayType === '农历' ? 'selected' : ''}>农历</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>户口性质</label>
-                        <select id="f_householdType">
-                            <option value="">请选择</option>
-                            <option value="农业" ${student.householdType === '农业' ? 'selected' : ''}>农业</option>
-                            <option value="非农业" ${student.householdType === '非农业' ? 'selected' : ''}>非农业</option>
-                            <option value="居民户" ${student.householdType === '居民户' ? 'selected' : ''}>居民户</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>现住址</label>
-                        <input type="text" id="f_currentAddress" value="${student.currentAddress || ''}" placeholder="详细到门牌">
-                    </div>
-                    <div class="form-group">
-                        <label>户籍所在地</label>
-                        <input type="text" id="f_householdAddress" value="${student.householdAddress || ''}" placeholder="详细到XX村XX号">
-                    </div>
-                    <div class="form-group">
-                        <label>是否农村留守儿童</label>
-                        <select id="f_isLeftBehind">
-                            <option value="是" ${student.isLeftBehind === '是' ? 'selected' : ''}>是</option>
-                            <option value="否" ${student.isLeftBehind === '否' ? 'selected' : ''}>否</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>是否孤儿/事实无人抚养</label>
-                        <select id="f_isOrphan">
-                            <option value="是" ${student.isOrphan === '是' ? 'selected' : ''}>是</option>
-                            <option value="否" ${student.isOrphan === '否' ? 'selected' : ''}>否</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>是否独生子女</label>
-                        <select id="f_isOnlyChild">
-                            <option value="是" ${student.isOnlyChild === '是' ? 'selected' : ''}>是</option>
-                            <option value="否" ${student.isOnlyChild === '否' ? 'selected' : ''}>否</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>是否烈士/优抚对象子女</label>
-                        <select id="f_isMartyrChild">
-                            <option value="是" ${student.isMartyrChild === '是' ? 'selected' : ''}>是</option>
-                            <option value="否" ${student.isMartyrChild === '否' ? 'selected' : ''}>否</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>残疾类型及等级</label>
-                        <input type="text" id="f_disabilityType" value="${student.disabilityType || '无'}" placeholder="无/具体类型+等级">
-                    </div>
-                    <div class="form-group">
-                        <label>政治面貌</label>
-                        <select id="f_politicalStatus">
-                            <option value="群众" ${student.politicalStatus === '群众' ? 'selected' : ''}>群众</option>
-                            <option value="少先队员" ${student.politicalStatus === '少先队员' ? 'selected' : ''}>少先队员</option>
-                            <option value="共青团员" ${student.politicalStatus === '共青团员' ? 'selected' : ''}>共青团员</option>
-                            <option value="中共党员" ${student.politicalStatus === '中共党员' ? 'selected' : ''}>中共党员</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>入队时间</label>
-                        <input type="month" id="f_joinTeamDate" value="${student.joinTeamDate || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>入团时间</label>
-                        <input type="date" id="f_joinLeagueDate" value="${student.joinLeagueDate || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>入党时间</label>
-                        <input type="date" id="f_joinPartyDate" value="${student.joinPartyDate || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>团/队内职务</label>
-                        <input type="text" id="f_teamPosition" value="${student.teamPosition || ''}" placeholder="如大队委、中队长">
-                    </div>
-                    <div class="form-group">
-                        <label>入学年份</label>
-                        <input type="text" id="f_enrollmentYear" value="${student.enrollmentYear || ''}" placeholder="如：2024">
-                    </div>
-                    <div class="form-group">
-                        <label>资助情况</label>
-                        <input type="text" id="f_subsidyStatus" value="${student.subsidyStatus || '无'}" placeholder="低保/建档立卡/特困供养及证件编号">
-                    </div>
-                    <div class="form-group">
-                        <label>上下学交通方式</label>
-                        <select id="f_transportMode">
-                            <option value="">请选择</option>
-                            <option value="步行" ${student.transportMode === '步行' ? 'selected' : ''}>步行</option>
-                            <option value="公交" ${student.transportMode === '公交' ? 'selected' : ''}>公交</option>
-                            <option value="家长接送" ${student.transportMode === '家长接送' ? 'selected' : ''}>家长接送</option>
-                            <option value="校车" ${student.transportMode === '校车' ? 'selected' : ''}>校车</option>
-                            <option value="拼车" ${student.transportMode === '拼车' ? 'selected' : ''}>拼车</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>第一联系人姓名（父/母）</label>
-                        <input type="text" id="f_firstContactName" value="${student.firstContactName || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>第一联系人电话</label>
-                        <input type="text" id="f_firstContactPhone" value="${student.firstContactPhone || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>第一联系人身份证号码</label>
-                        <input type="text" id="f_firstContactIdCard" value="${student.firstContactIdCard || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>第二联系人姓名（父/母）</label>
-                        <input type="text" id="f_secondContactName" value="${student.secondContactName || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>第二联系人电话</label>
-                        <input type="text" id="f_secondContactPhone" value="${student.secondContactPhone || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>第二联系人身份证号码</label>
-                        <input type="text" id="f_secondContactIdCard" value="${student.secondContactIdCard || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>紧急备用联系人及电话</label>
-                        <input type="text" id="f_emergencyContact" value="${student.emergencyContact || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>家庭详细住址</label>
-                        <input type="text" id="f_homeAddress" value="${student.homeAddress || ''}" placeholder="精确到门牌，附进入指引">
-                    </div>
-                    <div class="form-group">
-                        <label>是否住校</label>
-                        <select id="f_isBoarding">
-                            <option value="住校" ${student.isBoarding === '住校' ? 'selected' : ''}>住校</option>
-                            <option value="走读" ${student.isBoarding === '走读' ? 'selected' : ''}>走读</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>血型</label>
-                        <select id="f_bloodType">
-                            <option value="">请选择</option>
-                            <option value="A型" ${student.bloodType === 'A型' ? 'selected' : ''}>A型</option>
-                            <option value="B型" ${student.bloodType === 'B型' ? 'selected' : ''}>B型</option>
-                            <option value="AB型" ${student.bloodType === 'AB型' ? 'selected' : ''}>AB型</option>
-                            <option value="O型" ${student.bloodType === 'O型' ? 'selected' : ''}>O型</option>
-                            <option value="未知" ${student.bloodType === '未知' ? 'selected' : ''}>未知</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>重大疾病史</label>
-                        <input type="text" id="f_majorDisease" value="${student.majorDisease || ''}" placeholder="如癫痫、心脏病、哮喘">
-                    </div>
-                    <div class="form-group">
-                        <label>药物/食物过敏史（红色加粗）</label>
-                        <input type="text" id="f_allergyHistory" value="${student.allergyHistory || ''}" style="color: red; font-weight: bold;">
-                    </div>
-                    <div class="form-group">
-                        <label>特殊体质/禁忌</label>
-                        <input type="text" id="f_specialConstitution" value="${student.specialConstitution || ''}" placeholder="如不能剧烈运动">
-                    </div>
-                    <div class="form-group">
-                        <label>上下学方式及接送人</label>
-                        <input type="text" id="f_transportDetail" value="${student.transportDetail || ''}" placeholder="自行/家长/托管/校车+接送人称呼及电话">
-                    </div>
-                    <div class="form-group">
-                        <label>是否需在校服药及服用方法</label>
-                        <input type="text" id="f_medicationInfo" value="${student.medicationInfo || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>心理预警等级</label>
-                        <select id="f_psychologicalLevel">
-                            <option value="一般" ${student.psychologicalLevel === '一般' ? 'selected' : ''}>一般</option>
-                            <option value="重点关注" ${student.psychologicalLevel === '重点关注' ? 'selected' : ''}>重点关注</option>
-                            <option value="预警" ${student.psychologicalLevel === '预警' ? 'selected' : ''}>预警</option>
-                        </select>
-                    </div>
-                </div>
+            `;
+            
+            // 每行3个字段
+            let currentRowFields = [];
+            
+            studentFields.forEach((field, index) => {
+                const value = student[field.key] || '';
+                let fieldHtml = '';
+                
+                if (field.key === 'studentId') {
+                    fieldHtml = `
+                        <div class="form-group">
+                            <label>${field.label}（自动生成）</label>
+                            <input type="text" id="f_${field.key}" value="${value}" readonly style="background:#e9ecef;">
+                        </div>
+                    `;
+                } else if (selectFields[field.key]) {
+                    const options = selectFields[field.key].map(opt => 
+                        `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt || '请选择'}</option>`
+                    ).join('');
+                    fieldHtml = `
+                        <div class="form-group">
+                            <label>${field.label}</label>
+                            <select id="f_${field.key}">${options}</select>
+                        </div>
+                    `;
+                } else if (field.key === 'birthday') {
+                    fieldHtml = `
+                        <div class="form-group">
+                            <label>${field.label}</label>
+                            <input type="date" id="f_${field.key}" value="${value}">
+                        </div>
+                    `;
+                } else if (field.key === 'joinTeamDate') {
+                    fieldHtml = `
+                        <div class="form-group">
+                            <label>${field.label}</label>
+                            <input type="month" id="f_${field.key}" value="${value}">
+                        </div>
+                    `;
+                } else if (field.key === 'joinLeagueDate' || field.key === 'joinPartyDate') {
+                    fieldHtml = `
+                        <div class="form-group">
+                            <label>${field.label}</label>
+                            <input type="date" id="f_${field.key}" value="${value}">
+                        </div>
+                    `;
+                } else if (field.key === 'allergyHistory') {
+                    fieldHtml = `
+                        <div class="form-group">
+                            <label>${field.label}（红色加粗）</label>
+                            <input type="text" id="f_${field.key}" value="${value}" style="color: red; font-weight: bold;">
+                        </div>
+                    `;
+                } else if (field.key === 'name') {
+                    fieldHtml = `
+                        <div class="form-group">
+                            <label>${field.label} *</label>
+                            <input type="text" id="f_${field.key}" value="${value}" required>
+                        </div>
+                    `;
+                } else {
+                    fieldHtml = `
+                        <div class="form-group">
+                            <label>${field.label}</label>
+                            <input type="text" id="f_${field.key}" value="${value}">
+                        </div>
+                    `;
+                }
+                
+                currentRowFields.push(fieldHtml);
+                
+                // 每3个字段一行
+                if (currentRowFields.length === 3 || index === studentFields.length - 1) {
+                    formHtml += `<div class="student-form-row">${currentRowFields.join('')}</div>`;
+                    currentRowFields = [];
+                }
+            });
+            
+            formHtml += `
                 <div class="student-form-actions">
                     <button class="btn-save" onclick="saveStudentForm()">💾 保存</button>
                     <button class="btn-cancel-inline" onclick="cancelStudentForm()" style="padding: 10px 20px; font-size: 14px;">取消</button>
                 </div>
             `;
+            
+            return formHtml;
         }
         
         function saveStudentForm() {
@@ -1468,47 +1388,15 @@
                 return;
             }
             
-            const studentData = {
-                studentId: document.getElementById('f_studentId').value.trim(),
-                name: name,
-                gender: document.getElementById('f_gender').value,
-                ethnicity: document.getElementById('f_ethnicity').value.trim(),
-                idCard: document.getElementById('f_idCard').value.trim(),
-                birthday: document.getElementById('f_birthday').value,
-                birthdayType: document.getElementById('f_birthdayType').value,
-                householdType: document.getElementById('f_householdType').value,
-                currentAddress: document.getElementById('f_currentAddress').value.trim(),
-                householdAddress: document.getElementById('f_householdAddress').value.trim(),
-                isLeftBehind: document.getElementById('f_isLeftBehind').value,
-                isOrphan: document.getElementById('f_isOrphan').value,
-                isOnlyChild: document.getElementById('f_isOnlyChild').value,
-                isMartyrChild: document.getElementById('f_isMartyrChild').value,
-                disabilityType: document.getElementById('f_disabilityType').value.trim() || '无',
-                politicalStatus: document.getElementById('f_politicalStatus').value,
-                joinTeamDate: document.getElementById('f_joinTeamDate').value,
-                joinLeagueDate: document.getElementById('f_joinLeagueDate').value,
-                joinPartyDate: document.getElementById('f_joinPartyDate').value,
-                teamPosition: document.getElementById('f_teamPosition').value.trim(),
-                enrollmentYear: document.getElementById('f_enrollmentYear').value.trim(),
-                subsidyStatus: document.getElementById('f_subsidyStatus').value.trim() || '无',
-                transportMode: document.getElementById('f_transportMode').value,
-                firstContactName: document.getElementById('f_firstContactName').value.trim(),
-                firstContactPhone: document.getElementById('f_firstContactPhone').value.trim(),
-                firstContactIdCard: document.getElementById('f_firstContactIdCard').value.trim(),
-                secondContactName: document.getElementById('f_secondContactName').value.trim(),
-                secondContactPhone: document.getElementById('f_secondContactPhone').value.trim(),
-                secondContactIdCard: document.getElementById('f_secondContactIdCard').value.trim(),
-                emergencyContact: document.getElementById('f_emergencyContact').value.trim(),
-                homeAddress: document.getElementById('f_homeAddress').value.trim(),
-                isBoarding: document.getElementById('f_isBoarding').value,
-                bloodType: document.getElementById('f_bloodType').value,
-                majorDisease: document.getElementById('f_majorDisease').value.trim(),
-                allergyHistory: document.getElementById('f_allergyHistory').value.trim(),
-                specialConstitution: document.getElementById('f_specialConstitution').value.trim(),
-                transportDetail: document.getElementById('f_transportDetail').value.trim(),
-                medicationInfo: document.getElementById('f_medicationInfo').value.trim(),
-                psychologicalLevel: document.getElementById('f_psychologicalLevel').value
-            };
+            const studentData = {};
+            studentFields.forEach(field => {
+                const element = document.getElementById('f_' + field.key);
+                if (element) {
+                    studentData[field.key] = element.value.trim();
+                }
+            });
+            
+            studentData.class = currentClass;
             
             if (editingStudentId) {
                 const index = rosterStudents.findIndex(s => s.studentId === editingStudentId);
@@ -1533,53 +1421,65 @@
             showRosterModule();
         }
         
-        function exportRoster() {
-            const exportData = {
-                className: currentClass,
-                students: rosterStudents,
-                exportedAt: new Date().toISOString()
-            };
+        // 导出Excel
+        function exportRosterExcel() {
+            const exportData = rosterStudents.map(student => {
+                const row = {};
+                studentFields.forEach(field => {
+                    row[field.label] = student[field.key] || '';
+                });
+                return row;
+            });
             
-            const jsonStr = JSON.stringify(exportData, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = currentClass + '_花名册.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '学生花名册');
+            XLSX.writeFile(wb, currentClass + '_花名册.xlsx');
         }
         
+        // 显示导入Excel表单
         function showImportRosterForm() {
             const importContainer = document.getElementById('importRosterContainer');
             
             importContainer.innerHTML = `
                 <div style="background: #e0f7fa; border: 2px solid #00bcd4; border-radius: 5px; padding: 10px; margin-bottom: 10px;">
                     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <input type="file" id="importRosterFileInput" accept=".json" onchange="handleImportRosterFile(this)">
+                        <input type="file" id="importRosterFileInput" accept=".xlsx,.xls" onchange="handleImportRosterExcel(this)">
                         <button class="btn btn-cancel-inline" onclick="cancelImportRoster()">取消</button>
                     </div>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">支持 .xlsx 和 .xls 格式</p>
                 </div>
             `;
         }
         
-        function handleImportRosterFile(input) {
+        // 处理导入Excel文件
+        function handleImportRosterExcel(input) {
             const file = input.files[0];
             if (!file) return;
             
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const importData = JSON.parse(e.target.result);
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
                     
-                    if (!importData.students || !Array.isArray(importData.students)) {
-                        alert('无效的花名册文件');
+                    if (!jsonData || jsonData.length === 0) {
+                        alert('Excel文件为空或格式不正确');
                         return;
                     }
                     
-                    rosterStudents = importData.students;
+                    // 将Excel数据转换为学生数据
+                    rosterStudents = jsonData.map(row => {
+                        const student = {};
+                        studentFields.forEach(field => {
+                            student[field.key] = row[field.label] || '';
+                        });
+                        student.class = currentClass;
+                        return student;
+                    });
+                    
                     saveRosterStudents();
                     
                     document.getElementById('importRosterContainer').innerHTML = '';
@@ -1587,10 +1487,10 @@
                     alert('导入成功！共导入 ' + rosterStudents.length + ' 名学生');
                     
                 } catch (error) {
-                    alert('文件解析失败，请检查文件格式');
+                    alert('Excel文件解析失败，请检查文件格式');
                 }
             };
-            reader.readAsText(file);
+            reader.readAsArrayBuffer(file);
         }
         
         function cancelImportRoster() {
