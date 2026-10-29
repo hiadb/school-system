@@ -406,7 +406,7 @@
                     <div class="date-picker">
                         <div class="date-scroll">
                             <button class="scroll-btn" onclick="scrollDate('year', 1)">▲</button>
-                            <div class="scroll-value year" id="dateYear" ondblclick="startEditDate('year')" title="双击修改年份">2024</div>
+                            <div class="scroll-value year" id="dateYear" ondblclick="startEditDate('year')" title="双击修改年份">2026</div>
                             <button class="scroll-btn" onclick="scrollDate('year', -1)">▼</button>
                         </div>
                         <div class="date-scroll">
@@ -466,13 +466,26 @@
         let activeFilters = {};
         let committeeRosterData = [];
         let pointsDetailsData = [];
-        let pointsDateState = { year: 2024, month: 1, day: 1 };
+        let pointsDateState = { year: 2026, month: 9, day: 1 };
         let editingDateType = null;
         
         const gradeMap = { '一': '01', '二': '02', '三': '03', '四': '04', '五': '05', '六': '06', '七': '07', '八': '08', '九': '09', '初一': '07', '初二': '08', '初三': '09', '高一': '10', '高二': '11', '高三': '12' };
         
-        // 学期周次安排表（用于自动计算周数）
-        // 每个区间: { start: 'M-D', end: 'M-D', week: 周次数字, label: '第X周' }
+        // 学期周次安排表（完全对照2026年秋季学期大周时间安排表）
+        const semesterWeeks = [
+            { week: 1, label: '第一周', start: '09-01', end: '09-05' },
+            { week: 2, label: '第二周', start: '09-08', end: '09-17' },
+            { week: 3, label: '第三周', start: '09-21', end: '09-30' },
+            { week: 4, label: '第四周', start: '10-08', end: '10-16' },
+            { week: 5, label: '第五周', start: '10-19', end: '10-29' },
+            { week: 6, label: '第六周', start: '11-02', end: '11-12' },
+            { week: 7, label: '第七周', start: '11-16', end: '11-26' },
+            { week: 8, label: '第八周', start: '11-30', end: '12-09' },
+            { week: 9, label: '第九周', start: '12-14', end: '12-24' },
+            { week: 10, label: '第十周', start: '12-28', end: '01-07' },
+            { week: 11, label: '第十一周', start: '01-12', end: '01-31' } 
+        ];
+        
         // 根据日期计算周次
         function getWeekByDate(dateStr) {
             if (!dateStr) return '-';
@@ -499,40 +512,6 @@
                 }
             }
             return '未分周';
-        }
-        
-        // 根据日期计算周次
-        function getWeekByDate(dateStr) {
-            if (!dateStr) return '-';
-            const parts = dateStr.split('-');
-            if (parts.length < 3) return '-';
-            const month = parseInt(parts[1]);
-            const day = parseInt(parts[2]);
-            const md = String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-            
-            // 处理跨年：1月属于第10周及以后
-            const isJanuary = month === 1;
-            
-            for (const w of semesterWeeks) {
-                const [sm, sd] = w.start.split('-').map(Number);
-                const [em, ed] = w.end.split('-').map(Number);
-                
-                // 跨年处理
-                if (sm > em) {
-                    // 跨年区间（如12-28到01-06）
-                    if ((month === sm && day >= sd) || (month === em && day <= ed)) {
-                        return w.label;
-                    }
-                } else {
-                    // 同年区间
-                    if (month >= sm && month <= em) {
-                        if (month === sm && day < sd) continue;
-                        if (month === em && day > ed) continue;
-                        return w.label;
-                    }
-                }
-            }
-            return '-';
         }
         
         const studentFields = [
