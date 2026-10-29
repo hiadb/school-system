@@ -130,7 +130,64 @@
         .empty-schedule { text-align: center; padding: 60px 20px; color: #999; }
         .empty-schedule .icon { font-size: 64px; margin-bottom: 20px; }
         .empty-schedule p { font-size: 16px; margin-bottom: 20px; }
-        @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; padding: 10px; } .nav-group-header { padding: 10px 15px; font-size: 12px; } .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; } .schedule-title-input { font-size: 14px; } .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; } .home-btn { font-size: 24px; padding: 5px; } .student-form-row .form-group { flex: 1 1 100% !important; } }
+        /* 积分明细模块样式 */
+        .points-details-container { padding: 0; }
+        .points-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .points-header h2 { font-size: 20px; color: #333; }
+        .points-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .points-summary { display: flex; gap: 20px; background: #f0f0ff; border: 2px solid #667eea; border-radius: 8px; padding: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .points-summary-item { display: flex; flex-direction: column; gap: 5px; }
+        .points-summary-item .label { font-size: 12px; color: #666; }
+        .points-summary-item .value { font-size: 20px; font-weight: bold; color: #667eea; }
+        .points-table-container { overflow-x: auto; max-height: 600px; border: 1px solid #ddd; border-radius: 8px; }
+        .points-table { width: 100%; min-width: 800px; border-collapse: collapse; }
+        .points-table th { background: #667eea; color: white; padding: 10px; font-size: 13px; text-align: left; position: sticky; top: 0; z-index: 10; }
+        .points-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+        .points-table tr:hover { background: #f5f5ff; }
+        .points-table .points-positive { color: #4CAF50; font-weight: bold; }
+        .points-table .points-negative { color: #f44336; font-weight: bold; }
+        .points-table .points-reason { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .points-empty { text-align: center; padding: 60px 20px; color: #999; }
+        .points-empty .icon { font-size: 64px; margin-bottom: 20px; }
+        /* 小窗口（模态框）样式 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal-window { background: white; border-radius: 12px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalIn 0.25s ease; max-height: 90vh; overflow-y: auto; }
+        @keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid #eee; }
+        .modal-header h3 { font-size: 17px; color: #333; }
+        .modal-close { background: none; border: none; font-size: 22px; color: #999; cursor: pointer; line-height: 1; padding: 0 5px; }
+        .modal-close:hover { color: #f44336; }
+        .modal-body { padding: 20px 22px; }
+        .modal-footer { padding: 15px 22px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-footer .btn { padding: 9px 20px; font-size: 14px; }
+        .modal-form-group { margin-bottom: 16px; }
+        .modal-form-group label { display: block; margin-bottom: 6px; font-size: 13px; color: #555; font-weight: 600; }
+        .modal-form-group label .required { color: #f44336; margin-left: 2px; }
+        .modal-form-group input[type="text"], .modal-form-group input[type="number"] { width: 100%; padding: 9px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; transition: border-color 0.2s; }
+        .modal-form-group input:focus { outline: none; border-color: #667eea; }
+        .modal-form-group input[readonly] { background: #f5f5f5; color: #555; }
+        .modal-form-group textarea { width: 100%; padding: 9px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; resize: vertical; min-height: 80px; font-family: inherit; }
+        .modal-form-group textarea:focus { outline: none; border-color: #667eea; }
+        .student-name-display { margin-top: 6px; font-size: 13px; color: #667eea; font-weight: bold; min-height: 18px; }
+        /* 日期滚动选择器样式 */
+        .date-picker { display: flex; gap: 8px; align-items: center; justify-content: center; }
+        .date-scroll { position: relative; display: flex; flex-direction: column; align-items: center; }
+        .date-scroll .scroll-btn { background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; width: 100%; padding: 4px 0; cursor: pointer; font-size: 12px; color: #666; line-height: 1; }
+        .date-scroll .scroll-btn:hover { background: #667eea; color: white; border-color: #667eea; }
+        .date-scroll .scroll-btn:active { transform: scale(0.95); }
+        .date-scroll .scroll-value { padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 15px; font-weight: bold; color: #333; text-align: center; min-width: 60px; background: white; }
+        .date-scroll .scroll-value.year { min-width: 80px; }
+        .date-scroll .scroll-value.month { min-width: 55px; }
+        .date-scroll .scroll-value.day { min-width: 55px; }
+        .date-hint { text-align: center; font-size: 11px; color: #999; margin-top: 5px; }
+        .points-number-group { display: flex; gap: 8px; }
+        .points-number-group input { flex: 1; }
+        .points-quick-btns { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+        .points-quick-btns button { padding: 4px 10px; border: 1px solid #ddd; background: white; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+        .points-quick-btns button:hover { background: #667eea; color: white; border-color: #667eea; }
+        .points-quick-btns button.negative:hover { background: #f44336; border-color: #f44336; }
+        @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; padding: 10px; } .nav-group-header { padding: 10px 15px; font-size: 12px; } .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; } .schedule-title-input { font-size: 14px; } .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; } .home-btn { font-size: 24px; padding: 5px; } .student-form-row .form-group { flex: 1 1 100% !important; } .modal-window { max-width: 100%; } }
     </style>
 </head>
 <body>
@@ -319,6 +376,68 @@
         </div>
     </div>
 
+    <!-- 积分明细 - 添加积分小窗口 -->
+    <div class="modal-overlay" id="pointsModal" onclick="if(event.target===this)closePointsModal()">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>📝 添加积分记录</h3>
+                <button class="modal-close" onclick="closePointsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-form-group">
+                    <label>学号后两位 <span class="required">*</span></label>
+                    <input type="text" id="pointsStudentIdSuffix" placeholder="输入学号后两位，如 01" maxlength="2" oninput="onStudentIdSuffixInput(this)">
+                    <div class="student-name-display" id="pointsStudentNameDisplay"></div>
+                </div>
+                <div class="modal-form-group">
+                    <label>日期 <span class="required">*</span></label>
+                    <div class="date-picker">
+                        <div class="date-scroll">
+                            <button class="scroll-btn" onclick="scrollDate('year', 1)">▲</button>
+                            <div class="scroll-value year" id="dateYear">2024</div>
+                            <button class="scroll-btn" onclick="scrollDate('year', -1)">▼</button>
+                        </div>
+                        <div class="date-scroll">
+                            <button class="scroll-btn" onclick="scrollDate('month', 1)">▲</button>
+                            <div class="scroll-value month" id="dateMonth">01</div>
+                            <button class="scroll-btn" onclick="scrollDate('month', -1)">▼</button>
+                        </div>
+                        <div class="date-scroll">
+                            <button class="scroll-btn" onclick="scrollDate('day', 1)">▲</button>
+                            <div class="scroll-value day" id="dateDay">01</div>
+                            <button class="scroll-btn" onclick="scrollDate('day', -1)">▼</button>
+                        </div>
+                    </div>
+                    <div class="date-hint">点击 ▲▼ 调整年/月/日，默认今天</div>
+                </div>
+                <div class="modal-form-group">
+                    <label>加分/扣分 <span class="required">*</span></label>
+                    <div class="points-number-group">
+                        <input type="number" id="pointsValue" value="1" min="-100" max="300" step="1" placeholder="-100 ~ 300">
+                    </div>
+                    <div class="points-quick-btns">
+                        <button onclick="setPointsValue(1)">+1</button>
+                        <button onclick="setPointsValue(2)">+2</button>
+                        <button onclick="setPointsValue(5)">+5</button>
+                        <button onclick="setPointsValue(10)">+10</button>
+                        <button class="negative" onclick="setPointsValue(-1)">-1</button>
+                        <button class="negative" onclick="setPointsValue(-2)">-2</button>
+                        <button class="negative" onclick="setPointsValue(-5)">-5</button>
+                        <button class="negative" onclick="setPointsValue(-10)">-10</button>
+                    </div>
+                </div>
+                <div class="modal-form-group">
+                    <label>加分原因 <span class="required">*</span></label>
+                    <textarea id="pointsReason" placeholder="请输入加分/扣分原因，如：课堂表现优秀、帮助同学、未完成作业等"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" style="background:#999;color:white;padding:9px 20px;font-size:14px;" onclick="closePointsModal()">取消</button>
+                <button class="btn" style="background:#4CAF50;color:white;padding:9px 20px;font-size:14px;" onclick="addPointsRecord()">添加</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const WORKER_URL = 'https://school-api.hru123.workers.dev';
         const API_BASE = WORKER_URL + '/api';
@@ -334,6 +453,8 @@
         let editingStudentId = null;
         let activeFilters = {};
         let committeeRosterData = [];
+        let pointsDetailsData = [];
+        let pointsDateState = { year: 2024, month: 1, day: 1 };
         
         const gradeMap = { '一': '01', '二': '02', '三': '03', '四': '04', '五': '05', '六': '06', '七': '07', '八': '08', '九': '09', '初一': '07', '初二': '08', '初三': '09', '高一': '10', '高二': '11', '高三': '12' };
         
@@ -426,7 +547,6 @@
             { period: 8, periodLabel: '第8节', timeSlot: '晚上', startTime: '19:55', endTime: '20:40' }
         ];
         
-        // 周一到周十
         const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周七', '周八', '周九', '周十'];
         const timeSlots = ['早上', '上午', '下午', '晚上'];
         
@@ -436,8 +556,8 @@
         function goHome() { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); document.getElementById('mainContent').innerHTML = '<div id="module-schedule-main"></div>'; loadMainSchedule(); }
         function toggleGroup(h) { const s = h.nextElementSibling; const a = h.querySelector('.arrow'); if (s.classList.contains('open')) { s.classList.remove('open'); a.classList.remove('open'); } else { document.querySelectorAll('.nav-submenu.open').forEach(m => { if (m !== s) { m.classList.remove('open'); const oa = m.previousElementSibling.querySelector('.arrow'); if (oa) oa.classList.remove('open'); } }); s.classList.add('open'); a.classList.add('open'); } }
         function getTeacherClasses() { const u = getUser(); const c = []; if (u.classTeacherOf) u.classTeacherOf.forEach(x => c.push(x)); if (u.subjectTeacherOf) u.subjectTeacherOf.forEach(s => { const m = s.match(/^(.+?)(语文|数学|英语|物理|化学|生物|历史|地理|政治|体育|音乐|美术|信息技术|科学|道德与法治|劳动)/); if (m && m[1] && !c.includes(m[1])) c.push(m[1]); }); if (c.length === 0 && u.className) c.push(u.className); return c; }
-        function loadClassSelector() { const sel = document.getElementById('classSelect'); const classes = getTeacherClasses(); let o = '<option value="">请选择班级</option>'; classes.forEach(c => o += `<option value="${c}">${c}</option>`); sel.innerHTML = o; if (classes.length > 0) { sel.value = classes[0]; currentClass = classes[0]; loadAllSchedules(); loadRosterStudents(); loadCommitteeRosterData(); loadMainSchedule(); } }
-        function changeCurrentClass() { currentClass = document.getElementById('classSelect').value; activeFilters = {}; loadAllSchedules(); loadRosterStudents(); loadCommitteeRosterData(); loadMainSchedule(); }
+        function loadClassSelector() { const sel = document.getElementById('classSelect'); const classes = getTeacherClasses(); let o = '<option value="">请选择班级</option>'; classes.forEach(c => o += `<option value="${c}">${c}</option>`); sel.innerHTML = o; if (classes.length > 0) { sel.value = classes[0]; currentClass = classes[0]; loadAllSchedules(); loadRosterStudents(); loadCommitteeRosterData(); loadPointsDetailsData(); loadMainSchedule(); } }
+        function changeCurrentClass() { currentClass = document.getElementById('classSelect').value; activeFilters = {}; loadAllSchedules(); loadRosterStudents(); loadCommitteeRosterData(); loadPointsDetailsData(); loadMainSchedule(); }
         function encryptData(d) { return CryptoJS.AES.encrypt(JSON.stringify(d), ENCRYPTION_KEY).toString(); }
         function decryptData(e) { try { const b = CryptoJS.AES.decrypt(e, ENCRYPTION_KEY); return JSON.parse(b.toString(CryptoJS.enc.Utf8)); } catch { return null; } }
         function generateStudentId() { let g = '', c = ''; for (const [k, v] of Object.entries(gradeMap)) { if (currentClass.includes(k)) { g = v; break; } } if (!g) { const m = currentClass.match(/(\d+)/); if (m) g = m[1].padStart(2, '0'); } const cm = currentClass.match(/(\d+)班/); if (cm) c = cm[1].padStart(2, '0'); if (!g) g = '01'; if (!c) c = '01'; const cnt = rosterStudents.filter(s => s.studentId && s.studentId.startsWith(g + c)).length; return g + c + String(cnt + 1).padStart(2, '0'); }
@@ -479,7 +599,193 @@
         function importCommitteeRoster() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.xlsx,.xls'; i.onchange = function(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = new Uint8Array(e.target.result); const wb = XLSX.read(d, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const jd = XLSX.utils.sheet_to_json(ws); committeeRosterData = jd.map(row => ({ studentId: row['学号'] || '', studentName: row['姓名'] || '', position: row['职务'] || '', alias: row['职务别名'] || '', duty: row['工作内容'] || '', points: parseInt(row['积分']) || 0 })); saveCommitteeRosterData(); showCommitteeRosterModule(); alert('导入成功！'); } catch { alert('文件解析失败'); } }; r.readAsArrayBuffer(f); }; i.click(); }
         function showPointsListModule() { loadCommitteeRosterData(); const c = document.getElementById('mainContent'); c.innerHTML = `<div id="module-points-list"><h2 style="margin-bottom:20px;">📋 积分清单</h2><div class="class-info-banner"><span>当前班级：<span class="current-class">${currentClass||'未选择'}</span></span><span>积分总额：${committeeRosterData.reduce((s,m)=>s+(m.points||0),0)} 分</span></div><div class="roster-table-container"><table class="roster-table" style="min-width:600px;"><thead><tr><th class="col-frozen col-frozen-1">序号</th><th class="col-frozen col-frozen-2">姓名</th><th>职务</th><th>积分</th></tr></thead><tbody>${committeeRosterData.length===0?'<tr><td colspan="4" class="empty-state">暂无数据</td></tr>':committeeRosterData.map((m,i)=>`<tr><td class="col-frozen col-frozen-1">${i+1}</td><td class="col-frozen col-frozen-2">${m.studentName}</td><td>${m.position}</td><td>${m.points}</td></tr>`).join('')}</tbody></table></div></div>`; }
         function showPointsAssessmentModule() { document.getElementById('mainContent').innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">📊</div><h2>积分考核</h2><p style="color:#999;">该功能正在开发中</p></div>'; }
-        function showPointsDetailsModule() { document.getElementById('mainContent').innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">📝</div><h2>积分明细</h2><p style="color:#999;">该功能正在开发中</p></div>'; }
+        
+        // ==================== 积分明细模块 ====================
+        function loadPointsDetailsData() {
+            const s = localStorage.getItem('points_details_encrypted_' + currentClass);
+            if (s) {
+                const d = decryptData(s);
+                pointsDetailsData = (d && Array.isArray(d)) ? d : [];
+            } else {
+                pointsDetailsData = [];
+            }
+        }
+        function savePointsDetailsData() {
+            localStorage.setItem('points_details_encrypted_' + currentClass, encryptData(pointsDetailsData));
+        }
+        function showPointsDetailsModule() {
+            loadPointsDetailsData();
+            const c = document.getElementById('mainContent');
+            const totalAdd = pointsDetailsData.filter(p => p.points > 0).reduce((s, p) => s + p.points, 0);
+            const totalMinus = pointsDetailsData.filter(p => p.points < 0).reduce((s, p) => s + p.points, 0);
+            const netTotal = totalAdd + totalMinus;
+            c.innerHTML = `
+                <div id="module-points-details" class="points-details-container">
+                    <div class="points-header">
+                        <h2>📝 积分明细</h2>
+                        <div class="points-actions">
+                            <button class="btn-add" onclick="openPointsModal()">➕ 添加积分</button>
+                            <button class="btn-export" onclick="exportPointsDetails()">📤 导出</button>
+                        </div>
+                    </div>
+                    <div class="class-info-banner">
+                        <span>当前班级：<span class="current-class">${currentClass||'未选择'}</span></span>
+                        <span>记录条数：${pointsDetailsData.length} 条</span>
+                    </div>
+                    <div class="points-summary">
+                        <div class="points-summary-item"><span class="label">累计加分</span><span class="value" style="color:#4CAF50;">+${totalAdd}</span></div>
+                        <div class="points-summary-item"><span class="label">累计扣分</span><span class="value" style="color:#f44336;">${totalMinus}</span></div>
+                        <div class="points-summary-item"><span class="label">净积分</span><span class="value">${netTotal}</span></div>
+                        <div class="points-summary-item"><span class="label">参与学生</span><span class="value">${new Set(pointsDetailsData.map(p => p.studentId)).size} 人</span></div>
+                    </div>
+                    <div class="points-table-container">
+                        <table class="points-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:50px;">序号</th>
+                                    <th style="width:90px;">日期</th>
+                                    <th style="width:90px;">学号</th>
+                                    <th style="width:80px;">姓名</th>
+                                    <th style="width:80px;">积分</th>
+                                    <th>加分原因</th>
+                                    <th style="width:80px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pointsDetailsBody">
+                                ${pointsDetailsData.length === 0 ? '<tr><td colspan="7" class="points-empty"><div class="icon">📝</div><p>暂无积分记录，点击上方“添加积分”开始记录</p></td></tr>' : pointsDetailsData.map((p, i) => `
+                                    <tr>
+                                        <td>${i + 1}</td>
+                                        <td>${p.date || ''}</td>
+                                        <td>${p.studentId || ''}</td>
+                                        <td>${p.studentName || ''}</td>
+                                        <td class="${p.points > 0 ? 'points-positive' : 'points-negative'}">${p.points > 0 ? '+' + p.points : p.points}</td>
+                                        <td class="points-reason" title="${(p.reason || '').replace(/"/g, '&quot;')}">${p.reason || ''}</td>
+                                        <td><button class="btn btn-delete" onclick="deletePointsRecord(${i})">删除</button></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        function openPointsModal() {
+            const now = new Date();
+            pointsDateState = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+            updateDateDisplay();
+            document.getElementById('pointsStudentIdSuffix').value = '';
+            document.getElementById('pointsStudentNameDisplay').textContent = '';
+            document.getElementById('pointsValue').value = '1';
+            document.getElementById('pointsReason').value = '';
+            document.getElementById('pointsModal').classList.add('show');
+            setTimeout(() => document.getElementById('pointsStudentIdSuffix').focus(), 100);
+        }
+        function closePointsModal() {
+            document.getElementById('pointsModal').classList.remove('show');
+        }
+        function onStudentIdSuffixInput(input) {
+            // 只允许数字
+            input.value = input.value.replace(/\D/g, '');
+            const suffix = input.value;
+            const display = document.getElementById('pointsStudentNameDisplay');
+            if (suffix.length === 0) {
+                display.textContent = '';
+                display.style.color = '#667eea';
+                return;
+            }
+            // 在花名册中查找学号后两位匹配的学生
+            const matched = rosterStudents.filter(s => {
+                if (!s.studentId) return false;
+                const sid = String(s.studentId);
+                return sid.length >= 2 && sid.slice(-2) === suffix;
+            });
+            if (matched.length === 0) {
+                display.textContent = '⚠️ 未找到匹配的学生';
+                display.style.color = '#f44336';
+            } else if (matched.length === 1) {
+                display.textContent = '✅ ' + matched[0].name + '（' + matched[0].studentId + '）';
+                display.style.color = '#4CAF50';
+            } else {
+                display.textContent = '⚠️ 匹配到 ' + matched.length + ' 名学生：' + matched.map(s => s.name + '(' + s.studentId + ')').join('、') + '，请检查';
+                display.style.color = '#ff9800';
+            }
+        }
+        function updateDateDisplay() {
+            document.getElementById('dateYear').textContent = pointsDateState.year;
+            document.getElementById('dateMonth').textContent = String(pointsDateState.month).padStart(2, '0');
+            document.getElementById('dateDay').textContent = String(pointsDateState.day).padStart(2, '0');
+        }
+        function scrollDate(type, delta) {
+            if (type === 'year') {
+                pointsDateState.year += delta;
+                if (pointsDateState.year < 2000) pointsDateState.year = 2000;
+                if (pointsDateState.year > 2100) pointsDateState.year = 2100;
+            } else if (type === 'month') {
+                pointsDateState.month += delta;
+                if (pointsDateState.month > 12) { pointsDateState.month = 1; pointsDateState.year++; }
+                if (pointsDateState.month < 1) { pointsDateState.month = 12; pointsDateState.year--; }
+            } else if (type === 'day') {
+                pointsDateState.day += delta;
+                const maxDay = getMaxDay(pointsDateState.year, pointsDateState.month);
+                if (pointsDateState.day > maxDay) { pointsDateState.day = 1; pointsDateState.month++; if (pointsDateState.month > 12) { pointsDateState.month = 1; pointsDateState.year++; } }
+                if (pointsDateState.day < 1) { pointsDateState.month--; if (pointsDateState.month < 1) { pointsDateState.month = 12; pointsDateState.year--; } pointsDateState.day = getMaxDay(pointsDateState.year, pointsDateState.month); }
+            }
+            updateDateDisplay();
+        }
+        function getMaxDay(year, month) {
+            return new Date(year, month, 0).getDate();
+        }
+        function setPointsValue(v) {
+            document.getElementById('pointsValue').value = v;
+        }
+        function addPointsRecord() {
+            const suffix = document.getElementById('pointsStudentIdSuffix').value.trim();
+            const pointsVal = parseInt(document.getElementById('pointsValue').value);
+            const reason = document.getElementById('pointsReason').value.trim();
+            if (!suffix) { alert('请输入学号后两位'); return; }
+            if (isNaN(pointsVal) || pointsVal < -100 || pointsVal > 300) { alert('积分必须在 -100 到 300 之间'); return; }
+            if (!reason) { alert('请输入加分原因'); return; }
+            // 查找学生
+            const matched = rosterStudents.filter(s => {
+                if (!s.studentId) return false;
+                const sid = String(s.studentId);
+                return sid.length >= 2 && sid.slice(-2) === suffix;
+            });
+            if (matched.length === 0) { alert('未找到学号后两位为 "' + suffix + '" 的学生'); return; }
+            if (matched.length > 1) { alert('匹配到多名学生，请检查学号后两位是否唯一：' + matched.map(s => s.name + '(' + s.studentId + ')').join('、')); return; }
+            const student = matched[0];
+            const dateStr = pointsDateState.year + '-' + String(pointsDateState.month).padStart(2, '0') + '-' + String(pointsDateState.day).padStart(2, '0');
+            pointsDetailsData.push({
+                studentId: student.studentId,
+                studentName: student.name,
+                date: dateStr,
+                points: pointsVal,
+                reason: reason,
+                createdAt: new Date().toISOString()
+            });
+            savePointsDetailsData();
+            closePointsModal();
+            showPointsDetailsModule();
+            // 提示添加成功
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:12px 20px;border-radius:6px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+            toast.textContent = '✅ 已添加：' + student.name + ' ' + (pointsVal > 0 ? '+' : '') + pointsVal + ' 分';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+        function deletePointsRecord(i) {
+            if (!confirm('确定删除这条积分记录吗？')) return;
+            pointsDetailsData.splice(i, 1);
+            savePointsDetailsData();
+            showPointsDetailsModule();
+        }
+        function exportPointsDetails() {
+            const d = pointsDetailsData.map(p => ({ '日期': p.date || '', '学号': p.studentId || '', '姓名': p.studentName || '', '积分': p.points, '加分原因': p.reason || '' }));
+            const ws = XLSX.utils.json_to_sheet(d);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '积分明细');
+            XLSX.writeFile(wb, currentClass + '_积分明细.xlsx');
+        }
         
         function loadAllSchedules() { const s = localStorage.getItem('all_schedules_' + currentClass); allSchedules = s ? JSON.parse(s) : {}; }
         
