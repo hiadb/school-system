@@ -140,7 +140,7 @@
         .points-summary-item .label { font-size: 12px; color: #666; }
         .points-summary-item .value { font-size: 20px; font-weight: bold; color: #667eea; }
         .points-table-container { overflow-x: auto; max-height: 600px; border: 1px solid #ddd; border-radius: 8px; }
-        .points-table { width: 100%; min-width: 800px; border-collapse: collapse; }
+        .points-table { width: 100%; min-width: 900px; border-collapse: collapse; }
         .points-table th { background: #667eea; color: white; padding: 10px; font-size: 13px; text-align: left; position: sticky; top: 0; z-index: 10; }
         .points-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
         .points-table tr:hover { background: #f5f5ff; }
@@ -176,10 +176,13 @@
         .date-scroll .scroll-btn { background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; width: 100%; padding: 4px 0; cursor: pointer; font-size: 12px; color: #666; line-height: 1; }
         .date-scroll .scroll-btn:hover { background: #667eea; color: white; border-color: #667eea; }
         .date-scroll .scroll-btn:active { transform: scale(0.95); }
-        .date-scroll .scroll-value { padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 15px; font-weight: bold; color: #333; text-align: center; min-width: 60px; background: white; }
+        .date-scroll .scroll-value { padding: 6px 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 15px; font-weight: bold; color: #333; text-align: center; min-width: 60px; background: white; cursor: pointer; user-select: none; }
+        .date-scroll .scroll-value:hover { border-color: #667eea; background: #f0f0ff; }
         .date-scroll .scroll-value.year { min-width: 80px; }
         .date-scroll .scroll-value.month { min-width: 55px; }
         .date-scroll .scroll-value.day { min-width: 55px; }
+        .date-scroll .scroll-value.editing { padding: 0; border: none; }
+        .date-scroll .scroll-value.editing input { width: 100%; padding: 6px 10px; border: 2px solid #667eea; border-radius: 6px; font-size: 15px; font-weight: bold; color: #333; text-align: center; }
         .date-hint { text-align: center; font-size: 11px; color: #999; margin-top: 5px; }
         .points-number-group { display: flex; gap: 8px; }
         .points-number-group input { flex: 1; }
@@ -187,6 +190,15 @@
         .points-quick-btns button { padding: 4px 10px; border: 1px solid #ddd; background: white; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
         .points-quick-btns button:hover { background: #667eea; color: white; border-color: #667eea; }
         .points-quick-btns button.negative:hover { background: #f44336; border-color: #f44336; }
+        /* 积分清单排名样式 */
+        .rank-badge { display: inline-block; width: 26px; height: 26px; line-height: 26px; text-align: center; border-radius: 50%; font-weight: bold; font-size: 12px; color: white; }
+        .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500); }
+        .rank-2 { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); }
+        .rank-3 { background: linear-gradient(135deg, #CD7F32, #B8692A); }
+        .rank-normal { background: #e0e0e0; color: #666; }
+        .points-bar-wrapper { display: flex; align-items: center; gap: 8px; }
+        .points-bar { height: 18px; border-radius: 9px; background: linear-gradient(90deg, #667eea, #764ba2); min-width: 2px; transition: width 0.3s; }
+        .points-bar.negative { background: linear-gradient(90deg, #f44336, #ff7961); }
         @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; padding: 10px; } .nav-group-header { padding: 10px 15px; font-size: 12px; } .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; } .schedule-title-input { font-size: 14px; } .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; } .home-btn { font-size: 24px; padding: 5px; } .student-form-row .form-group { flex: 1 1 100% !important; } .modal-window { max-width: 100%; } }
     </style>
 </head>
@@ -394,21 +406,21 @@
                     <div class="date-picker">
                         <div class="date-scroll">
                             <button class="scroll-btn" onclick="scrollDate('year', 1)">▲</button>
-                            <div class="scroll-value year" id="dateYear">2024</div>
+                            <div class="scroll-value year" id="dateYear" ondblclick="startEditDate('year')" title="双击修改年份">2024</div>
                             <button class="scroll-btn" onclick="scrollDate('year', -1)">▼</button>
                         </div>
                         <div class="date-scroll">
                             <button class="scroll-btn" onclick="scrollDate('month', 1)">▲</button>
-                            <div class="scroll-value month" id="dateMonth">01</div>
+                            <div class="scroll-value month" id="dateMonth" ondblclick="startEditDate('month')" title="双击修改月份">01</div>
                             <button class="scroll-btn" onclick="scrollDate('month', -1)">▼</button>
                         </div>
                         <div class="date-scroll">
                             <button class="scroll-btn" onclick="scrollDate('day', 1)">▲</button>
-                            <div class="scroll-value day" id="dateDay">01</div>
+                            <div class="scroll-value day" id="dateDay" ondblclick="startEditDate('day')" title="双击修改日期">01</div>
                             <button class="scroll-btn" onclick="scrollDate('day', -1)">▼</button>
                         </div>
                     </div>
-                    <div class="date-hint">点击 ▲▼ 调整年/月/日，默认今天</div>
+                    <div class="date-hint">点击 ▲▼ 调整，或双击数字直接输入</div>
                 </div>
                 <div class="modal-form-group">
                     <label>加分/扣分 <span class="required">*</span></label>
@@ -455,8 +467,59 @@
         let committeeRosterData = [];
         let pointsDetailsData = [];
         let pointsDateState = { year: 2024, month: 1, day: 1 };
+        let editingDateType = null;
         
         const gradeMap = { '一': '01', '二': '02', '三': '03', '四': '04', '五': '05', '六': '06', '七': '07', '八': '08', '九': '09', '初一': '07', '初二': '08', '初三': '09', '高一': '10', '高二': '11', '高三': '12' };
+        
+        // 学期周次安排表（用于自动计算周数）
+        // 每个区间: { start: 'M-D', end: 'M-D', week: 周次数字, label: '第X周' }
+        const semesterWeeks = [
+            { week: 1, label: '第一周', start: '09-01', end: '09-04' },
+            { week: 2, label: '第二周', start: '09-08', end: '09-16' },
+            { week: 3, label: '第三周', start: '09-21', end: '09-29' },
+            { week: 4, label: '第四周', start: '10-08', end: '10-15' },
+            { week: 5, label: '第五周', start: '10-19', end: '10-28' },
+            { week: 6, label: '第六周', start: '11-02', end: '11-11' },
+            { week: 7, label: '第七周', start: '11-16', end: '11-25' },
+            { week: 8, label: '第八周', start: '11-30', end: '12-08' },
+            { week: 9, label: '第九周', start: '12-14', end: '12-23' },
+            { week: 10, label: '第十周', start: '12-28', end: '01-06' },
+            { week: 11, label: '第十一周', start: '01-12', end: '12-31' }
+        ];
+        
+        // 根据日期计算周次
+        function getWeekByDate(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length < 3) return '-';
+            const month = parseInt(parts[1]);
+            const day = parseInt(parts[2]);
+            const md = String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+            
+            // 处理跨年：1月属于第10周及以后
+            const isJanuary = month === 1;
+            
+            for (const w of semesterWeeks) {
+                const [sm, sd] = w.start.split('-').map(Number);
+                const [em, ed] = w.end.split('-').map(Number);
+                
+                // 跨年处理
+                if (sm > em) {
+                    // 跨年区间（如12-28到01-06）
+                    if ((month === sm && day >= sd) || (month === em && day <= ed)) {
+                        return w.label;
+                    }
+                } else {
+                    // 同年区间
+                    if (month >= sm && month <= em) {
+                        if (month === sm && day < sd) continue;
+                        if (month === em && day > ed) continue;
+                        return w.label;
+                    }
+                }
+            }
+            return '-';
+        }
         
         const studentFields = [
             { key: 'studentId', label: '学号', width: 'width-medium' }, { key: 'name', label: '姓名', width: 'width-short' },
@@ -597,7 +660,103 @@
         function deleteCommitteeMember(i) { committeeRosterData.splice(i, 1); saveCommitteeRosterData(); showCommitteeRosterModule(); }
         function exportCommitteeRoster() { const d = committeeRosterData.map(m => ({ '学号': '', '姓名': '', '职务': m.position || '', '职务别名': m.alias || '', '工作内容': m.duty || '', '积分': m.points || 0 })); const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '积分制度'); XLSX.writeFile(wb, currentClass + '_积分制度.xlsx'); }
         function importCommitteeRoster() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.xlsx,.xls'; i.onchange = function(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = new Uint8Array(e.target.result); const wb = XLSX.read(d, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const jd = XLSX.utils.sheet_to_json(ws); committeeRosterData = jd.map(row => ({ studentId: row['学号'] || '', studentName: row['姓名'] || '', position: row['职务'] || '', alias: row['职务别名'] || '', duty: row['工作内容'] || '', points: parseInt(row['积分']) || 0 })); saveCommitteeRosterData(); showCommitteeRosterModule(); alert('导入成功！'); } catch { alert('文件解析失败'); } }; r.readAsArrayBuffer(f); }; i.click(); }
-        function showPointsListModule() { loadCommitteeRosterData(); const c = document.getElementById('mainContent'); c.innerHTML = `<div id="module-points-list"><h2 style="margin-bottom:20px;">📋 积分清单</h2><div class="class-info-banner"><span>当前班级：<span class="current-class">${currentClass||'未选择'}</span></span><span>积分总额：${committeeRosterData.reduce((s,m)=>s+(m.points||0),0)} 分</span></div><div class="roster-table-container"><table class="roster-table" style="min-width:600px;"><thead><tr><th class="col-frozen col-frozen-1">序号</th><th class="col-frozen col-frozen-2">姓名</th><th>职务</th><th>积分</th></tr></thead><tbody>${committeeRosterData.length===0?'<tr><td colspan="4" class="empty-state">暂无数据</td></tr>':committeeRosterData.map((m,i)=>`<tr><td class="col-frozen col-frozen-1">${i+1}</td><td class="col-frozen col-frozen-2">${m.studentName}</td><td>${m.position}</td><td>${m.points}</td></tr>`).join('')}</tbody></table></div></div>`; }
+        
+        // ==================== 积分清单模块（显示每个人的总分）====================
+        function showPointsListModule() {
+            loadPointsDetailsData();
+            const c = document.getElementById('mainContent');
+            // 按学生汇总积分
+            const studentTotals = {};
+            pointsDetailsData.forEach(p => {
+                const key = p.studentId || 'unknown';
+                if (!studentTotals[key]) {
+                    studentTotals[key] = { studentId: p.studentId || '', studentName: p.studentName || '', total: 0, addTotal: 0, minusTotal: 0, count: 0 };
+                }
+                studentTotals[key].total += p.points;
+                if (p.points > 0) studentTotals[key].addTotal += p.points;
+                else studentTotals[key].minusTotal += p.points;
+                studentTotals[key].count++;
+            });
+            const list = Object.values(studentTotals).sort((a, b) => b.total - a.total);
+            const maxTotal = list.length > 0 ? Math.max(...list.map(x => Math.abs(x.total))) : 1;
+            const grandTotal = list.reduce((s, x) => s + x.total, 0);
+            
+            c.innerHTML = `
+                <div id="module-points-list">
+                    <div class="points-header">
+                        <h2>📋 积分清单</h2>
+                        <div class="points-actions">
+                            <button class="btn-export" onclick="exportPointsList()">📤 导出汇总</button>
+                        </div>
+                    </div>
+                    <div class="class-info-banner">
+                        <span>当前班级：<span class="current-class">${currentClass||'未选择'}</span></span>
+                        <span>学生人数：${list.length} 人</span>
+                        <span>班级总积分：${grandTotal} 分</span>
+                    </div>
+                    <div class="points-table-container">
+                        <table class="points-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:60px;">排名</th>
+                                    <th style="width:100px;">学号</th>
+                                    <th style="width:100px;">姓名</th>
+                                    <th style="width:80px;">记录数</th>
+                                    <th style="width:80px;">加分</th>
+                                    <th style="width:80px;">扣分</th>
+                                    <th style="width:100px;">净积分</th>
+                                    <th>积分可视化</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${list.length === 0 ? '<tr><td colspan="8" class="points-empty"><div class="icon">📋</div><p>暂无积分记录，请先在“积分明细”中添加</p></td></tr>' : list.map((s, i) => {
+                                    const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-normal';
+                                    const barWidth = maxTotal > 0 ? Math.max(2, Math.abs(s.total) / maxTotal * 100) : 2;
+                                    const barClass = s.total < 0 ? 'negative' : '';
+                                    return `<tr>
+                                        <td><span class="rank-badge ${rankClass}">${i + 1}</span></td>
+                                        <td>${s.studentId}</td>
+                                        <td><strong>${s.studentName}</strong></td>
+                                        <td>${s.count}</td>
+                                        <td class="points-positive">+${s.addTotal}</td>
+                                        <td class="points-negative">${s.minusTotal}</td>
+                                        <td class="${s.total >= 0 ? 'points-positive' : 'points-negative'}" style="font-size:15px;">${s.total > 0 ? '+' : ''}${s.total}</td>
+                                        <td>
+                                            <div class="points-bar-wrapper">
+                                                <div class="points-bar ${barClass}" style="width:${barWidth}%;"></div>
+                                                <span style="font-size:12px;color:#666;">${s.total}分</span>
+                                            </div>
+                                        </td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function exportPointsList() {
+            // 汇总导出
+            const studentTotals = {};
+            pointsDetailsData.forEach(p => {
+                const key = p.studentId || 'unknown';
+                if (!studentTotals[key]) {
+                    studentTotals[key] = { studentId: p.studentId || '', studentName: p.studentName || '', total: 0, addTotal: 0, minusTotal: 0, count: 0 };
+                }
+                studentTotals[key].total += p.points;
+                if (p.points > 0) studentTotals[key].addTotal += p.points;
+                else studentTotals[key].minusTotal += p.points;
+                studentTotals[key].count++;
+            });
+            const list = Object.values(studentTotals).sort((a, b) => b.total - a.total);
+            const d = list.map((s, i) => ({ '排名': i + 1, '学号': s.studentId, '姓名': s.studentName, '记录数': s.count, '累计加分': s.addTotal, '累计扣分': s.minusTotal, '净积分': s.total }));
+            const ws = XLSX.utils.json_to_sheet(d);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '积分汇总');
+            XLSX.writeFile(wb, currentClass + '_积分汇总.xlsx');
+        }
+        
         function showPointsAssessmentModule() { document.getElementById('mainContent').innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">📊</div><h2>积分考核</h2><p style="color:#999;">该功能正在开发中</p></div>'; }
         
         // ==================== 积分明细模块 ====================
@@ -626,6 +785,7 @@
                         <div class="points-actions">
                             <button class="btn-add" onclick="openPointsModal()">➕ 添加积分</button>
                             <button class="btn-export" onclick="exportPointsDetails()">📤 导出</button>
+                            <button class="btn-import" onclick="importPointsDetails()">📥 导入</button>
                         </div>
                     </div>
                     <div class="class-info-banner">
@@ -643,6 +803,7 @@
                             <thead>
                                 <tr>
                                     <th style="width:50px;">序号</th>
+                                    <th style="width:90px;">周次</th>
                                     <th style="width:90px;">日期</th>
                                     <th style="width:90px;">学号</th>
                                     <th style="width:80px;">姓名</th>
@@ -652,9 +813,10 @@
                                 </tr>
                             </thead>
                             <tbody id="pointsDetailsBody">
-                                ${pointsDetailsData.length === 0 ? '<tr><td colspan="7" class="points-empty"><div class="icon">📝</div><p>暂无积分记录，点击上方“添加积分”开始记录</p></td></tr>' : pointsDetailsData.map((p, i) => `
+                                ${pointsDetailsData.length === 0 ? '<tr><td colspan="8" class="points-empty"><div class="icon">📝</div><p>暂无积分记录，点击上方“添加积分”开始记录</p></td></tr>' : pointsDetailsData.map((p, i) => `
                                     <tr>
                                         <td>${i + 1}</td>
+                                        <td>${getWeekByDate(p.date)}</td>
                                         <td>${p.date || ''}</td>
                                         <td>${p.studentId || ''}</td>
                                         <td>${p.studentName || ''}</td>
@@ -672,6 +834,7 @@
         function openPointsModal() {
             const now = new Date();
             pointsDateState = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+            editingDateType = null;
             updateDateDisplay();
             document.getElementById('pointsStudentIdSuffix').value = '';
             document.getElementById('pointsStudentNameDisplay').textContent = '';
@@ -682,6 +845,7 @@
         }
         function closePointsModal() {
             document.getElementById('pointsModal').classList.remove('show');
+            editingDateType = null;
         }
         function onStudentIdSuffixInput(input) {
             // 只允许数字
@@ -716,6 +880,7 @@
             document.getElementById('dateDay').textContent = String(pointsDateState.day).padStart(2, '0');
         }
         function scrollDate(type, delta) {
+            if (editingDateType === type) return; // 编辑中不响应
             if (type === 'year') {
                 pointsDateState.year += delta;
                 if (pointsDateState.year < 2000) pointsDateState.year = 2000;
@@ -731,6 +896,48 @@
                 if (pointsDateState.day < 1) { pointsDateState.month--; if (pointsDateState.month < 1) { pointsDateState.month = 12; pointsDateState.year--; } pointsDateState.day = getMaxDay(pointsDateState.year, pointsDateState.month); }
             }
             updateDateDisplay();
+        }
+        function startEditDate(type) {
+            if (editingDateType) return; // 已在编辑
+            editingDateType = type;
+            const el = document.getElementById(type === 'year' ? 'dateYear' : type === 'month' ? 'dateMonth' : 'dateDay');
+            const val = type === 'year' ? pointsDateState.year : type === 'month' ? pointsDateState.month : pointsDateState.day;
+            const oldHTML = el.innerHTML;
+            el.classList.add('editing');
+            el.innerHTML = `<input type="number" id="dateEditInput" value="${val}" min="${type === 'year' ? 2000 : 1}" max="${type === 'year' ? 2100 : type === 'month' ? 12 : 31}">`;
+            const input = document.getElementById('dateEditInput');
+            input.focus();
+            input.select();
+            const finish = (commit) => {
+                editingDateType = null;
+                if (commit) {
+                    let v = parseInt(input.value);
+                    if (isNaN(v)) v = val;
+                    if (type === 'year') {
+                        if (v < 2000) v = 2000;
+                        if (v > 2100) v = 2100;
+                        pointsDateState.year = v;
+                    } else if (type === 'month') {
+                        if (v < 1) v = 1;
+                        if (v > 12) v = 12;
+                        pointsDateState.month = v;
+                        const md = getMaxDay(pointsDateState.year, pointsDateState.month);
+                        if (pointsDateState.day > md) pointsDateState.day = md;
+                    } else {
+                        const md = getMaxDay(pointsDateState.year, pointsDateState.month);
+                        if (v < 1) v = 1;
+                        if (v > md) v = md;
+                        pointsDateState.day = v;
+                    }
+                }
+                el.classList.remove('editing');
+                updateDateDisplay();
+            };
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+                else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+            });
+            input.addEventListener('blur', () => { if (editingDateType === type) finish(true); });
         }
         function getMaxDay(year, month) {
             return new Date(year, month, 0).getDate();
@@ -764,14 +971,22 @@
                 createdAt: new Date().toISOString()
             });
             savePointsDetailsData();
-            closePointsModal();
+            // 窗口保留，继续添加，只清空学生学号和原因，日期保留
+            document.getElementById('pointsStudentIdSuffix').value = '';
+            document.getElementById('pointsStudentNameDisplay').textContent = '';
+            document.getElementById('pointsReason').value = '';
+            document.getElementById('pointsValue').value = '1';
+            // 刷新积分明细列表
             showPointsDetailsModule();
+            // 重新打开小窗口（保持当前日期状态）
+            document.getElementById('pointsModal').classList.add('show');
             // 提示添加成功
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:12px 20px;border-radius:6px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
-            toast.textContent = '✅ 已添加：' + student.name + ' ' + (pointsVal > 0 ? '+' : '') + pointsVal + ' 分';
+            toast.textContent = '✅ 已添加：' + student.name + ' ' + (pointsVal > 0 ? '+' : '') + pointsVal + ' 分，可继续添加';
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
+            setTimeout(() => document.getElementById('pointsStudentIdSuffix').focus(), 100);
         }
         function deletePointsRecord(i) {
             if (!confirm('确定删除这条积分记录吗？')) return;
@@ -780,11 +995,48 @@
             showPointsDetailsModule();
         }
         function exportPointsDetails() {
-            const d = pointsDetailsData.map(p => ({ '日期': p.date || '', '学号': p.studentId || '', '姓名': p.studentName || '', '积分': p.points, '加分原因': p.reason || '' }));
+            const d = pointsDetailsData.map(p => ({ '周次': getWeekByDate(p.date), '日期': p.date || '', '学号': p.studentId || '', '姓名': p.studentName || '', '积分': p.points, '加分原因': p.reason || '' }));
             const ws = XLSX.utils.json_to_sheet(d);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, '积分明细');
             XLSX.writeFile(wb, currentClass + '_积分明细.xlsx');
+        }
+        function importPointsDetails() {
+            const i = document.createElement('input');
+            i.type = 'file';
+            i.accept = '.xlsx,.xls';
+            i.onchange = function(e) {
+                const f = e.target.files[0];
+                if (!f) return;
+                const r = new FileReader();
+                r.onload = function(ev) {
+                    try {
+                        const d = new Uint8Array(ev.target.result);
+                        const wb = XLSX.read(d, { type: 'array' });
+                        const ws = wb.Sheets[wb.SheetNames[0]];
+                        const jd = XLSX.utils.sheet_to_json(ws);
+                        if (!jd || !jd.length) { alert('Excel文件为空'); return; }
+                        const imported = jd.map(row => ({
+                            studentId: String(row['学号'] || ''),
+                            studentName: row['姓名'] || '',
+                            date: row['日期'] || '',
+                            points: parseInt(row['积分']) || 0,
+                            reason: row['加分原因'] || '',
+                            createdAt: new Date().toISOString()
+                        })).filter(p => p.studentId);
+                        if (imported.length === 0) { alert('没有有效数据'); return; }
+                        if (!confirm('导入将覆盖当前所有积分明细记录（' + pointsDetailsData.length + ' 条），确定继续？\n将导入 ' + imported.length + ' 条记录')) return;
+                        pointsDetailsData = imported;
+                        savePointsDetailsData();
+                        showPointsDetailsModule();
+                        alert('导入成功！共 ' + imported.length + ' 条记录');
+                    } catch (err) {
+                        alert('文件解析失败：' + err.message);
+                    }
+                };
+                r.readAsArrayBuffer(f);
+            };
+            i.click();
         }
         
         function loadAllSchedules() { const s = localStorage.getItem('all_schedules_' + currentClass); allSchedules = s ? JSON.parse(s) : {}; }
@@ -901,7 +1153,7 @@
         function confirmNewSchedule() { const nn = document.getElementById('newScheduleNameInput').value.trim(); if (!nn) return; if (allSchedules[nn]) { alert('已存在'); return; } allSchedules[nn] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; currentScheduleName = nn; scheduleData = []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('newScheduleFormContainer').innerHTML = ''; renderMainSchedule(); }
         function cancelNewSchedule() { document.getElementById('newScheduleFormContainer').innerHTML = ''; }
         
-        function showModule(moduleName) { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); const ai = document.querySelector(`.nav-item[data-tab="${moduleName}"]`); if (ai) ai.classList.add('active'); const mt = { 'roster':'📋 学生花名册','points-list':'📋 积分清单','points-assessment':'📊 积分考核','points-details':'📝 积分明细','committee-roster':'👥 积分制度','cleaning':'🧹 卫生安排表','seating':'💺 排座位','activities':'🎉 班级活动','finance-overview':'💰 收支总览','finance-income':'📈 收入详情','finance-expense':'📉 支出详情','exam-list':'📝 考试列表','score-entry':'✏️ 成绩录入','exam-analysis':'📊 单次分析','trend-analysis':'📈 个人趋势','subject-settings':'⚙️ 科目设置','homework-list':'📚 作业列表','homework-stats':'📊 作业统计看板','discipline-dashboard':'⚠️ 违纪数据看板','discipline-records':'📋 违纪记录明细','leave':'🏥 请假管理','risk-home':'🚨 风险预警首页','emotion-warning':'😟 学生情绪预警','special-constitution':'🏥 特殊体质登记','dropout-risk':'🚫 辍学风险预警','return-tracking':'🔍 未返校跟踪','conflict-resolution':'🤝 矛盾排查','conversations':'💬 谈话记录','parent-communication':'📞 家校沟通','work-traces':'📁 工作留痕','training-records':'📝 培训记录','lecture-records':'🎤 讲座记录','activity-participation':'🎯 活动参与','hours-stats':'⏱️ 学时统计' }; const title = mt[moduleName] || '模块'; const content = document.getElementById('mainContent'); if (moduleName === 'roster') showRosterModule(); else if (['points-list','points-assessment','points-details','committee-roster'].includes(moduleName)) showPointsModule(moduleName); else content.innerHTML = `<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">🚧</div><h2>${title}</h2><p style="color:#999;">该功能正在开发中</p></div>`; }
+        function showModule(moduleName) { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); const ai = document.querySelector(`.nav-item[data-tab="${moduleName}"]`); if (ai) ai.classList.add('active'); const mt = { 'roster':'📋 学生花名册','points-list':'📋 积分清单','points-assessment':'📊 积分考核','points-details':'📝 积分明细','committee-roster':'👥 积分制度','cleaning':'🧹 卫生安排表','seating':'💺 排座位','activities':'🎉 班级活动','finance-overview':'💰 收支总览','finance-income':'📈 收入详情','finance-expense':'📉 支出详情','exam-list':'📝 考试列表','score-entry':'✏️ 成绩录入','exam-analysis':'📊 单次分析','trend-analysis':'📈 个人趋势','subject-settings':'⚙️ 科目设置','homework-list':'📚 作业列表','homework-stats':'📊 作业统计看板','discipline-dashboard':'⚠️ 违纪数据看板','discipline-records':'📋 违纪记录明细','leave':'🏥 请假管理','risk-home':'🚨 风险预警首页','emotion-warning':'😟 学生情绪预警','special-constitution':'🏥 特殊体质登记','dropout-risk':'🚫 辍学风险预警','return-tracking':'🔍 未返校跟踪','conflict-resolution':'🤝 矛盾排查','conversations':'💬 谈话记录','parent-communication':'📞 家校沟通','work-traces':'📁 工作留痕','training-records':'📝 培训记录','lecture-records':'🎤 讲座记录','activity-participation':'🎯 活动参与','hours-stats':'⏱️ 学时统计' }; const title = mt[moduleName] || '模块'; const content = document.getElementById('mainContent'); if (moduleName === 'roster') showRosterModule(); else if (moduleName === 'points-list') showPointsListModule(); else if (moduleName === 'points-assessment') showPointsAssessmentModule(); else if (moduleName === 'points-details') showPointsDetailsModule(); else if (moduleName === 'committee-roster') showCommitteeRosterModule(); else content.innerHTML = `<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">🚧</div><h2>${title}</h2><p style="color:#999;">该功能正在开发中</p></div>`; }
         
         async function loadAllStudentsData() { try { const t = getToken(); const r = await fetch(API_BASE + '/students', { headers: { 'Authorization': 'Bearer ' + t } }); if (r.ok) allStudents = await r.json(); } catch (e) { console.error('加载学生数据失败:', e); } }
         async function init() { const u = getUser(); const t = getToken(); if (!t || !u.userId) { window.location.href = '/login.html'; return; } if (u.role !== 'teacher') { alert('无权限访问'); window.location.href = '/login.html'; return; } document.getElementById('sidebarUserName').textContent = u.realName || '教师'; document.getElementById('welcomeName').textContent = u.realName || '教师'; await loadAllStudentsData(); loadClassSelector(); const fg = document.querySelector('.nav-group-header'); if (fg) toggleGroup(fg); }
