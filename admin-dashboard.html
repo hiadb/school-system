@@ -367,6 +367,39 @@
             return code;
         }
         
+        // ============ 修复点1：统一加载年级数据 ============
+        async function loadAllGradesData() {
+            try {
+                const token = getToken();
+                const response = await fetch(API_BASE + '/admin/grades', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    // 重要：同步到全局变量
+                    allGrades = Array.isArray(data) ? data : [];
+                } else {
+                    allGrades = [];
+                }
+            } catch (error) {
+                console.error('加载年级数据失败:', error);
+                allGrades = [];
+            }
+            return allGrades;
+        }
+        
+        // ============ 修复点2：统一加载教师数据 ============
+        async function loadAllTeachersData() {
+            try {
+                const users = await loadAllUsers();
+                allTeachers = users.filter(u => u.role === 'teacher');
+            } catch (error) {
+                console.error('加载教师数据失败:', error);
+                allTeachers = [];
+            }
+            return allTeachers;
+        }
+        
         async function loadStats() {
             try {
                 const token = getToken();
@@ -411,11 +444,16 @@
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (response.ok) {
-                    allStudents = await response.json();
+                    const data = await response.json();
+                    allStudents = Array.isArray(data) ? data : [];
+                } else {
+                    allStudents = [];
                 }
             } catch (error) {
                 console.error('加载学生数据失败:', error);
+                allStudents = [];
             }
+            return allStudents;
         }
         
         async function loadStudentUsers() {
@@ -457,6 +495,9 @@
             tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
+                // 重要：同步加载年级数据，保证设置身份时下拉框有数据
+                await loadAllGradesData();
+                
                 const users = await loadAllUsers();
                 const teacherUsers = users.filter(u => u.role === 'teacher');
                 allTeachers = teacherUsers;
@@ -551,7 +592,7 @@
             }
         }
         
-        // 班级管理
+        // ============ 班级管理 ============
         async function loadClassManagementSelect() {
             const select = document.getElementById('classManagementSelect');
             
@@ -576,20 +617,6 @@
             }
         }
         
-        async function loadAllGradesData() {
-            try {
-                const token = getToken();
-                const response = await fetch(API_BASE + '/admin/grades', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (response.ok) {
-                    allGrades = await response.json();
-                }
-            } catch (error) {
-                console.error('加载年级数据失败:', error);
-            }
-        }
-        
         async function loadClassManagementData() {
             const select = document.getElementById('classManagementSelect');
             const selectedClass = select.value;
@@ -603,7 +630,7 @@
             contentDiv.innerHTML = '<div class="loading">加载中...</div>';
             
             try {
-                await loadAllUsers();
+                await loadAllTeachersData();
                 await loadAllStudentsData();
                 
                 // 获取该班级的班主任
@@ -678,7 +705,6 @@
                 
                 if (classStudents.length > 0) {
                     classStudents.forEach(student => {
-                        const userInfo = allTeachers.find(t => t.userId === student.studentId) || {};
                         html += `
                             <tr>
                                 <td>${student.name || '未知'}</td>
@@ -701,10 +727,24 @@
             }
         }
         
-        // 打开教师设置模态框
-        function openTeacherSetting(teacherId) {
+        // ============ 修复点3：打开教师设置时确保年级数据已加载 ============
+        async function openTeacherSetting(teacherId) {
             const teacher = allTeachers.find(t => t.userId === teacherId);
-            if (!teacher) return;
+            if (!teacher) {
+                alert('未找到该教师信息，请刷新页面重试');
+                return;
+            }
+            
+            // 重要：确保年级数据已加载
+            if (!allGrades || allGrades.length === 0) {
+                await loadAllGradesData();
+            }
+            
+            // 如果依然为空，提示管理员先去年级管理添加
+            if (!allGrades || allGrades.length === 0) {
+                alert('还没有任何年级/班级，请先在「年级管理」中添加年级和班级');
+                return;
+            }
             
             const oldModal = document.querySelector('.modal-overlay');
             if (oldModal) oldModal.remove();
@@ -809,11 +849,11 @@
             const selectedGradeId = gradeSelect.value;
             const grade = allGrades.find(g => g.gradeId === selectedGradeId);
             
-            if (grade && grade.classes) {
+            if (grade && grade.classes && grade.classes.length > 0) {
                 classSelect.innerHTML = '<option value="">选择班级</option>' + 
                     grade.classes.map(c => `<option value="${c.className}">${c.className}</option>`).join('');
             } else {
-                classSelect.innerHTML = '<option value="">选择班级</option>';
+                classSelect.innerHTML = '<option value="">该年级暂无班级</option>';
             }
         }
         
@@ -826,11 +866,11 @@
             const selectedGradeId = gradeSelect.value;
             const grade = allGrades.find(g => g.gradeId === selectedGradeId);
             
-            if (grade && grade.classes) {
+            if (grade && grade.classes && grade.classes.length > 0) {
                 classSelect.innerHTML = '<option value="">选择班级</option>' + 
                     grade.classes.map(c => `<option value="${c.className}">${c.className}</option>`).join('');
             } else {
-                classSelect.innerHTML = '<option value="">选择班级</option>';
+                classSelect.innerHTML = '<option value="">该年级暂无班级</option>';
             }
         }
         
@@ -971,70 +1011,62 @@
             }
         }
         
-        // 加载年级
+        // ============ 修复点4：loadGrades 同步 allTeachers ============
         async function loadGrades() {
             const gradeGrid = document.getElementById('gradeGrid');
             gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
             
             try {
-                const token = getToken();
-                const response = await fetch(API_BASE + '/admin/grades', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
+                await loadAllGradesData();
+                // 重要：同步教师全局变量
+                await loadAllTeachersData();
                 
-                if (response.ok) {
-                    const grades = await response.json();
-                    allGrades = grades;
-                    
-                    const users = await loadAllUsers();
-                    const teachers = users.filter(u => u.role === 'teacher');
-                    
-                    if (grades.length === 0) {
-                        gradeGrid.innerHTML = '<div class="empty-state">暂无年级，请添加</div>';
-                    } else {
-                        gradeGrid.innerHTML = grades.map(grade => `
-                            <div class="grade-card">
-                                <div class="grade-card-header">
-                                    <span class="grade-name">${grade.gradeName}</span>
-                                    <button class="btn-delete-grade" onclick="deleteGrade('${grade.gradeId}')">删除</button>
-                                </div>
-                                <div class="class-list">
-                                    ${grade.classes && grade.classes.length > 0 ? 
-                                        grade.classes.map(cls => {
-                                            const fullClassName = `${grade.gradeName}${cls.className}`;
-                                            const classTeacher = teachers.find(t => 
-                                                t.classTeacherOf && t.classTeacherOf.includes(fullClassName)
-                                            );
-                                            const teacherName = classTeacher ? classTeacher.realName : '';
-                                            
-                                            return `
-                                                <div class="class-item">
-                                                    <div class="class-info">
-                                                        <div class="class-name-row">
-                                                            <span class="class-name">${cls.className}</span>
-                                                            <span class="class-student-count">${cls.studentCount || 0} 人</span>
-                                                        </div>
-                                                        ${teacherName ? 
-                                                            `<div class="class-teacher-info">班主任：<span class="class-teacher-name">${teacherName}</span></div>` 
-                                                            : '<div class="class-teacher-info" style="color:#ccc;">未设置班主任</div>'
-                                                        }
-                                                    </div>
-                                                    <button class="btn-delete-class" onclick="deleteClass('${grade.gradeId}', '${cls.className}')">删除</button>
-                                                </div>
-                                            `;
-                                        }).join('') 
-                                        : '<div class="no-classes">暂无班级</div>'
-                                    }
-                                </div>
-                                <div class="class-add-form">
-                                    <input type="text" id="classInput_${grade.gradeId}" placeholder="输入班级名称" onkeypress="if(event.key==='Enter') addClass('${grade.gradeId}')">
-                                    <button class="btn-add-class" onclick="addClass('${grade.gradeId}')">➕ 添加</button>
-                                </div>
-                            </div>
-                        `).join('');
-                    }
+                const grades = allGrades;
+                const teachers = allTeachers;
+                
+                if (grades.length === 0) {
+                    gradeGrid.innerHTML = '<div class="empty-state">暂无年级，请添加</div>';
                 } else {
-                    gradeGrid.innerHTML = '<div class="empty-state">加载失败</div>';
+                    gradeGrid.innerHTML = grades.map(grade => `
+                        <div class="grade-card">
+                            <div class="grade-card-header">
+                                <span class="grade-name">${grade.gradeName}</span>
+                                <button class="btn-delete-grade" onclick="deleteGrade('${grade.gradeId}')">删除</button>
+                            </div>
+                            <div class="class-list">
+                                ${grade.classes && grade.classes.length > 0 ? 
+                                    grade.classes.map(cls => {
+                                        const fullClassName = `${grade.gradeName}${cls.className}`;
+                                        const classTeacher = teachers.find(t => 
+                                            t.classTeacherOf && t.classTeacherOf.includes(fullClassName)
+                                        );
+                                        const teacherName = classTeacher ? classTeacher.realName : '';
+                                        
+                                        return `
+                                            <div class="class-item">
+                                                <div class="class-info">
+                                                    <div class="class-name-row">
+                                                        <span class="class-name">${cls.className}</span>
+                                                        <span class="class-student-count">${cls.studentCount || 0} 人</span>
+                                                    </div>
+                                                    ${teacherName ? 
+                                                        `<div class="class-teacher-info">班主任：<span class="class-teacher-name">${teacherName}</span></div>` 
+                                                        : '<div class="class-teacher-info" style="color:#ccc;">未设置班主任</div>'
+                                                    }
+                                                </div>
+                                                <button class="btn-delete-class" onclick="deleteClass('${grade.gradeId}', '${cls.className}')">删除</button>
+                                            </div>
+                                        `;
+                                    }).join('') 
+                                    : '<div class="no-classes">暂无班级</div>'
+                                }
+                            </div>
+                            <div class="class-add-form">
+                                <input type="text" id="classInput_${grade.gradeId}" placeholder="输入班级名称" onkeypress="if(event.key==='Enter') addClass('${grade.gradeId}')">
+                                <button class="btn-add-class" onclick="addClass('${grade.gradeId}')">➕ 添加</button>
+                            </div>
+                        </div>
+                    `).join('');
                 }
             } catch (error) {
                 console.error('加载年级失败:', error);
@@ -1059,6 +1091,7 @@
                 
                 if (response.ok) {
                     document.getElementById('gradeNameInput').value = '';
+                    await loadAllGradesData();
                     await Promise.all([loadGrades(), loadStats()]);
                 }
             } catch (error) {
@@ -1083,6 +1116,7 @@
                 });
                 
                 if (response.ok) {
+                    await loadAllGradesData();
                     await Promise.all([loadGrades(), loadStats()]);
                 }
             } catch (error) {
@@ -1105,6 +1139,7 @@
                 });
                 
                 if (response.ok) {
+                    await loadAllGradesData();
                     await Promise.all([loadGrades(), loadStats()]);
                 }
             } catch (error) {
@@ -1123,6 +1158,7 @@
                 });
                 
                 if (response.ok) {
+                    await loadAllGradesData();
                     await Promise.all([loadGrades(), loadStats()]);
                 }
             } catch (error) {
@@ -1130,7 +1166,7 @@
             }
         }
         
-        // 邀请码管理
+        // ============ 邀请码管理 ============
         async function loadAllInviteCodes() {
             await Promise.all([loadStudentInviteCodes(), loadTeacherInviteCode()]);
         }
@@ -1381,7 +1417,8 @@
             
             document.getElementById('userName').textContent = user.realName || '管理员';
             loadStats();
-            loadAllUsers().then(() => {
+            // 重要：初始化时预加载年级和教师数据
+            Promise.all([loadAllGradesData(), loadAllTeachersData()]).then(() => {
                 showUserTab('student');
             });
         }
