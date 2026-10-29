@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>教师工作台 - 学校管理系统</title>
-    <!-- SheetJS 用于 Excel 导入导出 -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    <!-- CryptoJS 用于数据加密 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -129,11 +127,13 @@
         .inline-edit-actions { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
         .new-schedule-form { display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .new-schedule-form input { padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 13px; }
+        .empty-schedule { text-align: center; padding: 60px 20px; color: #999; }
+        .empty-schedule .icon { font-size: 64px; margin-bottom: 20px; }
+        .empty-schedule p { font-size: 16px; margin-bottom: 20px; }
         @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; padding: 10px; } .nav-group-header { padding: 10px 15px; font-size: 12px; } .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; } .schedule-title-input { font-size: 14px; } .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; } .home-btn { font-size: 24px; padding: 5px; } .student-form-row .form-group { flex: 1 1 100% !important; } }
     </style>
 </head>
 <body>
-    <!-- 侧边栏 -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h2>👨‍🏫 教师工作台</h2>
@@ -147,172 +147,108 @@
                 </select>
             </div>
         </div>
-        
         <div class="sidebar-nav">
-            <!-- 学生管理 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">👨‍🎓</span> 学生管理</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item active" data-tab="roster" onclick="showModule('roster')">
-                        <span class="icon">📋</span> 学生花名册
-                    </div>
+                    <div class="nav-item active" data-tab="roster" onclick="showModule('roster')"><span class="icon">📋</span> 学生花名册</div>
                 </div>
             </div>
-            
-            <!-- 积分管理 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">⭐</span> 积分管理</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="points-list" onclick="showModule('points-list')">
-                        <span class="icon">📋</span> 积分清单
-                    </div>
-                    <div class="nav-item" data-tab="points-assessment" onclick="showModule('points-assessment')">
-                        <span class="icon">📊</span> 积分考核
-                    </div>
-                    <div class="nav-item" data-tab="points-details" onclick="showModule('points-details')">
-                        <span class="icon">📝</span> 积分明细
-                    </div>
-                    <div class="nav-item" data-tab="committee-roster" onclick="showModule('committee-roster')">
-                        <span class="icon">👥</span> 积分制度
-                    </div>
+                    <div class="nav-item" data-tab="points-list" onclick="showModule('points-list')"><span class="icon">📋</span> 积分清单</div>
+                    <div class="nav-item" data-tab="points-assessment" onclick="showModule('points-assessment')"><span class="icon">📊</span> 积分考核</div>
+                    <div class="nav-item" data-tab="points-details" onclick="showModule('points-details')"><span class="icon">📝</span> 积分明细</div>
+                    <div class="nav-item" data-tab="committee-roster" onclick="showModule('committee-roster')"><span class="icon">👥</span> 积分制度</div>
                 </div>
             </div>
-            
-            <!-- 班级卫生 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">🧹</span> 班级卫生</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="cleaning" onclick="showModule('cleaning')">
-                        <span class="icon">📋</span> 卫生安排表
-                    </div>
+                    <div class="nav-item" data-tab="cleaning" onclick="showModule('cleaning')"><span class="icon">📋</span> 卫生安排表</div>
                 </div>
             </div>
-            
-            <!-- 排座位 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">💺</span> 排座位</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="seating" onclick="showModule('seating')">
-                        <span class="icon">💺</span> 排座位
-                    </div>
+                    <div class="nav-item" data-tab="seating" onclick="showModule('seating')"><span class="icon">💺</span> 排座位</div>
                 </div>
             </div>
-            
-            <!-- 班级活动 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">🎉</span> 班级活动</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="activities" onclick="showModule('activities')">
-                        <span class="icon">🎉</span> 班级活动
-                    </div>
+                    <div class="nav-item" data-tab="activities" onclick="showModule('activities')"><span class="icon">🎉</span> 班级活动</div>
                 </div>
             </div>
-            
-            <!-- 班级记账 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">💰</span> 班级记账</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="finance-overview" onclick="showModule('finance-overview')">
-                        <span class="icon">💰</span> 收支总览
-                    </div>
-                    <div class="nav-item" data-tab="finance-income" onclick="showModule('finance-income')">
-                        <span class="icon">📈</span> 收入详情
-                    </div>
-                    <div class="nav-item" data-tab="finance-expense" onclick="showModule('finance-expense')">
-                        <span class="icon">📉</span> 支出详情
-                    </div>
+                    <div class="nav-item" data-tab="finance-overview" onclick="showModule('finance-overview')"><span class="icon">💰</span> 收支总览</div>
+                    <div class="nav-item" data-tab="finance-income" onclick="showModule('finance-income')"><span class="icon">📈</span> 收入详情</div>
+                    <div class="nav-item" data-tab="finance-expense" onclick="showModule('finance-expense')"><span class="icon">📉</span> 支出详情</div>
                 </div>
             </div>
-            
-            <!-- 成绩分析 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">📊</span> 成绩分析</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="exam-list" onclick="showModule('exam-list')">
-                        <span class="icon">📝</span> 考试列表
-                    </div>
-                    <div class="nav-item" data-tab="score-entry" onclick="showModule('score-entry')">
-                        <span class="icon">✏️</span> 成绩录入
-                    </div>
-                    <div class="nav-item" data-tab="exam-analysis" onclick="showModule('exam-analysis')">
-                        <span class="icon">📊</span> 单次分析
-                    </div>
-                    <div class="nav-item" data-tab="trend-analysis" onclick="showModule('trend-analysis')">
-                        <span class="icon">📈</span> 个人趋势
-                    </div>
-                    <div class="nav-item" data-tab="subject-settings" onclick="showModule('subject-settings')">
-                        <span class="icon">⚙️</span> 科目设置
-                    </div>
+                    <div class="nav-item" data-tab="exam-list" onclick="showModule('exam-list')"><span class="icon">📝</span> 考试列表</div>
+                    <div class="nav-item" data-tab="score-entry" onclick="showModule('score-entry')"><span class="icon">✏️</span> 成绩录入</div>
+                    <div class="nav-item" data-tab="exam-analysis" onclick="showModule('exam-analysis')"><span class="icon">📊</span> 单次分析</div>
+                    <div class="nav-item" data-tab="trend-analysis" onclick="showModule('trend-analysis')"><span class="icon">📈</span> 个人趋势</div>
+                    <div class="nav-item" data-tab="subject-settings" onclick="showModule('subject-settings')"><span class="icon">⚙️</span> 科目设置</div>
                 </div>
             </div>
-            
-            <!-- 作业管理 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">📚</span> 作业管理</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="homework-list" onclick="showModule('homework-list')">
-                        <span class="icon">📚</span> 作业列表
-                    </div>
-                    <div class="nav-item" data-tab="homework-stats" onclick="showModule('homework-stats')">
-                        <span class="icon">📊</span> 作业统计看板
-                    </div>
+                    <div class="nav-item" data-tab="homework-list" onclick="showModule('homework-list')"><span class="icon">📚</span> 作业列表</div>
+                    <div class="nav-item" data-tab="homework-stats" onclick="showModule('homework-stats')"><span class="icon">📊</span> 作业统计看板</div>
                 </div>
             </div>
-            
-            <!-- 违纪情况 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">⚠️</span> 违纪情况</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="discipline-dashboard" onclick="showModule('discipline-dashboard')">
-                        <span class="icon">⚠️</span> 违纪数据看板
-                    </div>
-                    <div class="nav-item" data-tab="discipline-records" onclick="showModule('discipline-records')">
-                        <span class="icon">📋</span> 违纪记录明细
-                    </div>
+                    <div class="nav-item" data-tab="discipline-dashboard" onclick="showModule('discipline-dashboard')"><span class="icon">⚠️</span> 违纪数据看板</div>
+                    <div class="nav-item" data-tab="discipline-records" onclick="showModule('discipline-records')"><span class="icon">📋</span> 违纪记录明细</div>
                 </div>
             </div>
-            
-            <!-- 请假管理 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">🏥</span> 请假管理</span>
                     <span class="arrow">▶</span>
                 </div>
                 <div class="nav-submenu">
-                    <div class="nav-item" data-tab="leave" onclick="showModule('leave')">
-                        <span class="icon">🏥</span> 请假管理
-                    </div>
+                    <div class="nav-item" data-tab="leave" onclick="showModule('leave')"><span class="icon">🏥</span> 请假管理</div>
                 </div>
             </div>
-            
-            <!-- 风险预警 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">🚨</span> 风险预警</span>
@@ -327,8 +263,6 @@
                     <div class="nav-item" data-tab="conflict-resolution" onclick="showModule('conflict-resolution')"><span class="icon">🤝</span> 矛盾排查</div>
                 </div>
             </div>
-            
-            <!-- 谈话记录 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">💬</span> 谈话记录</span>
@@ -338,8 +272,6 @@
                     <div class="nav-item" data-tab="conversations" onclick="showModule('conversations')"><span class="icon">💬</span> 谈话记录</div>
                 </div>
             </div>
-            
-            <!-- 家校沟通 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">📞</span> 家校沟通</span>
@@ -349,8 +281,6 @@
                     <div class="nav-item" data-tab="parent-communication" onclick="showModule('parent-communication')"><span class="icon">📞</span> 家校沟通</div>
                 </div>
             </div>
-            
-            <!-- 工作留痕 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">📁</span> 工作留痕</span>
@@ -360,8 +290,6 @@
                     <div class="nav-item" data-tab="work-traces" onclick="showModule('work-traces')"><span class="icon">📁</span> 工作留痕</div>
                 </div>
             </div>
-            
-            <!-- 班主任培训 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">🎓</span> 班主任培训</span>
@@ -375,11 +303,9 @@
                 </div>
             </div>
         </div>
-        
         <button class="btn-logout" onclick="logout()">退出登录</button>
     </div>
     
-    <!-- 主内容区 -->
     <div class="main-content">
         <div class="welcome-banner">
             <div class="welcome-text">
@@ -388,15 +314,12 @@
             </div>
             <button class="home-btn" id="homeBtn" onclick="goHome()" title="返回课程表首页">📚</button>
         </div>
-        
         <div class="content" id="mainContent">
-            <!-- 默认显示课程表 -->
             <div id="module-schedule-main"></div>
         </div>
     </div>
 
     <script>
-        // ==================== 完整 JavaScript 代码 ====================
         const WORKER_URL = 'https://school-api.hru123.workers.dev';
         const API_BASE = WORKER_URL + '/api';
         const ENCRYPTION_KEY = 'school-management-system-2024';
@@ -412,52 +335,28 @@
         let activeFilters = {};
         let committeeRosterData = [];
         
-        const gradeMap = {
-            '一': '01', '二': '02', '三': '03', '四': '04', '五': '05', '六': '06',
-            '七': '07', '八': '08', '九': '09',
-            '初一': '07', '初二': '08', '初三': '09',
-            '高一': '10', '高二': '11', '高三': '12'
-        };
+        const gradeMap = { '一': '01', '二': '02', '三': '03', '四': '04', '五': '05', '六': '06', '七': '07', '八': '08', '九': '09', '初一': '07', '初二': '08', '初三': '09', '高一': '10', '高二': '11', '高三': '12' };
         
         const studentFields = [
-            { key: 'studentId', label: '学号', width: 'width-medium' },
-            { key: 'name', label: '姓名', width: 'width-short' },
-            { key: 'gender', label: '性别', width: 'width-short' },
-            { key: 'ethnicity', label: '民族', width: 'width-short' },
-            { key: 'idCard', label: '身份证号码', width: 'width-long' },
-            { key: 'birthday', label: '生日', width: 'width-medium' },
-            { key: 'birthdayType', label: '生日类型', width: 'width-short' },
-            { key: 'householdType', label: '户口性质', width: 'width-short' },
-            { key: 'currentAddress', label: '现住址', width: 'width-xlong' },
-            { key: 'householdAddress', label: '户籍所在地', width: 'width-xlong' },
-            { key: 'isLeftBehind', label: '农村留守儿童', width: 'width-medium' },
-            { key: 'isOrphan', label: '孤儿/事实无人抚养', width: 'width-medium' },
-            { key: 'isOnlyChild', label: '独生子女', width: 'width-short' },
-            { key: 'isMartyrChild', label: '烈士/优抚对象子女', width: 'width-medium' },
-            { key: 'disabilityType', label: '残疾类型及等级', width: 'width-medium' },
-            { key: 'politicalStatus', label: '政治面貌', width: 'width-short' },
-            { key: 'joinTeamDate', label: '入队时间', width: 'width-medium' },
-            { key: 'joinLeagueDate', label: '入团时间', width: 'width-medium' },
-            { key: 'joinPartyDate', label: '入党时间', width: 'width-medium' },
-            { key: 'teamPosition', label: '团/队内职务', width: 'width-medium' },
-            { key: 'enrollmentYear', label: '入学年份', width: 'width-short' },
-            { key: 'subsidyStatus', label: '资助情况', width: 'width-long' },
-            { key: 'transportMode', label: '上下学交通方式', width: 'width-short' },
-            { key: 'firstContactName', label: '第一联系人姓名', width: 'width-medium' },
-            { key: 'firstContactPhone', label: '第一联系人电话', width: 'width-medium' },
-            { key: 'firstContactIdCard', label: '第一联系人身份证', width: 'width-long' },
-            { key: 'secondContactName', label: '第二联系人姓名', width: 'width-medium' },
-            { key: 'secondContactPhone', label: '第二联系人电话', width: 'width-medium' },
-            { key: 'secondContactIdCard', label: '第二联系人身份证', width: 'width-long' },
-            { key: 'emergencyContact', label: '紧急备用联系人', width: 'width-long' },
-            { key: 'homeAddress', label: '家庭详细住址', width: 'width-xlong' },
-            { key: 'isBoarding', label: '是否住校', width: 'width-short' },
-            { key: 'bloodType', label: '血型', width: 'width-short' },
-            { key: 'majorDisease', label: '重大疾病史', width: 'width-long' },
-            { key: 'allergyHistory', label: '药物/食物过敏史', width: 'width-long' },
-            { key: 'specialConstitution', label: '特殊体质/禁忌', width: 'width-long' },
-            { key: 'transportDetail', label: '上下学方式及接送人', width: 'width-xlong' },
-            { key: 'medicationInfo', label: '在校服药情况', width: 'width-long' },
+            { key: 'studentId', label: '学号', width: 'width-medium' }, { key: 'name', label: '姓名', width: 'width-short' },
+            { key: 'gender', label: '性别', width: 'width-short' }, { key: 'ethnicity', label: '民族', width: 'width-short' },
+            { key: 'idCard', label: '身份证号码', width: 'width-long' }, { key: 'birthday', label: '生日', width: 'width-medium' },
+            { key: 'birthdayType', label: '生日类型', width: 'width-short' }, { key: 'householdType', label: '户口性质', width: 'width-short' },
+            { key: 'currentAddress', label: '现住址', width: 'width-xlong' }, { key: 'householdAddress', label: '户籍所在地', width: 'width-xlong' },
+            { key: 'isLeftBehind', label: '农村留守儿童', width: 'width-medium' }, { key: 'isOrphan', label: '孤儿/事实无人抚养', width: 'width-medium' },
+            { key: 'isOnlyChild', label: '独生子女', width: 'width-short' }, { key: 'isMartyrChild', label: '烈士/优抚对象子女', width: 'width-medium' },
+            { key: 'disabilityType', label: '残疾类型及等级', width: 'width-medium' }, { key: 'politicalStatus', label: '政治面貌', width: 'width-short' },
+            { key: 'joinTeamDate', label: '入队时间', width: 'width-medium' }, { key: 'joinLeagueDate', label: '入团时间', width: 'width-medium' },
+            { key: 'joinPartyDate', label: '入党时间', width: 'width-medium' }, { key: 'teamPosition', label: '团/队内职务', width: 'width-medium' },
+            { key: 'enrollmentYear', label: '入学年份', width: 'width-short' }, { key: 'subsidyStatus', label: '资助情况', width: 'width-long' },
+            { key: 'transportMode', label: '上下学交通方式', width: 'width-short' }, { key: 'firstContactName', label: '第一联系人姓名', width: 'width-medium' },
+            { key: 'firstContactPhone', label: '第一联系人电话', width: 'width-medium' }, { key: 'firstContactIdCard', label: '第一联系人身份证', width: 'width-long' },
+            { key: 'secondContactName', label: '第二联系人姓名', width: 'width-medium' }, { key: 'secondContactPhone', label: '第二联系人电话', width: 'width-medium' },
+            { key: 'secondContactIdCard', label: '第二联系人身份证', width: 'width-long' }, { key: 'emergencyContact', label: '紧急备用联系人', width: 'width-long' },
+            { key: 'homeAddress', label: '家庭详细住址', width: 'width-xlong' }, { key: 'isBoarding', label: '是否住校', width: 'width-short' },
+            { key: 'bloodType', label: '血型', width: 'width-short' }, { key: 'majorDisease', label: '重大疾病史', width: 'width-long' },
+            { key: 'allergyHistory', label: '药物/食物过敏史', width: 'width-long' }, { key: 'specialConstitution', label: '特殊体质/禁忌', width: 'width-long' },
+            { key: 'transportDetail', label: '上下学方式及接送人', width: 'width-xlong' }, { key: 'medicationInfo', label: '在校服药情况', width: 'width-long' },
             { key: 'psychologicalLevel', label: '心理预警等级', width: 'width-short' }
         ];
         
@@ -473,18 +372,12 @@
                 { name: '心理委员', alias: '暖心大使', duty: '男女生各一个，观察同学情绪，填写"晴雨表"，发现异常悄悄报告老师。' }
             ]},
             { category: '第二类：学科专业岗（12个）', points: 1, positions: [
-                { name: '语文课代表', alias: '诵读领航员', duty: '' },
-                { name: '数学课代表', alias: '逻辑先锋', duty: '' },
-                { name: '英语课代表', alias: '外交官', duty: '' },
-                { name: '科学课代表', alias: '实验员', duty: '负责科学课器材的准备和整理。' },
-                { name: '道德与法治课代表', alias: '文明观察员', duty: '' },
-                { name: '音乐课代表', alias: '金嗓子领唱', duty: '' },
-                { name: '美术课代表', alias: '色彩总监', duty: '' },
-                { name: '信息技术课代表', alias: '机房管理员', duty: '负责开关电脑、收发鞋套。' },
-                { name: '书法课代表', alias: '墨香督导', duty: '' },
-                { name: '劳动/综合实践课代表', alias: '工具管家', duty: '' },
-                { name: '校本/地方课程课代表', alias: '资料收发员', duty: '' },
-                { name: '阅读课代表', alias: '图书银行行长', duty: '' }
+                { name: '语文课代表', alias: '诵读领航员', duty: '' }, { name: '数学课代表', alias: '逻辑先锋', duty: '' },
+                { name: '英语课代表', alias: '外交官', duty: '' }, { name: '科学课代表', alias: '实验员', duty: '负责科学课器材的准备和整理。' },
+                { name: '道德与法治课代表', alias: '文明观察员', duty: '' }, { name: '音乐课代表', alias: '金嗓子领唱', duty: '' },
+                { name: '美术课代表', alias: '色彩总监', duty: '' }, { name: '信息技术课代表', alias: '机房管理员', duty: '负责开关电脑、收发鞋套。' },
+                { name: '书法课代表', alias: '墨香督导', duty: '' }, { name: '劳动/综合实践课代表', alias: '工具管家', duty: '' },
+                { name: '校本/地方课程课代表', alias: '资料收发员', duty: '' }, { name: '阅读课代表', alias: '图书银行行长', duty: '' }
             ]},
             { category: '第三类：日常事务服务岗（20个）', points: 1, positions: [
                 { name: '门窗管理员', alias: '光明使者/安全哨兵', duty: '负责开关灯、关窗锁门。' },
@@ -536,7 +429,6 @@
         const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
         const timeSlots = ['早上', '上午', '下午', '晚上'];
         
-        // ==================== 工具函数 ====================
         function getToken() { return localStorage.getItem('token'); }
         function getUser() { const s = localStorage.getItem('user'); if (!s) return {}; try { return JSON.parse(s); } catch { return {}; } }
         function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login.html'; }
@@ -550,7 +442,6 @@
         function generateStudentId() { let g = '', c = ''; for (const [k, v] of Object.entries(gradeMap)) { if (currentClass.includes(k)) { g = v; break; } } if (!g) { const m = currentClass.match(/(\d+)/); if (m) g = m[1].padStart(2, '0'); } const cm = currentClass.match(/(\d+)班/); if (cm) c = cm[1].padStart(2, '0'); if (!g) g = '01'; if (!c) c = '01'; const cnt = rosterStudents.filter(s => s.studentId && s.studentId.startsWith(g + c)).length; return g + c + String(cnt + 1).padStart(2, '0'); }
         function addMinutes(t, m) { const [h, mi] = t.split(':').map(Number); const total = h * 60 + mi + m; return String(Math.floor(total / 60) % 24).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0'); }
         
-        // ==================== 学生花名册 ====================
         function loadRosterStudents() { const s = localStorage.getItem('roster_encrypted_' + currentClass); if (s) { const d = decryptData(s); rosterStudents = (d && Array.isArray(d)) ? d : []; } else { const o = localStorage.getItem('roster_' + currentClass); if (o) { rosterStudents = JSON.parse(o); saveRosterStudents(); } else { rosterStudents = allStudents.filter(x => x.class === currentClass).map(x => ({ studentId: x.studentId || x.id || generateStudentId(), name: x.name || '', username: x.username || '', class: x.class || currentClass, gender: '', ethnicity: '', idCard: '', birthday: '', birthdayType: '公历', householdType: '', currentAddress: '', householdAddress: '', isLeftBehind: '否', isOrphan: '否', isOnlyChild: '否', isMartyrChild: '否', disabilityType: '无', politicalStatus: '群众', joinTeamDate: '', joinLeagueDate: '', joinPartyDate: '', teamPosition: '', enrollmentYear: '', subsidyStatus: '无', transportMode: '', firstContactName: '', firstContactPhone: '', firstContactIdCard: '', secondContactName: '', secondContactPhone: '', secondContactIdCard: '', emergencyContact: '', homeAddress: '', isBoarding: '走读', bloodType: '', majorDisease: '', allergyHistory: '', specialConstitution: '', transportDetail: '', medicationInfo: '', psychologicalLevel: '一般', isLeftBehindDuplicate: '否' })); saveRosterStudents(); } } filteredRosterStudents = [...rosterStudents]; }
         function saveRosterStudents() { localStorage.setItem('roster_encrypted_' + currentClass, encryptData(rosterStudents)); localStorage.removeItem('roster_' + currentClass); }
         function applyFilters() { filteredRosterStudents = rosterStudents.filter(s => Object.entries(activeFilters).every(([k, v]) => { if (!v) return true; return (s[k] || '').toString().includes(v); })); }
@@ -572,7 +463,6 @@
         function handleImportRosterExcel(i) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = new Uint8Array(e.target.result); const wb = XLSX.read(d, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const jd = XLSX.utils.sheet_to_json(ws); if (!jd || !jd.length) { alert('Excel文件为空'); return; } rosterStudents = jd.map(row => { const s = {}; studentFields.forEach(f => s[f.key] = row[f.label] || ''); s.class = currentClass; return s; }); saveRosterStudents(); applyFilters(); document.getElementById('importRosterContainer').innerHTML = ''; showRosterModule(); alert('导入成功！'); } catch { alert('文件解析失败'); } }; r.readAsArrayBuffer(f); }
         function cancelImportRoster() { document.getElementById('importRosterContainer').innerHTML = ''; }
         
-        // ==================== 积分管理 ====================
         function loadCommitteeRosterData() { const s = localStorage.getItem('committee_roster_encrypted_' + currentClass); if (s) { const d = decryptData(s); committeeRosterData = (d && Array.isArray(d)) ? d : []; } else committeeRosterData = []; }
         function saveCommitteeRosterData() { localStorage.setItem('committee_roster_encrypted_' + currentClass, encryptData(committeeRosterData)); }
         function showPointsModule(t) { if (t === 'committee-roster') showCommitteeRosterModule(); else if (t === 'points-list') showPointsListModule(); else if (t === 'points-assessment') showPointsAssessmentModule(); else if (t === 'points-details') showPointsDetailsModule(); }
@@ -590,35 +480,41 @@
         function showPointsAssessmentModule() { document.getElementById('mainContent').innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">📊</div><h2>积分考核</h2><p style="color:#999;">该功能正在开发中</p></div>'; }
         function showPointsDetailsModule() { document.getElementById('mainContent').innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">📝</div><h2>积分明细</h2><p style="color:#999;">该功能正在开发中</p></div>'; }
         
-        // ==================== 课程表 ====================
         function loadAllSchedules() { const s = localStorage.getItem('all_schedules_' + currentClass); allSchedules = s ? JSON.parse(s) : {}; }
         function loadMainSchedule() { const sc = document.getElementById('module-schedule-main'); if (!sc) return; if (!currentClass) { sc.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>请选择班级</p></div>'; return; } const names = Object.keys(allSchedules); if (!names.length) { currentScheduleName = '我的课表'; allSchedules[currentScheduleName] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; } else currentScheduleName = names[0]; scheduleData = allSchedules[currentScheduleName].courses || []; renderMainSchedule(); }
-        function renderMainSchedule() { const c = document.getElementById('module-schedule-main'); if (!c) return; const cs = allSchedules[currentScheduleName] || { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; const pt = cs.periodTimes || defaultPeriodTimes; const names = Object.keys(allSchedules); let h = `<div class="schedule-header"><input type="text" class="schedule-title-input" id="scheduleTitleInput" value="${currentScheduleName}"><select class="schedule-selector" id="scheduleSelector" onchange="switchSchedule(this.value)"><option value="">切换课表</option>${names.map(n=>`<option value="${n}" ${n===currentScheduleName?'selected':''}>${n}</option>`).join('')}</select><div class="schedule-actions"><button class="btn-save" onclick="saveSchedule()">💾 保存</button><button class="btn-export" onclick="exportSchedule()">📤 导出</button><button class="btn-import" onclick="showImportForm()">📥 导入</button><button class="btn-clear" onclick="showClearConfirm()">🗑️ 清空</button><button class="btn-new" onclick="showNewScheduleForm()">📄 新建</button></div></div><div id="newScheduleFormContainer"></div><div id="importFormContainer"></div><div id="clearConfirmContainer"></div><div class="schedule-container"><table class="schedule-table"><thead><tr><th class="time-slot-header">时间段</th><th class="period-time-header">节数/时间</th>${weekDays.map(d=>`<th class="day-header">${d}</th>`).join('')}</tr></thead><tbody>`; timeSlots.forEach(ts => { const ps = pt.filter(p => p.timeSlot === ts); ps.forEach((p, idx) => { h += '<tr>'; if (idx === 0) h += `<td class="period-group-header" rowspan="${ps.length}">${ts}<button class="add-period-btn" onclick="addPeriod('${ts}')">+</button></td>`; h += `<td class="period-time-cell"><span class="period-label" onclick="editPeriodLabel(${p.period})">${p.periodLabel||'第'+p.period+'节'}</span><span class="period-time" onclick="editPeriodTime(${p.period})">${p.startTime}-${p.endTime}</span><button class="delete-period-btn" onclick="removePeriod(${p.period})">×</button></td>`; for (let d = 1; d <= 7; d++) { const course = scheduleData.find(x => x.day === d && x.period === p.period); if (course) h += `<td class="course-cell" onclick="editCourseInline(${d},${p.period})"><span class="course-name">${course.courseName||''}</span><span class="class-name">${course.className||''}</span></td>`; else h += `<td class="course-cell" onclick="editCourseInline(${d},${p.period})"><span class="edit-hint">+ 添加</span></td>`; } h += '</tr>'; }); }); h += '</tbody></table></div>'; c.innerHTML = h; }
-        function addPeriod(ts) { const cs = allSchedules[currentScheduleName]; const ps = cs.periodTimes.filter(p => p.timeSlot === ts); let maxP = 0; cs.periodTimes.forEach(p => { if (p.period > maxP) maxP = p.period; }); const np = maxP + 1; let st = '08:00', et = '08:45'; if (ps.length) { const lp = ps[ps.length-1]; st = lp.endTime; et = addMinutes(lp.endTime, 45); } else { const dt = { '早上':{start:'07:30',end:'08:15'}, '上午':{start:'09:30',end:'10:15'}, '下午':{start:'14:00',end:'14:45'}, '晚上':{start:'19:00',end:'19:45'} }; st = dt[ts].start; et = dt[ts].end; } cs.periodTimes.push({ period: np, periodLabel: '第'+np+'节', timeSlot: ts, startTime: st, endTime: et }); cs.periodTimes.sort((a,b) => a.period - b.period); scheduleData = cs.courses; renderMainSchedule(); }
-        function removePeriod(p) { const cs = allSchedules[currentScheduleName]; cs.periodTimes = cs.periodTimes.filter(x => x.period !== p); cs.courses = cs.courses.filter(x => x.period !== p); scheduleData = cs.courses; renderMainSchedule(); }
+        
+        function renderMainSchedule() { const c = document.getElementById('module-schedule-main'); if (!c) return; const cs = allSchedules[currentScheduleName] || { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; const pt = cs.periodTimes || defaultPeriodTimes; const names = Object.keys(allSchedules); const hasPeriods = pt.length > 0; let h = `<div class="schedule-header"><input type="text" class="schedule-title-input" id="scheduleTitleInput" value="${currentScheduleName}"><select class="schedule-selector" id="scheduleSelector" onchange="switchSchedule(this.value)"><option value="">切换课表</option>${names.map(n=>`<option value="${n}" ${n===currentScheduleName?'selected':''}>${n}</option>`).join('')}</select><div class="schedule-actions"><button class="btn-save" onclick="saveSchedule()">💾 保存</button><button class="btn-export" onclick="exportSchedule()">📤 导出</button><button class="btn-import" onclick="showImportForm()">📥 导入</button><button class="btn-clear" onclick="showClearConfirm()">🗑️ 清空</button><button class="btn-new" onclick="showNewScheduleForm()">📄 新建</button><button class="btn-new" style="background:#4CAF50;" onclick="resetScheduleToDefault()">🔄 恢复默认</button></div></div><div id="newScheduleFormContainer"></div><div id="importFormContainer"></div><div id="clearConfirmContainer"></div>`; if (!hasPeriods) { h += `<div class="empty-schedule"><div class="icon">📅</div><p>当前课程表已清空，没有任何节次</p><button class="btn-add" onclick="resetScheduleToDefault()" style="font-size:16px;padding:12px 30px;">🔄 恢复默认课程表</button><p style="margin-top:20px;font-size:13px;">或点击各时间段的"+"按钮添加节次</p></div>`; } else { h += `<div class="schedule-container"><table class="schedule-table"><thead><tr><th class="time-slot-header">时间段</th><th class="period-time-header">节数/时间</th>${weekDays.map(d=>`<th class="day-header">${d}</th>`).join('')}</tr></thead><tbody>`; timeSlots.forEach(ts => { const ps = pt.filter(p => p.timeSlot === ts); if (ps.length === 0) { h += `<tr><td class="period-group-header">${ts}<button class="add-period-btn" onclick="addPeriod('${ts}')" title="添加节数">+</button></td><td colspan="${weekDays.length + 1}" style="color:#999;font-size:12px;padding:10px;">暂无节次，点击左侧"+"添加</td></tr>`; } else { ps.forEach((p, idx) => { h += '<tr>'; if (idx === 0) h += `<td class="period-group-header" rowspan="${ps.length}">${ts}<button class="add-period-btn" onclick="addPeriod('${ts}')" title="添加节数">+</button></td>`; h += `<td class="period-time-cell"><span class="period-label" onclick="editPeriodLabel(${p.period})" title="点击修改节数名称">${p.periodLabel||'第'+p.period+'节'}</span><span class="period-time" onclick="editPeriodTime(${p.period})" title="点击修改时间">${p.startTime}-${p.endTime}</span><button class="delete-period-btn" onclick="removePeriod(${p.period})" title="删除这一节">×</button></td>`; for (let d = 1; d <= 7; d++) { const course = scheduleData.find(x => x.day === d && x.period === p.period); if (course) h += `<td class="course-cell" onclick="editCourseInline(${d},${p.period})" title="点击编辑课程"><span class="course-name">${course.courseName||''}</span><span class="class-name">${course.className||''}</span></td>`; else h += `<td class="course-cell" onclick="editCourseInline(${d},${p.period})" title="点击添加课程"><span class="edit-hint">+ 添加</span></td>`; } h += '</tr>'; }); } }); h += '</tbody></table></div>'; } c.innerHTML = h; }
+        
+        function addPeriod(ts) { const cs = allSchedules[currentScheduleName]; if (!cs) return; if (!cs.periodTimes) cs.periodTimes = []; const ps = cs.periodTimes.filter(p => p.timeSlot === ts); let maxP = 0; cs.periodTimes.forEach(p => { if (p.period > maxP) maxP = p.period; }); const np = maxP + 1; let st = '08:00', et = '08:45'; if (ps.length) { const lp = ps[ps.length-1]; st = lp.endTime; et = addMinutes(lp.endTime, 45); } else { const dt = { '早上':{start:'07:30',end:'08:15'}, '上午':{start:'09:30',end:'10:15'}, '下午':{start:'14:00',end:'14:45'}, '晚上':{start:'19:00',end:'19:45'} }; st = dt[ts].start; et = dt[ts].end; } cs.periodTimes.push({ period: np, periodLabel: '第'+np+'节', timeSlot: ts, startTime: st, endTime: et }); cs.periodTimes.sort((a,b) => a.period - b.period); scheduleData = cs.courses || []; renderMainSchedule(); }
+        
+        function removePeriod(p) { const cs = allSchedules[currentScheduleName]; if (!cs) return; cs.periodTimes = (cs.periodTimes || []).filter(x => x.period !== p); cs.courses = (cs.courses || []).filter(x => x.period !== p); scheduleData = cs.courses; renderMainSchedule(); }
+        
         function switchSchedule(n) { if (!n) return; currentScheduleName = n; scheduleData = allSchedules[n].courses || []; const ti = document.getElementById('scheduleTitleInput'); if (ti) ti.value = n; renderMainSchedule(); }
-        function editPeriodLabel(p) { const cs = allSchedules[currentScheduleName]; const pi = cs.periodTimes.find(x => x.period === p); if (!pi) return; const el = event.target; const cl = pi.periodLabel || ('第'+p+'节'); el.innerHTML = `<input type="text" class="inline-editor" id="editPeriodLabelInput" value="${cl}"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="savePeriodLabel(${p})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`; setTimeout(() => { const i = document.getElementById('editPeriodLabelInput'); if (i) { i.focus(); i.select(); } }, 50); }
-        function savePeriodLabel(p) { const v = document.getElementById('editPeriodLabelInput').value.trim(); if (!v) return; const cs = allSchedules[currentScheduleName]; const pi = cs.periodTimes.find(x => x.period === p); if (pi) pi.periodLabel = v; renderMainSchedule(); }
-        function editPeriodTime(p) { const cs = allSchedules[currentScheduleName]; const pi = cs.periodTimes.find(x => x.period === p); if (!pi) return; const el = event.target; el.innerHTML = `<input type="time" class="inline-editor" id="editStartTimeInput" value="${pi.startTime}"><input type="time" class="inline-editor" id="editEndTimeInput" value="${pi.endTime}"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="savePeriodTime(${p})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`; setTimeout(() => { const i = document.getElementById('editStartTimeInput'); if (i) i.focus(); }, 50); }
-        function savePeriodTime(p) { const st = document.getElementById('editStartTimeInput').value; const et = document.getElementById('editEndTimeInput').value; if (!st || !et) return; const cs = allSchedules[currentScheduleName]; const pi = cs.periodTimes.find(x => x.period === p); if (pi) { pi.startTime = st; pi.endTime = et; } renderMainSchedule(); }
+        function editPeriodLabel(p) { const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (!pi) return; const el = event.target; const cl = pi.periodLabel || ('第'+p+'节'); el.innerHTML = `<input type="text" class="inline-editor" id="editPeriodLabelInput" value="${cl}"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="savePeriodLabel(${p})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`; setTimeout(() => { const i = document.getElementById('editPeriodLabelInput'); if (i) { i.focus(); i.select(); } }, 50); }
+        function savePeriodLabel(p) { const v = document.getElementById('editPeriodLabelInput').value.trim(); if (!v) return; const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (pi) pi.periodLabel = v; renderMainSchedule(); }
+        function editPeriodTime(p) { const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (!pi) return; const el = event.target; el.innerHTML = `<input type="time" class="inline-editor" id="editStartTimeInput" value="${pi.startTime}"><input type="time" class="inline-editor" id="editEndTimeInput" value="${pi.endTime}"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="savePeriodTime(${p})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`; setTimeout(() => { const i = document.getElementById('editStartTimeInput'); if (i) i.focus(); }, 50); }
+        function savePeriodTime(p) { const st = document.getElementById('editStartTimeInput').value; const et = document.getElementById('editEndTimeInput').value; if (!st || !et) return; const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (pi) { pi.startTime = st; pi.endTime = et; } renderMainSchedule(); }
         function editCourseInline(d, p) { const cell = event.target.closest('.course-cell'); if (!cell) return; const ec = scheduleData.find(x => x.day === d && x.period === p); cell.innerHTML = `<input type="text" class="inline-editor" id="editCourseNameInput" value="${ec?ec.courseName:''}" placeholder="课程名"><input type="text" class="inline-editor" id="editClassNameInput" value="${ec?ec.className:''}" placeholder="班级"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="saveCourseInline(${d},${p})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`; setTimeout(() => { const i = document.getElementById('editCourseNameInput'); if (i) i.focus(); }, 50); }
         function saveCourseInline(d, p) { const cn = document.getElementById('editCourseNameInput').value.trim(); const cl = document.getElementById('editClassNameInput').value.trim(); if (!cn) return; const ec = scheduleData.find(x => x.day === d && x.period === p); if (ec) { ec.courseName = cn; ec.className = cl; } else scheduleData.push({ day: d, period: p, courseName: cn, className: cl }); renderMainSchedule(); }
-        function saveSchedule() { if (!currentClass) return; const ti = document.getElementById('scheduleTitleInput'); const nn = ti ? ti.value.trim() : currentScheduleName; if (!nn) return; if (nn !== currentScheduleName) { const od = allSchedules[currentScheduleName]; delete allSchedules[currentScheduleName]; allSchedules[nn] = od; currentScheduleName = nn; } allSchedules[currentScheduleName].courses = scheduleData; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); const btn = event.target; const ot = btn.textContent; btn.textContent = '✅ 已保存'; btn.style.background = '#4CAF50'; setTimeout(() => { btn.textContent = ot; btn.style.background = ''; }, 2000); renderMainSchedule(); }
-        function exportSchedule() { const cs = allSchedules[currentScheduleName]; const d = { scheduleName: currentScheduleName, periodTimes: cs.periodTimes, courses: scheduleData, exportedAt: new Date().toISOString() }; const json = JSON.stringify(d, null, 2); const blob = new Blob([json], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = currentScheduleName + '_' + currentClass + '.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+        function saveSchedule() { if (!currentClass) return; const ti = document.getElementById('scheduleTitleInput'); const nn = ti ? ti.value.trim() : currentScheduleName; if (!nn) return; if (nn !== currentScheduleName) { const od = allSchedules[currentScheduleName]; delete allSchedules[currentScheduleName]; allSchedules[nn] = od; currentScheduleName = nn; } if (!allSchedules[currentScheduleName]) allSchedules[currentScheduleName] = { periodTimes: [], courses: [] }; allSchedules[currentScheduleName].courses = scheduleData; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); const btn = event.target; const ot = btn.textContent; btn.textContent = '✅ 已保存'; btn.style.background = '#4CAF50'; setTimeout(() => { btn.textContent = ot; btn.style.background = ''; }, 2000); renderMainSchedule(); }
+        function exportSchedule() { const cs = allSchedules[currentScheduleName]; const d = { scheduleName: currentScheduleName, periodTimes: cs.periodTimes || [], courses: scheduleData, exportedAt: new Date().toISOString() }; const json = JSON.stringify(d, null, 2); const blob = new Blob([json], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = currentScheduleName + '_' + currentClass + '.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
         function showImportForm() { document.getElementById('importFormContainer').innerHTML = `<div style="background:#e0f7fa;border:2px solid #00bcd4;border-radius:5px;padding:10px;margin-bottom:10px;"><div class="new-schedule-form"><input type="file" id="importFileInput" accept=".json" onchange="handleImportFile(this)"><button class="btn btn-cancel-inline" onclick="cancelImport()">取消</button></div></div>`; }
         function handleImportFile(i) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = JSON.parse(e.target.result); if (!d.periodTimes || !d.courses) { alert('无效文件'); return; } let nn = d.scheduleName || '导入的课表'; let idx = 1; while (allSchedules[nn]) { nn = d.scheduleName + '_' + idx; idx++; } allSchedules[nn] = { periodTimes: d.periodTimes, courses: d.courses }; currentScheduleName = nn; scheduleData = d.courses; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('importFormContainer').innerHTML = ''; renderMainSchedule(); } catch { alert('解析失败'); } }; r.readAsText(f); }
         function cancelImport() { document.getElementById('importFormContainer').innerHTML = ''; }
-        function showClearConfirm() { document.getElementById('clearConfirmContainer').innerHTML = `<div style="background:#fff3e0;border:2px solid #ff9800;border-radius:5px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span>确定清空？</span><button class="btn btn-clear" onclick="confirmClearSchedule()">确定清空</button><button class="btn btn-cancel-inline" onclick="cancelClearConfirm()">取消</button></div>`; }
-        function confirmClearSchedule() { scheduleData = []; allSchedules[currentScheduleName].courses = []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('clearConfirmContainer').innerHTML = ''; renderMainSchedule(); }
+        function showClearConfirm() { document.getElementById('clearConfirmContainer').innerHTML = `<div style="background:#fff3e0;border:2px solid #ff9800;border-radius:5px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span>确定要清空整个课程表吗？（包括所有节次和课程）</span><button class="btn btn-clear" onclick="confirmClearSchedule()">确定清空</button><button class="btn btn-cancel-inline" onclick="cancelClearConfirm()">取消</button></div>`; }
+        
+        function confirmClearSchedule() { const cs = allSchedules[currentScheduleName]; if (cs) { cs.periodTimes = []; cs.courses = []; } scheduleData = []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('clearConfirmContainer').innerHTML = ''; renderMainSchedule(); }
+        
         function cancelClearConfirm() { document.getElementById('clearConfirmContainer').innerHTML = ''; }
+        
+        function resetScheduleToDefault() { const cs = allSchedules[currentScheduleName]; if (!cs) { allSchedules[currentScheduleName] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; } else { cs.periodTimes = JSON.parse(JSON.stringify(defaultPeriodTimes)); cs.courses = []; } scheduleData = []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); renderMainSchedule(); }
+        
         function showNewScheduleForm() { document.getElementById('newScheduleFormContainer').innerHTML = `<div style="background:#e3f2fd;border:2px solid #2196f3;border-radius:5px;padding:10px;margin-bottom:10px;"><div class="new-schedule-form"><input type="text" id="newScheduleNameInput" placeholder="输入新课表名称"><button class="btn btn-new" onclick="confirmNewSchedule()">创建</button><button class="btn btn-cancel-inline" onclick="cancelNewSchedule()">取消</button></div></div>`; setTimeout(() => { const i = document.getElementById('newScheduleNameInput'); if (i) i.focus(); }, 50); }
-        function confirmNewSchedule() { const nn = document.getElementById('newScheduleNameInput').value.trim(); if (!nn) return; if (allSchedules[nn]) { alert('已存在'); return; } allSchedules[nn] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: JSON.parse(JSON.stringify(scheduleData)) }; currentScheduleName = nn; scheduleData = allSchedules[nn].courses; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('newScheduleFormContainer').innerHTML = ''; renderMainSchedule(); }
+        function confirmNewSchedule() { const nn = document.getElementById('newScheduleNameInput').value.trim(); if (!nn) return; if (allSchedules[nn]) { alert('已存在'); return; } allSchedules[nn] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; currentScheduleName = nn; scheduleData = []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('newScheduleFormContainer').innerHTML = ''; renderMainSchedule(); }
         function cancelNewSchedule() { document.getElementById('newScheduleFormContainer').innerHTML = ''; }
         
-        // ==================== 模块显示 ====================
         function showModule(moduleName) { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); const ai = document.querySelector(`.nav-item[data-tab="${moduleName}"]`); if (ai) ai.classList.add('active'); const mt = { 'roster':'📋 学生花名册','points-list':'📋 积分清单','points-assessment':'📊 积分考核','points-details':'📝 积分明细','committee-roster':'👥 积分制度','cleaning':'🧹 卫生安排表','seating':'💺 排座位','activities':'🎉 班级活动','finance-overview':'💰 收支总览','finance-income':'📈 收入详情','finance-expense':'📉 支出详情','exam-list':'📝 考试列表','score-entry':'✏️ 成绩录入','exam-analysis':'📊 单次分析','trend-analysis':'📈 个人趋势','subject-settings':'⚙️ 科目设置','homework-list':'📚 作业列表','homework-stats':'📊 作业统计看板','discipline-dashboard':'⚠️ 违纪数据看板','discipline-records':'📋 违纪记录明细','leave':'🏥 请假管理','risk-home':'🚨 风险预警首页','emotion-warning':'😟 学生情绪预警','special-constitution':'🏥 特殊体质登记','dropout-risk':'🚫 辍学风险预警','return-tracking':'🔍 未返校跟踪','conflict-resolution':'🤝 矛盾排查','conversations':'💬 谈话记录','parent-communication':'📞 家校沟通','work-traces':'📁 工作留痕','training-records':'📝 培训记录','lecture-records':'🎤 讲座记录','activity-participation':'🎯 活动参与','hours-stats':'⏱️ 学时统计' }; const title = mt[moduleName] || '模块'; const content = document.getElementById('mainContent'); if (moduleName === 'roster') showRosterModule(); else if (['points-list','points-assessment','points-details','committee-roster'].includes(moduleName)) showPointsModule(moduleName); else content.innerHTML = `<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">🚧</div><h2>${title}</h2><p style="color:#999;">该功能正在开发中</p></div>`; }
         
-        // ==================== 初始化 ====================
         async function loadAllStudentsData() { try { const t = getToken(); const r = await fetch(API_BASE + '/students', { headers: { 'Authorization': 'Bearer ' + t } }); if (r.ok) allStudents = await r.json(); } catch (e) { console.error('加载学生数据失败:', e); } }
         async function init() { const u = getUser(); const t = getToken(); if (!t || !u.userId) { window.location.href = '/login.html'; return; } if (u.role !== 'teacher') { alert('无权限访问'); window.location.href = '/login.html'; return; } document.getElementById('sidebarUserName').textContent = u.realName || '教师'; document.getElementById('welcomeName').textContent = u.realName || '教师'; await loadAllStudentsData(); loadClassSelector(); const fg = document.querySelector('.nav-group-header'); if (fg) toggleGroup(fg); }
         
