@@ -110,7 +110,7 @@
         .schedule-table th { background: #667eea; color: white; font-weight: bold; }
         .schedule-table .time-slot-header { background: #5a67d8; width: 60px; }
         .schedule-table .period-time-header { width: 90px; }
-        .schedule-table .day-header { min-width: 100px; }
+        .schedule-table .day-header { min-width: 80px; font-size: 12px; }
         .schedule-table .period-group-header { background: #f8f9fa; font-weight: bold; color: #333; writing-mode: vertical-lr; text-orientation: mixed; width: 50px; position: relative; }
         .schedule-table .period-group-header .add-period-btn { writing-mode: horizontal-tb; display: block; margin-top: 5px; background: #4CAF50; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 16px; cursor: pointer; line-height: 22px; text-align: center; padding: 0; }
         .schedule-table .period-time-cell { background: #f0f0ff; font-weight: bold; color: #333; cursor: pointer; }
@@ -119,7 +119,7 @@
         .schedule-table .delete-period-btn { display: inline-block; margin-top: 4px; background: #f44336; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 14px; cursor: pointer; line-height: 20px; text-align: center; padding: 0; }
         .schedule-table .course-cell { cursor: pointer; transition: background 0.3s; min-height: 60px; }
         .schedule-table .course-cell:hover { background: #f0f0ff; }
-        .schedule-table .course-cell .course-name { font-weight: bold; display: block; font-size: 14px; }
+        .schedule-table .course-cell .course-name { font-weight: bold; display: block; font-size: 13px; }
         .schedule-table .course-cell .class-name { font-size: 11px; color: #666; display: block; margin-top: 3px; }
         .schedule-table .course-cell .edit-hint { font-size: 10px; color: #ccc; display: block; margin-top: 3px; }
         .inline-editor { width: 90%; border: 2px solid #667eea; border-radius: 3px; padding: 4px; font-size: 12px; text-align: center; margin-bottom: 3px; }
@@ -426,7 +426,8 @@
             { period: 8, periodLabel: '第8节', timeSlot: '晚上', startTime: '19:55', endTime: '20:40' }
         ];
         
-        const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        // 周一到周十
+        const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日', '周一(八)', '周二(九)', '周三(十)'];
         const timeSlots = ['早上', '上午', '下午', '晚上'];
         
         function getToken() { return localStorage.getItem('token'); }
@@ -481,31 +482,112 @@
         function showPointsDetailsModule() { document.getElementById('mainContent').innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">📝</div><h2>积分明细</h2><p style="color:#999;">该功能正在开发中</p></div>'; }
         
         function loadAllSchedules() { const s = localStorage.getItem('all_schedules_' + currentClass); allSchedules = s ? JSON.parse(s) : {}; }
-        function loadMainSchedule() { const sc = document.getElementById('module-schedule-main'); if (!sc) return; if (!currentClass) { sc.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>请选择班级</p></div>'; return; } const names = Object.keys(allSchedules); if (!names.length) { currentScheduleName = '我的课表'; allSchedules[currentScheduleName] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; } else currentScheduleName = names[0]; scheduleData = allSchedules[currentScheduleName].courses || []; renderMainSchedule(); }
         
-        function renderMainSchedule() { const c = document.getElementById('module-schedule-main'); if (!c) return; const cs = allSchedules[currentScheduleName] || { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; const pt = cs.periodTimes || defaultPeriodTimes; const names = Object.keys(allSchedules); const hasPeriods = pt.length > 0; let h = `<div class="schedule-header"><input type="text" class="schedule-title-input" id="scheduleTitleInput" value="${currentScheduleName}"><select class="schedule-selector" id="scheduleSelector" onchange="switchSchedule(this.value)"><option value="">切换课表</option>${names.map(n=>`<option value="${n}" ${n===currentScheduleName?'selected':''}>${n}</option>`).join('')}</select><div class="schedule-actions"><button class="btn-save" onclick="saveSchedule()">💾 保存</button><button class="btn-export" onclick="exportSchedule()">📤 导出</button><button class="btn-import" onclick="showImportForm()">📥 导入</button><button class="btn-clear" onclick="showClearConfirm()">🗑️ 清空</button><button class="btn-new" onclick="showNewScheduleForm()">📄 新建</button><button class="btn-new" style="background:#4CAF50;" onclick="resetScheduleToDefault()">🔄 恢复默认</button></div></div><div id="newScheduleFormContainer"></div><div id="importFormContainer"></div><div id="clearConfirmContainer"></div>`; if (!hasPeriods) { h += `<div class="empty-schedule"><div class="icon">📅</div><p>当前课程表已清空，没有任何节次</p><button class="btn-add" onclick="resetScheduleToDefault()" style="font-size:16px;padding:12px 30px;">🔄 恢复默认课程表</button><p style="margin-top:20px;font-size:13px;">或点击各时间段的"+"按钮添加节次</p></div>`; } else { h += `<div class="schedule-container"><table class="schedule-table"><thead><tr><th class="time-slot-header">时间段</th><th class="period-time-header">节数/时间</th>${weekDays.map(d=>`<th class="day-header">${d}</th>`).join('')}</tr></thead><tbody>`; timeSlots.forEach(ts => { const ps = pt.filter(p => p.timeSlot === ts); if (ps.length === 0) { h += `<tr><td class="period-group-header">${ts}<button class="add-period-btn" onclick="addPeriod('${ts}')" title="添加节数">+</button></td><td colspan="${weekDays.length + 1}" style="color:#999;font-size:12px;padding:10px;">暂无节次，点击左侧"+"添加</td></tr>`; } else { ps.forEach((p, idx) => { h += '<tr>'; if (idx === 0) h += `<td class="period-group-header" rowspan="${ps.length}">${ts}<button class="add-period-btn" onclick="addPeriod('${ts}')" title="添加节数">+</button></td>`; h += `<td class="period-time-cell"><span class="period-label" onclick="editPeriodLabel(${p.period})" title="点击修改节数名称">${p.periodLabel||'第'+p.period+'节'}</span><span class="period-time" onclick="editPeriodTime(${p.period})" title="点击修改时间">${p.startTime}-${p.endTime}</span><button class="delete-period-btn" onclick="removePeriod(${p.period})" title="删除这一节">×</button></td>`; for (let d = 1; d <= 7; d++) { const course = scheduleData.find(x => x.day === d && x.period === p.period); if (course) h += `<td class="course-cell" onclick="editCourseInline(${d},${p.period})" title="点击编辑课程"><span class="course-name">${course.courseName||''}</span><span class="class-name">${course.className||''}</span></td>`; else h += `<td class="course-cell" onclick="editCourseInline(${d},${p.period})" title="点击添加课程"><span class="edit-hint">+ 添加</span></td>`; } h += '</tr>'; }); } }); h += '</tbody></table></div>'; } c.innerHTML = h; }
+        function loadMainSchedule() { 
+            const sc = document.getElementById('module-schedule-main'); 
+            if (!sc) return; 
+            if (!currentClass) { 
+                sc.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>请选择班级</p></div>'; 
+                return; 
+            } 
+            const names = Object.keys(allSchedules); 
+            if (!names.length) { 
+                currentScheduleName = '我的课表'; 
+                allSchedules[currentScheduleName] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; 
+                localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules));
+            } else { 
+                currentScheduleName = names[0]; 
+            } 
+            scheduleData = allSchedules[currentScheduleName].courses || []; 
+            renderMainSchedule(); 
+        }
         
-        function addPeriod(ts) { const cs = allSchedules[currentScheduleName]; if (!cs) return; if (!cs.periodTimes) cs.periodTimes = []; const ps = cs.periodTimes.filter(p => p.timeSlot === ts); let maxP = 0; cs.periodTimes.forEach(p => { if (p.period > maxP) maxP = p.period; }); const np = maxP + 1; let st = '08:00', et = '08:45'; if (ps.length) { const lp = ps[ps.length-1]; st = lp.endTime; et = addMinutes(lp.endTime, 45); } else { const dt = { '早上':{start:'07:30',end:'08:15'}, '上午':{start:'09:30',end:'10:15'}, '下午':{start:'14:00',end:'14:45'}, '晚上':{start:'19:00',end:'19:45'} }; st = dt[ts].start; et = dt[ts].end; } cs.periodTimes.push({ period: np, periodLabel: '第'+np+'节', timeSlot: ts, startTime: st, endTime: et }); cs.periodTimes.sort((a,b) => a.period - b.period); scheduleData = cs.courses || []; renderMainSchedule(); }
+        function renderMainSchedule() { 
+            const c = document.getElementById('module-schedule-main'); 
+            if (!c) return; 
+            const cs = allSchedules[currentScheduleName] || { periodTimes: [], courses: [] }; 
+            const pt = cs.periodTimes || []; 
+            const names = Object.keys(allSchedules); 
+            const hasPeriods = pt.length > 0; 
+            let h = `<div class="schedule-header"><input type="text" class="schedule-title-input" id="scheduleTitleInput" value="${currentScheduleName}"><select class="schedule-selector" id="scheduleSelector" onchange="switchSchedule(this.value)"><option value="">切换课表</option>${names.map(n=>`<option value="${n}" ${n===currentScheduleName?'selected':''}>${n}</option>`).join('')}</select><div class="schedule-actions"><button class="btn-save" onclick="saveSchedule()">💾 保存</button><button class="btn-export" onclick="exportSchedule()">📤 导出</button><button class="btn-import" onclick="showImportForm()">📥 导入</button><button class="btn-clear" onclick="showClearConfirm()">🗑️ 清空课程</button><button class="btn-delete" style="padding:10px 20px;margin-bottom:20px;" onclick="showDeleteScheduleConfirm()">❌ 删除整个课表</button><button class="btn-new" onclick="showNewScheduleForm()">📄 新建课表</button></div></div><div id="newScheduleFormContainer"></div><div id="importFormContainer"></div><div id="clearConfirmContainer"></div><div id="deleteScheduleConfirmContainer"></div>`; 
+            if (!hasPeriods) { 
+                h += `<div class="empty-schedule"><div class="icon">📅</div><p>当前课程表已清空，没有任何节次</p><button class="btn-add" onclick="resetScheduleToDefault()" style="font-size:16px;padding:12px 30px;">🔄 恢复默认8节课程</button><p style="margin-top:20px;font-size:13px;">或点击各时间段的"+"按钮添加节次</p></div>`; 
+            } else { 
+                h += `<div class="schedule-container"><table class="schedule-table"><thead><tr><th class="time-slot-header">时间段</th><th class="period-time-header">节数/时间</th>${weekDays.map(d=>`<th class="day-header">${d}</th>`).join('')}</tr></thead><tbody>`; 
+                timeSlots.forEach(ts => { 
+                    const ps = pt.filter(p => p.timeSlot === ts); 
+                    if (ps.length === 0) { 
+                        h += `<tr><td class="period-group-header">${ts}<button class="add-period-btn" onclick="addPeriod('${ts}')" title="添加节数">+</button></td><td colspan="${weekDays.length + 1}" style="color:#999;font-size:12px;padding:10px;">暂无节次，点击左侧"+"添加</td></tr>`; 
+                    } else { 
+                        ps.forEach((p, idx) => { 
+                            h += '<tr>'; 
+                            if (idx === 0) h += `<td class="period-group-header" rowspan="${ps.length}">${ts}<button class="add-period-btn" onclick="addPeriod('${ts}')" title="添加节数">+</button></td>`; 
+                            h += `<td class="period-time-cell"><span class="period-label" onclick="editPeriodLabel(${p.period})" title="点击修改节数名称">${p.periodLabel||'第'+p.period+'节'}</span><span class="period-time" onclick="editPeriodTime(${p.period})" title="点击修改时间">${p.startTime}-${p.endTime}</span><button class="delete-period-btn" onclick="removePeriod(${p.period})" title="删除这一节">×</button></td>`; 
+                            for (let d = 1; d <= weekDays.length; d++) { 
+                                const course = scheduleData.find(x => x.day === d && x.period === p.period); 
+                                if (course) h += `<td class="course-cell" onclick="editCourseInline(${d},${p.period})" title="点击编辑课程"><span class="course-name">${course.courseName||''}</span><span class="class-name">${course.className||''}</span></td>`; 
+                                else h += `<td class="course-cell" onclick="editCourseInline(${d},${p.period})" title="点击添加课程"><span class="edit-hint">+ 添加</span></td>`; 
+                            } 
+                            h += '</tr>'; 
+                        }); 
+                    } 
+                }); 
+                h += '</tbody></table></div>'; 
+            } 
+            c.innerHTML = h; 
+        }
         
-        function removePeriod(p) { const cs = allSchedules[currentScheduleName]; if (!cs) return; cs.periodTimes = (cs.periodTimes || []).filter(x => x.period !== p); cs.courses = (cs.courses || []).filter(x => x.period !== p); scheduleData = cs.courses; renderMainSchedule(); }
+        function addPeriod(ts) { const cs = allSchedules[currentScheduleName]; if (!cs) return; if (!cs.periodTimes) cs.periodTimes = []; const ps = cs.periodTimes.filter(p => p.timeSlot === ts); let maxP = 0; cs.periodTimes.forEach(p => { if (p.period > maxP) maxP = p.period; }); const np = maxP + 1; let st = '08:00', et = '08:45'; if (ps.length) { const lp = ps[ps.length-1]; st = lp.endTime; et = addMinutes(lp.endTime, 45); } else { const dt = { '早上':{start:'07:30',end:'08:15'}, '上午':{start:'09:30',end:'10:15'}, '下午':{start:'14:00',end:'14:45'}, '晚上':{start:'19:00',end:'19:45'} }; st = dt[ts].start; et = dt[ts].end; } cs.periodTimes.push({ period: np, periodLabel: '第'+np+'节', timeSlot: ts, startTime: st, endTime: et }); cs.periodTimes.sort((a,b) => a.period - b.period); scheduleData = cs.courses || []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); renderMainSchedule(); }
+        
+        function removePeriod(p) { const cs = allSchedules[currentScheduleName]; if (!cs) return; cs.periodTimes = (cs.periodTimes || []).filter(x => x.period !== p); cs.courses = (cs.courses || []).filter(x => x.period !== p); scheduleData = cs.courses; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); renderMainSchedule(); }
         
         function switchSchedule(n) { if (!n) return; currentScheduleName = n; scheduleData = allSchedules[n].courses || []; const ti = document.getElementById('scheduleTitleInput'); if (ti) ti.value = n; renderMainSchedule(); }
         function editPeriodLabel(p) { const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (!pi) return; const el = event.target; const cl = pi.periodLabel || ('第'+p+'节'); el.innerHTML = `<input type="text" class="inline-editor" id="editPeriodLabelInput" value="${cl}"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="savePeriodLabel(${p})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`; setTimeout(() => { const i = document.getElementById('editPeriodLabelInput'); if (i) { i.focus(); i.select(); } }, 50); }
-        function savePeriodLabel(p) { const v = document.getElementById('editPeriodLabelInput').value.trim(); if (!v) return; const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (pi) pi.periodLabel = v; renderMainSchedule(); }
+        function savePeriodLabel(p) { const v = document.getElementById('editPeriodLabelInput').value.trim(); if (!v) return; const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (pi) pi.periodLabel = v; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); renderMainSchedule(); }
         function editPeriodTime(p) { const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (!pi) return; const el = event.target; el.innerHTML = `<input type="time" class="inline-editor" id="editStartTimeInput" value="${pi.startTime}"><input type="time" class="inline-editor" id="editEndTimeInput" value="${pi.endTime}"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="savePeriodTime(${p})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`; setTimeout(() => { const i = document.getElementById('editStartTimeInput'); if (i) i.focus(); }, 50); }
-        function savePeriodTime(p) { const st = document.getElementById('editStartTimeInput').value; const et = document.getElementById('editEndTimeInput').value; if (!st || !et) return; const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (pi) { pi.startTime = st; pi.endTime = et; } renderMainSchedule(); }
+        function savePeriodTime(p) { const st = document.getElementById('editStartTimeInput').value; const et = document.getElementById('editEndTimeInput').value; if (!st || !et) return; const cs = allSchedules[currentScheduleName]; const pi = (cs.periodTimes||[]).find(x => x.period === p); if (pi) { pi.startTime = st; pi.endTime = et; } localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); renderMainSchedule(); }
         function editCourseInline(d, p) { const cell = event.target.closest('.course-cell'); if (!cell) return; const ec = scheduleData.find(x => x.day === d && x.period === p); cell.innerHTML = `<input type="text" class="inline-editor" id="editCourseNameInput" value="${ec?ec.courseName:''}" placeholder="课程名"><input type="text" class="inline-editor" id="editClassNameInput" value="${ec?ec.className:''}" placeholder="班级"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="saveCourseInline(${d},${p})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`; setTimeout(() => { const i = document.getElementById('editCourseNameInput'); if (i) i.focus(); }, 50); }
-        function saveCourseInline(d, p) { const cn = document.getElementById('editCourseNameInput').value.trim(); const cl = document.getElementById('editClassNameInput').value.trim(); if (!cn) return; const ec = scheduleData.find(x => x.day === d && x.period === p); if (ec) { ec.courseName = cn; ec.className = cl; } else scheduleData.push({ day: d, period: p, courseName: cn, className: cl }); renderMainSchedule(); }
+        function saveCourseInline(d, p) { const cn = document.getElementById('editCourseNameInput').value.trim(); const cl = document.getElementById('editClassNameInput').value.trim(); if (!cn) return; const ec = scheduleData.find(x => x.day === d && x.period === p); if (ec) { ec.courseName = cn; ec.className = cl; } else scheduleData.push({ day: d, period: p, courseName: cn, className: cl }); localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); renderMainSchedule(); }
         function saveSchedule() { if (!currentClass) return; const ti = document.getElementById('scheduleTitleInput'); const nn = ti ? ti.value.trim() : currentScheduleName; if (!nn) return; if (nn !== currentScheduleName) { const od = allSchedules[currentScheduleName]; delete allSchedules[currentScheduleName]; allSchedules[nn] = od; currentScheduleName = nn; } if (!allSchedules[currentScheduleName]) allSchedules[currentScheduleName] = { periodTimes: [], courses: [] }; allSchedules[currentScheduleName].courses = scheduleData; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); const btn = event.target; const ot = btn.textContent; btn.textContent = '✅ 已保存'; btn.style.background = '#4CAF50'; setTimeout(() => { btn.textContent = ot; btn.style.background = ''; }, 2000); renderMainSchedule(); }
         function exportSchedule() { const cs = allSchedules[currentScheduleName]; const d = { scheduleName: currentScheduleName, periodTimes: cs.periodTimes || [], courses: scheduleData, exportedAt: new Date().toISOString() }; const json = JSON.stringify(d, null, 2); const blob = new Blob([json], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = currentScheduleName + '_' + currentClass + '.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
         function showImportForm() { document.getElementById('importFormContainer').innerHTML = `<div style="background:#e0f7fa;border:2px solid #00bcd4;border-radius:5px;padding:10px;margin-bottom:10px;"><div class="new-schedule-form"><input type="file" id="importFileInput" accept=".json" onchange="handleImportFile(this)"><button class="btn btn-cancel-inline" onclick="cancelImport()">取消</button></div></div>`; }
         function handleImportFile(i) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = JSON.parse(e.target.result); if (!d.periodTimes || !d.courses) { alert('无效文件'); return; } let nn = d.scheduleName || '导入的课表'; let idx = 1; while (allSchedules[nn]) { nn = d.scheduleName + '_' + idx; idx++; } allSchedules[nn] = { periodTimes: d.periodTimes, courses: d.courses }; currentScheduleName = nn; scheduleData = d.courses; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('importFormContainer').innerHTML = ''; renderMainSchedule(); } catch { alert('解析失败'); } }; r.readAsText(f); }
         function cancelImport() { document.getElementById('importFormContainer').innerHTML = ''; }
-        function showClearConfirm() { document.getElementById('clearConfirmContainer').innerHTML = `<div style="background:#fff3e0;border:2px solid #ff9800;border-radius:5px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span>确定要清空整个课程表吗？（包括所有节次和课程）</span><button class="btn btn-clear" onclick="confirmClearSchedule()">确定清空</button><button class="btn btn-cancel-inline" onclick="cancelClearConfirm()">取消</button></div>`; }
         
-        function confirmClearSchedule() { const cs = allSchedules[currentScheduleName]; if (cs) { cs.periodTimes = []; cs.courses = []; } scheduleData = []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('clearConfirmContainer').innerHTML = ''; renderMainSchedule(); }
-        
+        function showClearConfirm() { document.getElementById('clearConfirmContainer').innerHTML = `<div style="background:#fff3e0;border:2px solid #ff9800;border-radius:5px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span>确定要清空当前课程表的所有课程吗？（保留节次）</span><button class="btn btn-clear" onclick="confirmClearSchedule()">确定清空</button><button class="btn btn-cancel-inline" onclick="cancelClearConfirm()">取消</button></div>`; }
+        function confirmClearSchedule() { const cs = allSchedules[currentScheduleName]; if (cs) { cs.courses = []; } scheduleData = []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('clearConfirmContainer').innerHTML = ''; renderMainSchedule(); }
         function cancelClearConfirm() { document.getElementById('clearConfirmContainer').innerHTML = ''; }
+        
+        function showDeleteScheduleConfirm() { document.getElementById('deleteScheduleConfirmContainer').innerHTML = `<div style="background:#ffebee;border:2px solid #f44336;border-radius:5px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span>⚠️ 确定要删除整个课程表「${currentScheduleName}」吗？此操作不可恢复！</span><button class="btn btn-delete" onclick="confirmDeleteSchedule()">确定删除</button><button class="btn btn-cancel-inline" onclick="cancelDeleteScheduleConfirm()">取消</button></div>`; }
+        
+        function confirmDeleteSchedule() { 
+            delete allSchedules[currentScheduleName]; 
+            localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); 
+            const remaining = Object.keys(allSchedules); 
+            if (remaining.length > 0) { 
+                currentScheduleName = remaining[0]; 
+                scheduleData = allSchedules[currentScheduleName].courses || []; 
+            } else { 
+                currentScheduleName = ''; 
+                scheduleData = []; 
+            } 
+            document.getElementById('deleteScheduleConfirmContainer').innerHTML = ''; 
+            if (!currentScheduleName) { 
+                document.getElementById('module-schedule-main').innerHTML = `<div class="empty-schedule"><div class="icon">📅</div><p>所有课程表已删除</p><button class="btn-add" onclick="createFirstSchedule()" style="font-size:16px;padding:12px 30px;">📄 创建新课程表</button></div>`; 
+            } else { 
+                renderMainSchedule(); 
+            } 
+        }
+        
+        function cancelDeleteScheduleConfirm() { document.getElementById('deleteScheduleConfirmContainer').innerHTML = ''; }
+        
+        function createFirstSchedule() { 
+            currentScheduleName = '我的课表'; 
+            allSchedules[currentScheduleName] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; 
+            scheduleData = []; 
+            localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); 
+            renderMainSchedule(); 
+        }
         
         function resetScheduleToDefault() { const cs = allSchedules[currentScheduleName]; if (!cs) { allSchedules[currentScheduleName] = { periodTimes: JSON.parse(JSON.stringify(defaultPeriodTimes)), courses: [] }; } else { cs.periodTimes = JSON.parse(JSON.stringify(defaultPeriodTimes)); cs.courses = []; } scheduleData = []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); renderMainSchedule(); }
         
