@@ -473,19 +473,33 @@
         
         // 学期周次安排表（用于自动计算周数）
         // 每个区间: { start: 'M-D', end: 'M-D', week: 周次数字, label: '第X周' }
-        const semesterWeeks = [
-            { week: 1, label: '第一周', start: '09-01', end: '09-04' },
-            { week: 2, label: '第二周', start: '09-08', end: '09-16' },
-            { week: 3, label: '第三周', start: '09-21', end: '09-29' },
-            { week: 4, label: '第四周', start: '10-08', end: '10-15' },
-            { week: 5, label: '第五周', start: '10-19', end: '10-28' },
-            { week: 6, label: '第六周', start: '11-02', end: '11-11' },
-            { week: 7, label: '第七周', start: '11-16', end: '11-25' },
-            { week: 8, label: '第八周', start: '11-30', end: '12-08' },
-            { week: 9, label: '第九周', start: '12-14', end: '12-23' },
-            { week: 10, label: '第十周', start: '12-28', end: '01-06' },
-            { week: 11, label: '第十一周', start: '01-12', end: '12-31' }
-        ];
+        // 根据日期计算周次
+        function getWeekByDate(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length < 3) return '-';
+            const month = parseInt(parts[1]);
+            const day = parseInt(parts[2]);
+            
+            for (const w of semesterWeeks) {
+                const [sm, sd] = w.start.split('-').map(Number);
+                const [em, ed] = w.end.split('-').map(Number);
+                
+                // 情况1：没有跨年（如 09-01 到 09-05）
+                if (sm <= em) {
+                    if (month === sm && day >= sd && month === em && day <= ed) return w.label;
+                    if (month > sm && month < em) return w.label;
+                    if (month === sm && day >= sd && month < em) return w.label;
+                    if (month === em && day <= ed && month > sm) return w.label;
+                } 
+                // 情况2：跨年（如第十周 12-28 到 01-07）
+                else {
+                    if (month === sm && day >= sd) return w.label; // 12月底
+                    if (month === em && day <= ed) return w.label; // 次年1月初
+                }
+            }
+            return '未分周';
+        }
         
         // 根据日期计算周次
         function getWeekByDate(dateStr) {
