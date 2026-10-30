@@ -312,7 +312,7 @@
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">🎉</span> 班级活动</span>
                     <span class="arrow">▶</span>
-                </div>
+                                </div>
                 <div class="nav-submenu">
                     <div class="nav-item" data-tab="activities" onclick="showModule('activities')"><span class="icon">🎉</span> 班级活动</div>
                 </div>
@@ -823,14 +823,14 @@
             `).join(''); 
 
             t.querySelectorAll('.btn-edit-row').forEach(btn => {
-                btn.onclick = function() {
+                btn.addEventListener('click', function() {
                     editStudent(this.getAttribute('data-id'));
-                };
+                });
             });
             t.querySelectorAll('.btn-del-row').forEach(btn => {
-                btn.onclick = function() {
+                btn.addEventListener('click', function() {
                     deleteStudent(this.getAttribute('data-id'));
-                };
+                });
             });
         }
 
@@ -873,7 +873,9 @@
         }
         
         function saveStudentModal() { 
-            const n = document.getElementById('f_name').value.trim(); 
+            const nameEl = document.getElementById('f_name');
+            if (!nameEl) { alert('表单异常，请重试'); return; }
+            const n = nameEl.value.trim(); 
             if (!n) { alert('请输入学生姓名'); return; } 
             const d = {}; 
             studentFields.forEach(f => { 
