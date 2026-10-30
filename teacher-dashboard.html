@@ -236,6 +236,46 @@
         .points-bar.negative { background: linear-gradient(90deg, #f44336, #ff7961); }
 
         @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; padding: 10px; } .nav-group-header { padding: 10px 15px; font-size: 12px; } .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; } .schedule-title-input { font-size: 14px; } .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; } .home-btn { font-size: 24px; padding: 5px; } .student-form-row .form-group { flex: 1 1 100% !important; } .modal-window { max-width: 100%; } }
+                /* ===== 新增：学生编辑弹窗样式 ===== */
+        .student-edit-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1100;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .student-edit-overlay.show { display: flex; }
+        .student-edit-window {
+            background: white; border-radius: 12px; width: 100%; max-width: 850px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalIn 0.25s ease;
+            max-height: 90vh; display: flex; flex-direction: column;
+        }
+        .student-edit-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 24px; border-bottom: 1px solid #eee; background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+        .student-edit-header h3 { font-size: 18px; color: #333; margin: 0; }
+        .student-edit-body {
+            padding: 20px 24px; overflow-y: auto; flex: 1;
+            scrollbar-width: thin; scrollbar-color: #667eea #e0e0e0;
+        }
+        .student-edit-body::-webkit-scrollbar { width: 8px; }
+        .student-edit-body::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
+        .student-edit-body::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
+        .student-edit-footer {
+            padding: 16px 24px; border-top: 1px solid #eee; display: flex;
+            justify-content: flex-end; gap: 12px; background: #f8f9fa; border-radius: 0 0 12px 12px;
+        }
+        .student-edit-footer .btn { padding: 10px 24px; font-size: 14px; font-weight: bold; }
+        /* 表单分块样式 */
+        .form-section-title {
+            font-size: 14px; font-weight: bold; color: #667eea; margin: 15px 0 10px 0;
+            padding-bottom: 5px; border-bottom: 1px dashed #ccc;
+            grid-column: 1 / -1;
+        }
+        .form-section-title:first-child { margin-top: 0; }
+        .student-edit-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;
+        }
     </style>
 </head>
 <body>
@@ -488,6 +528,22 @@
     </div>
 
     <!-- 批量加分小窗口 -->
+        <!-- 学生编辑弹窗 -->
+    <div class="student-edit-overlay" id="studentEditModal" onclick="if(event.target===this)closeEditModal()">
+        <div class="student-edit-window">
+            <div class="student-edit-header">
+                <h3 id="studentModalTitle">编辑学生信息</h3>
+                <button class="modal-close" onclick="closeEditModal()">×</button>
+            </div>
+            <div class="student-edit-body" id="studentModalBody">
+                <!-- 动态渲染表单 -->
+            </div>
+            <div class="student-edit-footer">
+                <button class="btn" style="background:#999;color:white;" onclick="closeEditModal()">取消</button>
+                <button class="btn btn-save" style="margin-bottom:0;" onclick="saveStudentModal()">💾 保存信息</button>
+            </div>
+        </div>
+    </div>
     <div class="modal-overlay" id="batchModal" onclick="if(event.target===this)closeBatchModal()">
         <div class="modal-window">
             <div class="modal-header">
@@ -773,9 +829,65 @@
             `; 
             renderRosterTable(); 
         }
-        function showAddStudentForm() { editingStudentId = null; const f = document.getElementById('studentFormContainer'); f.innerHTML = generateStudentFormHTML({ studentId: generateStudentId() }); f.classList.add('show'); }
+        function showAddStudentForm() { 
+            editingStudentId = null; 
+            document.getElementById('studentModalTitle').textContent = '添加新学生';
+            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML({ studentId: generateStudentId() }); 
+            document.getElementById('studentEditModal').classList.add('show');
+        }
+        
+        function editStudent(id) { 
+            const s = rosterStudents.find(x => x.studentId === id); 
+            if (!s) return; 
+            editingStudentId = id; 
+            document.getElementById('studentModalTitle').textContent = '编辑学生信息 - ' + s.name;
+            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML(s); 
+            document.getElementById('studentEditModal').classList.add('show');
+        }
+        
+        function closeEditModal() {
+            document.getElementById('studentEditModal').classList.remove('show');
+            editingStudentId = null;
+        }
         function editStudent(id) { const s = rosterStudents.find(x => x.studentId === id); if (!s) return; editingStudentId = id; const f = document.getElementById('studentFormContainer'); f.innerHTML = generateStudentFormHTML(s); f.classList.add('show'); }
-        function generateStudentFormHTML(st) { const sf = { gender:['','男','女'], birthdayType:['公历','农历'], householdType:['','农业','非农业','居民户'], isLeftBehind:['是','否'], isOrphan:['是','否'], isOnlyChild:['是','否'], isMartyrChild:['是','否'], politicalStatus:['群众','少先队员','共青团员','中共党员'], transportMode:['','步行','公交','家长接送','校车','拼车'], isBoarding:['住校','走读'], bloodType:['','A型','B型','AB型','O型','未知'], psychologicalLevel:['一般','重点关注','预警'] }; let h = `<h3 style="margin-bottom:15px;">${editingStudentId?'编辑学生':'添加学生'}</h3><div class="student-form-row">`; studentFields.forEach(f => { const v = st[f.key] || ''; const w = f.width || 'width-medium'; let fh = ''; if (f.key === 'studentId') fh = `<div class="form-group ${w}"><label>${f.label}（自动生成）</label><input type="text" id="f_${f.key}" value="${v}" readonly style="background:#e9ecef;width:100%;"></div>`; else if (sf[f.key]) { const opts = sf[f.key].map(o => `<option value="${o}" ${v===o?'selected':''}>${o||'请选择'}</option>`).join(''); fh = `<div class="form-group ${w}"><label>${f.label}</label><select id="f_${f.key}" style="width:100%;">${opts}</select></div>`; } else if (f.key === 'birthday' || f.key === 'joinLeagueDate' || f.key === 'joinPartyDate') fh = `<div class="form-group ${w}"><label>${f.label}</label><input type="date" id="f_${f.key}" value="${v}" style="width:100%;"></div>`; else if (f.key === 'joinTeamDate') fh = `<div class="form-group ${w}"><label>${f.label}</label><input type="month" id="f_${f.key}" value="${v}" style="width:100%;"></div>`; else if (f.key === 'allergyHistory') fh = `<div class="form-group ${w}"><label>${f.label}（红色加粗）</label><input type="text" id="f_${f.key}" value="${v}" style="color:red;font-weight:bold;width:100%;"></div>`; else if (f.key === 'name') fh = `<div class="form-group ${w}"><label>${f.label} *</label><input type="text" id="f_${f.key}" value="${v}" required style="width:100%;"></div>`; else fh = `<div class="form-group ${w}"><label>${f.label}</label><input type="text" id="f_${f.key}" value="${v}" style="width:100%;"></div>`; h += fh; }); h += `</div><div class="student-form-actions"><button class="btn-save" onclick="saveStudentForm()">💾 保存</button><button class="btn-cancel-inline" onclick="cancelStudentForm()" style="padding:10px 20px;font-size:14px;">取消</button></div>`; return h; }
+        function generateStudentFormHTML(st) { 
+            const sf = { gender:['','男','女'], birthdayType:['公历','农历'], householdType:['','农业','非农业','居民户'], isLeftBehind:['是','否'], isOrphan:['是','否'], isOnlyChild:['是','否'], isMartyrChild:['是','否'], politicalStatus:['群众','少先队员','共青团员','中共党员'], transportMode:['','步行','公交','家长接送','校车','拼车'], isBoarding:['住校','走读'], bloodType:['','A型','B型','AB型','O型','未知'], psychologicalLevel:['一般','重点关注','预警'] }; 
+            
+            // 字段分组
+            const group1 = ['studentId', 'name', 'gender', 'ethnicity', 'idCard', 'birthday', 'birthdayType', 'householdType'];
+            const group2 = ['politicalStatus', 'joinTeamDate', 'joinLeagueDate', 'joinPartyDate', 'teamPosition', 'enrollmentYear', 'isBoarding'];
+            const group3 = ['firstContactName', 'firstContactPhone', 'firstContactIdCard', 'secondContactName', 'secondContactPhone', 'secondContactIdCard', 'emergencyContact'];
+            const group4 = ['homeAddress', 'currentAddress', 'householdAddress', 'transportMode', 'transportDetail', 'subsidyStatus'];
+            const group5 = ['bloodType', 'majorDisease', 'allergyHistory', 'specialConstitution', 'medicationInfo', 'psychologicalLevel', 'isLeftBehind', 'isOrphan', 'isOnlyChild', 'isMartyrChild', 'disabilityType'];
+
+            function renderFields(keys) {
+                let html = '';
+                keys.forEach(key => {
+                    const f = studentFields.find(x => x.key === key);
+                    if (!f) return;
+                    const v = st[f.key] || '';
+                    let fh = '';
+                    if (f.key === 'studentId') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}（自动生成）</label><input type="text" id="f_${f.key}" value="${v}" readonly style="background:#e9ecef;"></div>`;
+                    else if (sf[f.key]) { const opts = sf[f.key].map(o => `<option value="${o}" ${v===o?'selected':''}>${o||'请选择'}</option>`).join(''); fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><select id="f_${f.key}">${opts}</select></div>`; }
+                    else if (f.key === 'birthday' || f.key === 'joinLeagueDate' || f.key === 'joinPartyDate') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><input type="date" id="f_${f.key}" value="${v}"></div>`;
+                    else if (f.key === 'joinTeamDate') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><input type="month" id="f_${f.key}" value="${v}"></div>`;
+                    else if (f.key === 'allergyHistory') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}（红色加粗）</label><input type="text" id="f_${f.key}" value="${v}" style="color:red;font-weight:bold;"></div>`;
+                    else if (f.key === 'name') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label} *</label><input type="text" id="f_${f.key}" value="${v}" required></div>`;
+                    else fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><input type="text" id="f_${f.key}" value="${v}"></div>`;
+                    html += fh;
+                });
+                return html;
+            }
+
+            let h = `<div class="student-edit-grid">`;
+            h += `<div class="form-section-title">📌 基本信息</div>` + renderFields(group1);
+            h += `<div class="form-section-title">🎓 学籍与政治面貌</div>` + renderFields(group2);
+            h += `<div class="form-section-title">📞 联系人信息</div>` + renderFields(group3);
+            h += `<div class="form-section-title">🏠 住址与通勤</div>` + renderFields(group4);
+            h += `<div class="form-section-title">🏥 健康与特殊体质</div>` + renderFields(group5);
+            h += `</div>`;
+            return h; 
+        }
         function saveStudentForm() { const n = document.getElementById('f_name').value.trim(); if (!n) { alert('请输入学生姓名'); return; } const d = {}; studentFields.forEach(f => { const el = document.getElementById('f_' + f.key); if (el) d[f.key] = el.value.trim(); }); d.class = currentClass; if (editingStudentId) { const i = rosterStudents.findIndex(s => s.studentId === editingStudentId); if (i !== -1) rosterStudents[i] = { ...rosterStudents[i], ...d }; } else rosterStudents.push(d); saveRosterStudents(); applyFilters(); showRosterModule(); }
         function cancelStudentForm() { document.getElementById('studentFormContainer').classList.remove('show'); }
         function deleteStudent(id) { rosterStudents = rosterStudents.filter(s => s.studentId !== id); saveRosterStudents(); applyFilters(); showRosterModule(); }
