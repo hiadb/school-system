@@ -69,10 +69,11 @@
         .loading { text-align: center; padding: 20px; color: #666; }
         .class-info-banner { background: #f0f0ff; border: 2px solid #667eea; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .class-info-banner .current-class { font-weight: bold; color: #667eea; font-size: 16px; }
-        /* 1. 设置容器自适应宽度并产生内部滚动条 */
+        
+        /* 花名册表格核心样式 */
         .roster-table-container { 
             width: 100%; 
-            max-width: calc(100vw - 320px); /* 防止宽度撑破主体区域 */
+            max-width: calc(100vw - 320px); 
             overflow-x: auto; 
             overflow-y: auto; 
             max-height: 600px; 
@@ -81,50 +82,25 @@
             background: #fff;
             border: 1px solid #ddd;
         }
-        /* 2. 去掉 table-layout: fixed，让表格根据内容自动调整宽度 */
         .roster-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; }
         .roster-table th, .roster-table td { padding: 10px 12px; text-align: left; border: 1px solid #ddd; font-size: 12px; white-space: nowrap; vertical-align: middle; box-sizing: border-box; }
-        
-        /* 3. 表头吸附顶部 */
         .roster-table th { background: #667eea; color: white; font-weight: bold; position: sticky; top: 0; z-index: 20; }
-        
-        /* 4. 冻结列 */
         .roster-table th.col-frozen, .roster-table td.col-frozen { position: sticky; background: #f0f0ff; z-index: 10; }
-        /* 固定序号列 */
         .roster-table th.col-frozen-1, .roster-table td.col-frozen-1 { left: 0; width: 50px; min-width: 50px; max-width: 50px; text-align: center; z-index: 11; }
-        /* 固定学号列 */
         .roster-table th.col-frozen-2, .roster-table td.col-frozen-2 { left: 50px; width: 90px; min-width: 90px; max-width: 90px; z-index: 11; }
-        /* 固定姓名列 */
         .roster-table th.col-frozen-3, .roster-table td.col-frozen-3 { left: 140px; width: 90px; min-width: 90px; max-width: 90px; z-index: 11; }
-        
-        /* 5. 表头冻结列置顶 */
         .roster-table th.col-frozen { z-index: 30; background: #5a67d8; }
-        
-        /* 6. 右侧边界阴影，让冻结列看起来像一个完整的板块 */
         .roster-table th.col-frozen-3, .roster-table td.col-frozen-3 { border-right: 2px solid #aaa; box-shadow: 2px 0 5px rgba(0,0,0,0.15); }
         .roster-table tr:hover td.col-frozen { background: #e0e0ff; }
-        .roster-table tr:hover td.col-frozen { background: #e0e0ff; }
+        
         .filter-btn { background: none; border: none; cursor: pointer; font-size: 10px; margin-left: 3px; color: #fff; padding: 0; }
         .filter-btn:hover { color: #ffd700; }
         .filter-dropdown { position: absolute; background: white; border: 1px solid #ddd; border-radius: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; max-height: 200px; overflow-y: auto; min-width: 150px; padding: 8px; }
         .filter-dropdown label { display: flex; align-items: center; gap: 5px; padding: 3px 5px; font-size: 12px; cursor: pointer; }
         .filter-dropdown label:hover { background: #f0f0ff; }
         .filter-dropdown input[type="text"] { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px; margin-bottom: 5px; }
-        .student-form-container { background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; display: none; max-height: 500px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #667eea #e0e0e0; }
-        .student-form-container::-webkit-scrollbar { width: 8px; }
-        .student-form-container::-webkit-scrollbar-track { background: #e0e0e0; border-radius: 4px; }
-        .student-form-container::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
-        .student-form-container.show { display: block; }
-        .student-form-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; align-items: flex-end; }
-        .student-form-row .form-group { margin-bottom: 0; }
-        .student-form-row .form-group label { font-size: 12px; margin-bottom: 3px; display: block; color: #555; }
-        .student-form-row .form-group input, .student-form-row .form-group select { padding: 6px 8px; font-size: 12px; border: 1px solid #ddd; border-radius: 3px; }
-        .form-group.width-short { flex: 0 0 80px; }
-        .form-group.width-medium { flex: 0 0 120px; }
-        .form-group.width-long { flex: 0 0 180px; }
-        .form-group.width-xlong { flex: 1 1 250px; }
-        .form-group.width-full { flex: 1 1 100%; }
-        .student-form-actions { display: flex; gap: 10px; margin-top: 20px; position: sticky; bottom: -20px; background: #f8f9fa; padding: 10px 0; }
+
+        /* 课程表样式 */
         .schedule-container { overflow-x: auto; }
         .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .schedule-title-input { padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 18px; font-weight: bold; min-width: 200px; }
@@ -155,7 +131,7 @@
         .empty-schedule { text-align: center; padding: 60px 20px; color: #999; }
         .empty-schedule .icon { font-size: 64px; margin-bottom: 20px; }
         .empty-schedule p { font-size: 16px; margin-bottom: 20px; }
-        
+
         /* 积分明细与清单模块样式 */
         .points-details-container { padding: 0; }
         .points-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
@@ -235,8 +211,7 @@
         .points-bar { height: 18px; border-radius: 9px; background: linear-gradient(90deg, #667eea, #764ba2); min-width: 2px; transition: width 0.3s; }
         .points-bar.negative { background: linear-gradient(90deg, #f44336, #ff7961); }
 
-        @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; padding: 10px; } .nav-group-header { padding: 10px 15px; font-size: 12px; } .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; } .schedule-title-input { font-size: 14px; } .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; } .home-btn { font-size: 24px; padding: 5px; } .student-form-row .form-group { flex: 1 1 100% !important; } .modal-window { max-width: 100%; } }
-                /* ===== 新增：学生编辑弹窗样式 ===== */
+        /* ===== 新增：学生编辑弹窗样式 ===== */
         .student-edit-overlay {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5); z-index: 1100;
@@ -266,7 +241,6 @@
             justify-content: flex-end; gap: 12px; background: #f8f9fa; border-radius: 0 0 12px 12px;
         }
         .student-edit-footer .btn { padding: 10px 24px; font-size: 14px; font-weight: bold; }
-        /* 表单分块样式 */
         .form-section-title {
             font-size: 14px; font-weight: bold; color: #667eea; margin: 15px 0 10px 0;
             padding-bottom: 5px; border-bottom: 1px dashed #ccc;
@@ -276,6 +250,8 @@
         .student-edit-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;
         }
+        
+        @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; padding: 10px; } .nav-group-header { padding: 10px 15px; font-size: 12px; } .nav-submenu .nav-item { padding: 6px 15px 6px 30px; font-size: 11px; } .schedule-title-input { font-size: 14px; } .schedule-table th, .schedule-table td { padding: 5px; font-size: 11px; } .home-btn { font-size: 24px; padding: 5px; } .modal-window { max-width: 100%; } }
     </style>
 </head>
 <body>
@@ -313,7 +289,6 @@
                     <div class="nav-item" data-tab="points-details" onclick="showModule('points-details')"><span class="icon">📝</span> 积分明细</div>
                 </div>
             </div>
-            <!-- 班级值日与卫生菜单 -->
             <div class="nav-group">
                 <div class="nav-group-header" onclick="toggleGroup(this)">
                     <span class="group-title"><span class="icon">🧹</span> 班级值日与卫生</span>
@@ -527,8 +502,7 @@
         </div>
     </div>
 
-    <!-- 批量加分小窗口 -->
-        <!-- 学生编辑弹窗 -->
+    <!-- 学生编辑弹窗 -->
     <div class="student-edit-overlay" id="studentEditModal" onclick="if(event.target===this)closeEditModal()">
         <div class="student-edit-window">
             <div class="student-edit-header">
@@ -544,6 +518,8 @@
             </div>
         </div>
     </div>
+
+    <!-- 批量加分小窗口 -->
     <div class="modal-overlay" id="batchModal" onclick="if(event.target===this)closeBatchModal()">
         <div class="modal-window">
             <div class="modal-header">
@@ -604,7 +580,7 @@
         let allSchedules = {};
         let editingStudentId = null;
         let activeFilters = {};
-        let committeeRosterData = []; // 用于班级值日（原班委积分制度）
+        let committeeRosterData = [];
         let pointsDetailsData = [];
         
         let pointsDateState = { year: 2026, month: 9, day: 1 };
@@ -615,7 +591,6 @@
         
         const gradeMap = { '一': '01', '二': '02', '三': '03', '四': '04', '五': '05', '六': '06', '七': '07', '八': '08', '九': '09', '初一': '07', '初二': '08', '初三': '09', '高一': '10', '高二': '11', '高三': '12' };
         
-        // 学期周次安排表（2026年秋季学期）
         const semesterWeeks = [
             { week: 1, label: '第一周', start: '09-01', end: '09-05' },
             { week: 2, label: '第二周', start: '09-08', end: '09-17' },
@@ -630,18 +605,15 @@
             { week: 11, label: '第十一周', start: '01-12', end: '01-31' } 
         ];
         
-        // 根据日期计算周次
         function getWeekByDate(dateStr) {
             if (!dateStr) return '-';
             const parts = dateStr.split('-');
             if (parts.length < 3) return '-';
             const month = parseInt(parts[1]);
             const day = parseInt(parts[2]);
-            
             for (const w of semesterWeeks) {
                 const [sm, sd] = w.start.split('-').map(Number);
                 const [em, ed] = w.end.split('-').map(Number);
-                
                 if (sm <= em) {
                     if (month === sm && day >= sd && month === em && day <= ed) return w.label;
                     if (month > sm && month < em) return w.label;
@@ -760,6 +732,7 @@
         function generateStudentId() { let g = '', c = ''; for (const [k, v] of Object.entries(gradeMap)) { if (currentClass.includes(k)) { g = v; break; } } if (!g) { const m = currentClass.match(/(\d+)/); if (m) g = m[1].padStart(2, '0'); } const cm = currentClass.match(/(\d+)班/); if (cm) c = cm[1].padStart(2, '0'); if (!g) g = '01'; if (!c) c = '01'; const cnt = rosterStudents.filter(s => s.studentId && s.studentId.startsWith(g + c)).length; return g + c + String(cnt + 1).padStart(2, '0'); }
         function addMinutes(t, m) { const [h, mi] = t.split(':').map(Number); const total = h * 60 + mi + m; return String(Math.floor(total / 60) % 24).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0'); }
         
+        // ==================== 学生花名册模块 ====================
         function loadRosterStudents() { const s = localStorage.getItem('roster_encrypted_' + currentClass); if (s) { const d = decryptData(s); rosterStudents = (d && Array.isArray(d)) ? d : []; } else { const o = localStorage.getItem('roster_' + currentClass); if (o) { rosterStudents = JSON.parse(o); saveRosterStudents(); } else { rosterStudents = allStudents.filter(x => x.class === currentClass).map(x => ({ studentId: x.studentId || x.id || generateStudentId(), name: x.name || '', username: x.username || '', class: x.class || currentClass, gender: '', ethnicity: '', idCard: '', birthday: '', birthdayType: '公历', householdType: '', currentAddress: '', householdAddress: '', isLeftBehind: '否', isOrphan: '否', isOnlyChild: '否', isMartyrChild: '否', disabilityType: '无', politicalStatus: '群众', joinTeamDate: '', joinLeagueDate: '', joinPartyDate: '', teamPosition: '', enrollmentYear: '', subsidyStatus: '无', transportMode: '', firstContactName: '', firstContactPhone: '', firstContactIdCard: '', secondContactName: '', secondContactPhone: '', secondContactIdCard: '', emergencyContact: '', homeAddress: '', isBoarding: '走读', bloodType: '', majorDisease: '', allergyHistory: '', specialConstitution: '', transportDetail: '', medicationInfo: '', psychologicalLevel: '一般', isLeftBehindDuplicate: '否' })); saveRosterStudents(); } } filteredRosterStudents = [...rosterStudents]; }
         function saveRosterStudents() { localStorage.setItem('roster_encrypted_' + currentClass, encryptData(rosterStudents)); localStorage.removeItem('roster_' + currentClass); }
         function applyFilters() { filteredRosterStudents = rosterStudents.filter(s => Object.entries(activeFilters).every(([k, v]) => { if (!v) return true; return (s[k] || '').toString().includes(v); })); }
@@ -767,6 +740,7 @@
         function setFilter(k, v, c) { if (c) activeFilters[k] = v; else delete activeFilters[k]; applyFilters(); renderRosterTable(); }
         function clearFilter(k) { delete activeFilters[k]; applyFilters(); renderRosterTable(); document.querySelectorAll('.filter-dropdown').forEach(x => x.remove()); }
         function filterDropdownOptions(i, k) { const t = i.value.toLowerCase(); i.parentElement.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(t) ? 'flex' : 'none'); }
+        
         function renderRosterTable() { 
             const t = document.getElementById('rosterTableBody'); 
             if (!t) return; 
@@ -780,7 +754,6 @@
                     <td class="col-frozen col-frozen-2">${s.studentId||''}</td>
                     <td class="col-frozen col-frozen-3">${s.name||''}</td>
                     ${studentFields.slice(3).map(f => {
-                        // 去除了宽度的限制，文字长会自动撑开表格
                         const colorStyle = f.key === 'allergyHistory' ? 'color:red;font-weight:bold;' : '';
                         return `<td style="${colorStyle}">${s[f.key]||''}</td>`;
                     }).join('')}
@@ -791,6 +764,7 @@
                 </tr>
             `).join(''); 
         }
+
         function showRosterModule() { 
             const c = document.getElementById('mainContent'); 
             c.innerHTML = `
@@ -807,7 +781,6 @@
                         <button class="btn-import" onclick="downloadExcelTemplate()" style="background:#607d8b;">📋 下载模板</button>
                     </div>
                     <div id="importRosterContainer"></div>
-                    <div id="studentFormContainer" class="student-form-container"></div>
                     
                     <div class="roster-table-container">
                         <table class="roster-table">
@@ -854,7 +827,6 @@
         function generateStudentFormHTML(st) { 
             const sf = { gender:['','男','女'], birthdayType:['公历','农历'], householdType:['','农业','非农业','居民户'], isLeftBehind:['是','否'], isOrphan:['是','否'], isOnlyChild:['是','否'], isMartyrChild:['是','否'], politicalStatus:['群众','少先队员','共青团员','中共党员'], transportMode:['','步行','公交','家长接送','校车','拼车'], isBoarding:['住校','走读'], bloodType:['','A型','B型','AB型','O型','未知'], psychologicalLevel:['一般','重点关注','预警'] }; 
             
-            // 字段分组
             const group1 = ['studentId', 'name', 'gender', 'ethnicity', 'idCard', 'birthday', 'birthdayType', 'householdType'];
             const group2 = ['politicalStatus', 'joinTeamDate', 'joinLeagueDate', 'joinPartyDate', 'teamPosition', 'enrollmentYear', 'isBoarding'];
             const group3 = ['firstContactName', 'firstContactPhone', 'firstContactIdCard', 'secondContactName', 'secondContactPhone', 'secondContactIdCard', 'emergencyContact'];
@@ -917,102 +889,13 @@
             setTimeout(() => toast.remove(), 2000);
         }
         
-        function cancelStudentForm() { closeEditModal(); }
-        function showAddStudentForm() { 
-                    function editStudent(id) { 
-            const s = rosterStudents.find(x => x.studentId === id); 
-            if (!s) return; 
-            editingStudentId = id; 
-            document.getElementById('studentModalTitle').textContent = '编辑学生信息 - ' + s.name;
-            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML(s); 
-            document.getElementById('studentEditModal').classList.add('show');
-        }
-        
-        function closeEditModal() {
-            document.getElementById('studentEditModal').classList.remove('show');
-            editingStudentId = null;
-        }
-            editingStudentId = null; 
-            document.getElementById('studentModalTitle').textContent = '添加新学生';
-            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML({ studentId: generateStudentId() }); 
-            document.getElementById('studentEditModal').classList.add('show');
-        }
-        
-
-        function editStudent(id) { const s = rosterStudents.find(x => x.studentId === id); if (!s) return; editingStudentId = id; const f = document.getElementById('studentFormContainer'); f.innerHTML = generateStudentFormHTML(s); f.classList.add('show'); }
-        function generateStudentFormHTML(st) { 
-            const sf = { gender:['','男','女'], birthdayType:['公历','农历'], householdType:['','农业','非农业','居民户'], isLeftBehind:['是','否'], isOrphan:['是','否'], isOnlyChild:['是','否'], isMartyrChild:['是','否'], politicalStatus:['群众','少先队员','共青团员','中共党员'], transportMode:['','步行','公交','家长接送','校车','拼车'], isBoarding:['住校','走读'], bloodType:['','A型','B型','AB型','O型','未知'], psychologicalLevel:['一般','重点关注','预警'] }; 
-            
-            // 字段分组
-            const group1 = ['studentId', 'name', 'gender', 'ethnicity', 'idCard', 'birthday', 'birthdayType', 'householdType'];
-            const group2 = ['politicalStatus', 'joinTeamDate', 'joinLeagueDate', 'joinPartyDate', 'teamPosition', 'enrollmentYear', 'isBoarding'];
-            const group3 = ['firstContactName', 'firstContactPhone', 'firstContactIdCard', 'secondContactName', 'secondContactPhone', 'secondContactIdCard', 'emergencyContact'];
-            const group4 = ['homeAddress', 'currentAddress', 'householdAddress', 'transportMode', 'transportDetail', 'subsidyStatus'];
-            const group5 = ['bloodType', 'majorDisease', 'allergyHistory', 'specialConstitution', 'medicationInfo', 'psychologicalLevel', 'isLeftBehind', 'isOrphan', 'isOnlyChild', 'isMartyrChild', 'disabilityType'];
-
-            function renderFields(keys) {
-                let html = '';
-                keys.forEach(key => {
-                    const f = studentFields.find(x => x.key === key);
-                    if (!f) return;
-                    const v = st[f.key] || '';
-                    let fh = '';
-                    if (f.key === 'studentId') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}（自动生成）</label><input type="text" id="f_${f.key}" value="${v}" readonly style="background:#e9ecef;"></div>`;
-                    else if (sf[f.key]) { const opts = sf[f.key].map(o => `<option value="${o}" ${v===o?'selected':''}>${o||'请选择'}</option>`).join(''); fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><select id="f_${f.key}">${opts}</select></div>`; }
-                    else if (f.key === 'birthday' || f.key === 'joinLeagueDate' || f.key === 'joinPartyDate') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><input type="date" id="f_${f.key}" value="${v}"></div>`;
-                    else if (f.key === 'joinTeamDate') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><input type="month" id="f_${f.key}" value="${v}"></div>`;
-                    else if (f.key === 'allergyHistory') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}（红色加粗）</label><input type="text" id="f_${f.key}" value="${v}" style="color:red;font-weight:bold;"></div>`;
-                    else if (f.key === 'name') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label} *</label><input type="text" id="f_${f.key}" value="${v}" required></div>`;
-                    else fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><input type="text" id="f_${f.key}" value="${v}"></div>`;
-                    html += fh;
-                });
-                return html;
-            }
-
-            let h = `<div class="student-edit-grid">`;
-            h += `<div class="form-section-title">📌 基本信息</div>` + renderFields(group1);
-            h += `<div class="form-section-title">🎓 学籍与政治面貌</div>` + renderFields(group2);
-            h += `<div class="form-section-title">📞 联系人信息</div>` + renderFields(group3);
-            h += `<div class="form-section-title">🏠 住址与通勤</div>` + renderFields(group4);
-            h += `<div class="form-section-title">🏥 健康与特殊体质</div>` + renderFields(group5);
-            h += `</div>`;
-            return h; 
-        }
-        function saveStudentModal() { 
-            const n = document.getElementById('f_name').value.trim(); 
-            if (!n) { alert('请输入学生姓名'); return; } 
-            const d = {}; 
-            studentFields.forEach(f => { 
-                const el = document.getElementById('f_' + f.key); 
-                if (el) d[f.key] = el.value.trim(); 
-            }); 
-            d.class = currentClass; 
-            if (editingStudentId) { 
-                const i = rosterStudents.findIndex(s => s.studentId === editingStudentId); 
-                if (i !== -1) rosterStudents[i] = { ...rosterStudents[i], ...d }; 
-            } else {
-                rosterStudents.push(d); 
-            }
-            saveRosterStudents(); 
-            applyFilters(); 
-            closeEditModal(); 
-            showRosterModule(); 
-            
-            const toast = document.createElement('div');
-            toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:12px 20px;border-radius:6px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
-            toast.textContent = '✅ 学生信息已保存';
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
-        }
-        
-        function cancelStudentForm() { closeEditModal(); }
         function deleteStudent(id) { rosterStudents = rosterStudents.filter(s => s.studentId !== id); saveRosterStudents(); applyFilters(); showRosterModule(); }
         function downloadExcelTemplate() { const t = [{}]; studentFields.forEach(f => t[0][f.label] = ''); const ws = XLSX.utils.json_to_sheet(t); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '模板'); XLSX.writeFile(wb, currentClass + '_花名册模板.xlsx'); }
         function exportRosterExcel() { const d = filteredRosterStudents.map(s => { const r = {}; studentFields.forEach(f => r[f.label] = s[f.key] || ''); return r; }); const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '学生花名册'); XLSX.writeFile(wb, currentClass + '_花名册.xlsx'); }
         function showImportRosterForm() { document.getElementById('importRosterContainer').innerHTML = `<div style="background:#e0f7fa;border:2px solid #00bcd4;border-radius:5px;padding:10px;margin-bottom:10px;"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><input type="file" id="importRosterFileInput" accept=".xlsx,.xls" onchange="handleImportRosterExcel(this)"><button class="btn btn-cancel-inline" onclick="cancelImportRoster()">取消</button></div><p style="font-size:12px;color:#666;margin-top:5px;">支持 .xlsx 和 .xls 格式</p></div>`; }
         function handleImportRosterExcel(i) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = new Uint8Array(e.target.result); const wb = XLSX.read(d, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const jd = XLSX.utils.sheet_to_json(ws); if (!jd || !jd.length) { alert('Excel文件为空'); return; } rosterStudents = jd.map(row => { const s = {}; studentFields.forEach(f => s[f.key] = row[f.label] || ''); s.class = currentClass; return s; }); saveRosterStudents(); applyFilters(); document.getElementById('importRosterContainer').innerHTML = ''; showRosterModule(); alert('导入成功！'); } catch { alert('文件解析失败'); } }; r.readAsArrayBuffer(f); }
         function cancelImportRoster() { document.getElementById('importRosterContainer').innerHTML = ''; }
-        
+
         // ==================== 班级值日（原积分制度班委模块） ====================
         function loadCommitteeRosterData() { const s = localStorage.getItem('committee_roster_encrypted_' + currentClass); if (s) { const d = decryptData(s); committeeRosterData = (d && Array.isArray(d)) ? d : []; } else committeeRosterData = []; }
         function saveCommitteeRosterData() { localStorage.setItem('committee_roster_encrypted_' + currentClass, encryptData(committeeRosterData)); }
@@ -1131,7 +1014,6 @@
             if (!m) return; 
             const tbody = document.getElementById('committeeRosterBody'); 
             const row = tbody.querySelectorAll('tr')[index]; 
-            // 单元格 3 是职务，4 是别名，5 是内容，6 是积分，7 是操作
             row.cells[3].innerHTML = `<input type="text" id="editPos_${index}" value="${m.position||''}" style="width:100px;padding:4px;border:1px solid #667eea;border-radius:3px;">`; 
             row.cells[4].innerHTML = `<input type="text" id="editAlias_${index}" value="${m.alias||''}" style="width:100px;padding:4px;border:1px solid #667eea;border-radius:3px;">`; 
             row.cells[5].innerHTML = `<textarea id="editDuty_${index}" rows="2" style="width:150px;padding:4px;border:1px solid #667eea;border-radius:3px;">${m.duty||''}</textarea>`; 
@@ -1171,7 +1053,6 @@
             batchEditingDateType = null;
             updateBatchDateDisplay();
             
-            // 生成勾选列表
             let h = `<label class="select-all-row"><input type="checkbox" id="batchSelectAll" checked onchange="toggleSelectAllBatch(this.checked)"> 全选 / 取消全选</label>`;
             committeeRosterData.forEach((m, i) => {
                 h += `<label><input type="checkbox" class="batch-member-cb" value="${i}" data-sid="${m.studentId}" data-sname="${m.studentName}" data-points="${m.points}" checked> ${m.studentName}（${m.position} +${m.points}分）</label>`;
@@ -1204,8 +1085,7 @@
             
             const dateStr = batchDateState.year + '-' + String(batchDateState.month).padStart(2, '0') + '-' + String(batchDateState.day).padStart(2, '0');
             
-            loadPointsDetailsData(); // 确保数据最新
-            
+            loadPointsDetailsData();
             let count = 0;
             checkedBoxes.forEach(cb => {
                 const sid = cb.getAttribute('data-sid');
@@ -1233,7 +1113,6 @@
             setTimeout(() => toast.remove(), 3000);
         }
         
-        // 绑定批量日期修改（复用主日期控件逻辑，通过传入不同的type和target）
         function startEditDate(type, target) {
             if (target === 'main') {
                 if (editingDateType) return;
@@ -1284,7 +1163,7 @@
             }
         }
         
-        // 积分明细及其他模块
+        // ==================== 积分明细与清单 ====================
         function loadPointsDetailsData() {
             const s = localStorage.getItem('points_details_encrypted_' + currentClass);
             if (s) {
@@ -1439,7 +1318,6 @@
             const student = matched[0];
             const dateStr = pointsDateState.year + '-' + String(pointsDateState.month).padStart(2, '0') + '-' + String(pointsDateState.day).padStart(2, '0');
             
-            // 重新加载以防数据未同步
             loadPointsDetailsData();
             pointsDetailsData.push({
                 studentId: student.studentId,
@@ -1520,7 +1398,6 @@
             i.click();
         }
         
-        // ==================== 积分清单模块（显示每个人的总分）====================
         function showPointsListModule() {
             loadPointsDetailsData();
             const c = document.getElementById('mainContent');
