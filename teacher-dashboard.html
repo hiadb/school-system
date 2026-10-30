@@ -81,9 +81,9 @@
             background: #fff;
             border: 1px solid #ddd;
         }
-        /* 2. 表格最小宽度和独立布局 */
-        .roster-table { min-width: 2800px; width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
-        .roster-table th, .roster-table td { padding: 10px 8px; text-align: left; border: 1px solid #ddd; font-size: 12px; white-space: nowrap; vertical-align: middle; box-sizing: border-box; }
+        /* 2. 去掉 table-layout: fixed，让表格根据内容自动调整宽度 */
+        .roster-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; }
+        .roster-table th, .roster-table td { padding: 10px 12px; text-align: left; border: 1px solid #ddd; font-size: 12px; white-space: nowrap; vertical-align: middle; box-sizing: border-box; }
         
         /* 3. 表头吸附顶部 */
         .roster-table th { background: #667eea; color: white; font-weight: bold; position: sticky; top: 0; z-index: 20; }
@@ -724,20 +724,55 @@
                     <td class="col-frozen col-frozen-2">${s.studentId||''}</td>
                     <td class="col-frozen col-frozen-3">${s.name||''}</td>
                     ${studentFields.slice(3).map(f => {
-                        let w = 120; // 默认宽度
-                        if (f.key === 'idCard' || f.key === 'currentAddress') w = 180;
-                        if (f.key === 'gender' || f.key === 'ethnicity') w = 60;
+                        // 去除了宽度的限制，文字长会自动撑开表格
                         const colorStyle = f.key === 'allergyHistory' ? 'color:red;font-weight:bold;' : '';
-                        return `<td style="width:${w}px; min-width:${w}px; ${colorStyle}">${s[f.key]||''}</td>`;
+                        return `<td style="${colorStyle}">${s[f.key]||''}</td>`;
                     }).join('')}
-                    <td style="width:120px; min-width:120px; position:sticky; right:0; background:#fff; z-index:15; box-shadow:-2px 0 5px rgba(0,0,0,0.1);">
+                    <td style="position:sticky; right:0; background:#fff; z-index:15; box-shadow:-2px 0 5px rgba(0,0,0,0.1); white-space:nowrap;">
                         <button class="btn btn-edit" onclick="editStudent('${s.studentId}')">编辑</button> 
                         <button class="btn btn-delete" onclick="deleteStudent('${s.studentId}')">删除</button>
                     </td>
                 </tr>
             `).join(''); 
         }
-        function showRosterModule() { const c = document.getElementById('mainContent'); c.innerHTML = `<div id="module-roster"><h2 style="margin-bottom:20px;">📋 学生花名册</h2><div class="class-info-banner"><span>当前班级：<span class="current-class">${currentClass||'未选择'}</span></span><span>学生数量：${filteredRosterStudents.length} / ${rosterStudents.length} 人</span></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;"><button class="btn-add" onclick="showAddStudentForm()">➕ 添加学生</button><button class="btn-export" onclick="exportRosterExcel()">📤 导出Excel</button><button class="btn-import" onclick="showImportRosterForm()">📥 导入Excel</button><button class="btn-import" onclick="downloadExcelTemplate()" style="background:#607d8b;">📋 下载模板</button></div><div id="importRosterContainer"></div><div id="studentFormContainer" class="student-form-container"></div><div class="roster-table-container"><table class="roster-table"><thead><tr><th class="col-frozen col-frozen-1">序号</th><th class="col-frozen col-frozen-2">学号 <button class="filter-btn" onclick="showFilterDropdown('studentId',event)">🔽</button></th><th class="col-frozen col-frozen-3">姓名 <button class="filter-btn" onclick="showFilterDropdown('name',event)">🔽</button></th>${studentFields.slice(3).map(f=>`<th>${f.label} <button class="filter-btn" onclick="showFilterDropdown('${f.key}',event)">🔽</button></th>`).join('')}<th>操作</th></tr></thead><tbody id="rosterTableBody"></tbody></table></div></div>`; renderRosterTable(); }
+        function showRosterModule() { 
+            const c = document.getElementById('mainContent'); 
+            c.innerHTML = `
+                <div id="module-roster">
+                    <h2 style="margin-bottom:20px;">📋 学生花名册</h2>
+                    <div class="class-info-banner">
+                        <span>当前班级：<span class="current-class">${currentClass||'未选择'}</span></span>
+                        <span>学生数量：${filteredRosterStudents.length} / ${rosterStudents.length} 人</span>
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+                        <button class="btn-add" onclick="showAddStudentForm()">➕ 添加学生</button>
+                        <button class="btn-export" onclick="exportRosterExcel()">📤 导出Excel</button>
+                        <button class="btn-import" onclick="showImportRosterForm()">📥 导入Excel</button>
+                        <button class="btn-import" onclick="downloadExcelTemplate()" style="background:#607d8b;">📋 下载模板</button>
+                    </div>
+                    <div id="importRosterContainer"></div>
+                    <div id="studentFormContainer" class="student-form-container"></div>
+                    
+                    <div class="roster-table-container">
+                        <table class="roster-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-frozen col-frozen-1">序号</th>
+                                    <th class="col-frozen col-frozen-2">学号 <button class="filter-btn" onclick="showFilterDropdown('studentId',event)">🔽</button></th>
+                                    <th class="col-frozen col-frozen-3">姓名 <button class="filter-btn" onclick="showFilterDropdown('name',event)">🔽</button></th>
+                                    ${studentFields.slice(3).map(f=>`
+                                        <th>${f.label} <button class="filter-btn" onclick="showFilterDropdown('${f.key}',event)">🔽</button></th>
+                                    `).join('')}
+                                    <th style="position:sticky; right:0; background:#5a67d8; z-index:30; box-shadow:-2px 0 5px rgba(0,0,0,0.15);">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rosterTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            `; 
+            renderRosterTable(); 
+        }
         function showAddStudentForm() { editingStudentId = null; const f = document.getElementById('studentFormContainer'); f.innerHTML = generateStudentFormHTML({ studentId: generateStudentId() }); f.classList.add('show'); }
         function editStudent(id) { const s = rosterStudents.find(x => x.studentId === id); if (!s) return; editingStudentId = id; const f = document.getElementById('studentFormContainer'); f.innerHTML = generateStudentFormHTML(s); f.classList.add('show'); }
         function generateStudentFormHTML(st) { const sf = { gender:['','男','女'], birthdayType:['公历','农历'], householdType:['','农业','非农业','居民户'], isLeftBehind:['是','否'], isOrphan:['是','否'], isOnlyChild:['是','否'], isMartyrChild:['是','否'], politicalStatus:['群众','少先队员','共青团员','中共党员'], transportMode:['','步行','公交','家长接送','校车','拼车'], isBoarding:['住校','走读'], bloodType:['','A型','B型','AB型','O型','未知'], psychologicalLevel:['一般','重点关注','预警'] }; let h = `<h3 style="margin-bottom:15px;">${editingStudentId?'编辑学生':'添加学生'}</h3><div class="student-form-row">`; studentFields.forEach(f => { const v = st[f.key] || ''; const w = f.width || 'width-medium'; let fh = ''; if (f.key === 'studentId') fh = `<div class="form-group ${w}"><label>${f.label}（自动生成）</label><input type="text" id="f_${f.key}" value="${v}" readonly style="background:#e9ecef;width:100%;"></div>`; else if (sf[f.key]) { const opts = sf[f.key].map(o => `<option value="${o}" ${v===o?'selected':''}>${o||'请选择'}</option>`).join(''); fh = `<div class="form-group ${w}"><label>${f.label}</label><select id="f_${f.key}" style="width:100%;">${opts}</select></div>`; } else if (f.key === 'birthday' || f.key === 'joinLeagueDate' || f.key === 'joinPartyDate') fh = `<div class="form-group ${w}"><label>${f.label}</label><input type="date" id="f_${f.key}" value="${v}" style="width:100%;"></div>`; else if (f.key === 'joinTeamDate') fh = `<div class="form-group ${w}"><label>${f.label}</label><input type="month" id="f_${f.key}" value="${v}" style="width:100%;"></div>`; else if (f.key === 'allergyHistory') fh = `<div class="form-group ${w}"><label>${f.label}（红色加粗）</label><input type="text" id="f_${f.key}" value="${v}" style="color:red;font-weight:bold;width:100%;"></div>`; else if (f.key === 'name') fh = `<div class="form-group ${w}"><label>${f.label} *</label><input type="text" id="f_${f.key}" value="${v}" required style="width:100%;"></div>`; else fh = `<div class="form-group ${w}"><label>${f.label}</label><input type="text" id="f_${f.key}" value="${v}" style="width:100%;"></div>`; h += fh; }); h += `</div><div class="student-form-actions"><button class="btn-save" onclick="saveStudentForm()">💾 保存</button><button class="btn-cancel-inline" onclick="cancelStudentForm()" style="padding:10px 20px;font-size:14px;">取消</button></div>`; return h; }
