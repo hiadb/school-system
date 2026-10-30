@@ -211,7 +211,7 @@
         .points-bar { height: 18px; border-radius: 9px; background: linear-gradient(90deg, #667eea, #764ba2); min-width: 2px; transition: width 0.3s; }
         .points-bar.negative { background: linear-gradient(90deg, #f44336, #ff7961); }
 
-        /* ===== 新增：学生编辑弹窗样式 ===== */
+        /* ===== 学生编辑弹窗样式 ===== */
         .student-edit-overlay {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5); z-index: 1100;
@@ -741,32 +741,25 @@
         function clearFilter(k) { delete activeFilters[k]; applyFilters(); renderRosterTable(); document.querySelectorAll('.filter-dropdown').forEach(x => x.remove()); }
         function filterDropdownOptions(i, k) { const t = i.value.toLowerCase(); i.parentElement.querySelectorAll('label').forEach(l => l.style.display = l.textContent.toLowerCase().includes(t) ? 'flex' : 'none'); }
         
-        function renderRosterTable() { 
-            const t = document.getElementById('rosterTableBody'); 
-            if (!t) return; 
-            if (!filteredRosterStudents.length) { 
-                t.innerHTML = `<tr><td colspan="${studentFields.length+2}" class="empty-state">暂无学生数据</td></tr>`; 
-                return; 
-            } 
-            t.innerHTML = filteredRosterStudents.map((s, i) => {
-                const sId = s.studentId || '';
-                // 生成数据行
-                return `
-                <tr>
-                    <td class="col-frozen col-frozen-1">${i+1}</td>
-                    <td class="col-frozen col-frozen-2">${sId}</td>
-                    <td class="col-frozen col-frozen-3">${s.name||''}</td>
-                    ${studentFields.slice(3).map(f => {
-                        const colorStyle = f.key === 'allergyHistory' ? 'color:red;font-weight:bold;' : '';
-                        return `<td style="${colorStyle}">${s[f.key]||''}</td>`;
-                    }).join('')}
-                    <td style="position:sticky; right:0; background:#fff; z-index:15; box-shadow:-2px 0 5px rgba(0,0,0,0.1); white-space:nowrap;">
-                        <button class="btn btn-edit" onclick="editStudent('${sId}')">编辑</button> 
-                        <button class="btn btn-delete" onclick="deleteStudent('${sId}')">删除</button>
-                    </td>
-                </tr>
-                `;
-            }).join(''); 
+        function showAddStudentForm() { 
+            editingStudentId = null; 
+            document.getElementById('studentModalTitle').textContent = '添加新学生';
+            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML({ studentId: generateStudentId() }); 
+            document.getElementById('studentEditModal').classList.add('show');
+        }
+
+        function editStudent(id) { 
+            const s = rosterStudents.find(x => x.studentId === id); 
+            if (!s) return; 
+            editingStudentId = id; 
+            document.getElementById('studentModalTitle').textContent = '编辑学生信息 - ' + s.name;
+            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML(s); 
+            document.getElementById('studentEditModal').classList.add('show');
+        }
+        
+        function closeEditModal() {
+            document.getElementById('studentEditModal').classList.remove('show');
+            editingStudentId = null;
         }
 
         function showRosterModule() { 
@@ -806,26 +799,41 @@
             `; 
             renderRosterTable(); 
         }
+        function renderRosterTable() { 
+            const t = document.getElementById('rosterTableBody'); 
+            if (!t) return; 
+            if (!filteredRosterStudents.length) { 
+                t.innerHTML = `<tr><td colspan="${studentFields.length+2}" class="empty-state">暂无学生数据</td></tr>`; 
+                return; 
+            } 
+            t.innerHTML = filteredRosterStudents.map((s, i) => `
+                <tr>
+                    <td class="col-frozen col-frozen-1">${i+1}</td>
+                    <td class="col-frozen col-frozen-2">${s.studentId||''}</td>
+                    <td class="col-frozen col-frozen-3">${s.name||''}</td>
+                    ${studentFields.slice(3).map(f => {
+                        const colorStyle = f.key === 'allergyHistory' ? 'color:red;font-weight:bold;' : '';
+                        return `<td style="${colorStyle}">${s[f.key]||''}</td>`;
+                    }).join('')}
+                    <td style="position:sticky; right:0; background:#fff; z-index:15; box-shadow:-2px 0 5px rgba(0,0,0,0.1); white-space:nowrap;">
+                        <button class="btn btn-edit btn-edit-row" data-id="${s.studentId}">编辑</button> 
+                        <button class="btn btn-delete btn-del-row" data-id="${s.studentId}">删除</button>
+                    </td>
+                </tr>
+            `).join(''); 
 
-        function showAddStudentForm() { 
-            editingStudentId = null; 
-            document.getElementById('studentModalTitle').textContent = '添加新学生';
-            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML({ studentId: generateStudentId() }); 
-            document.getElementById('studentEditModal').classList.add('show');
-        }
-
-        function editStudent(id) { 
-            const s = rosterStudents.find(x => x.studentId === id); 
-            if (!s) return; 
-            editingStudentId = id; 
-            document.getElementById('studentModalTitle').textContent = '编辑学生信息 - ' + s.name;
-            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML(s); 
-            document.getElementById('studentEditModal').classList.add('show');
-        }
-        
-        function closeEditModal() {
-            document.getElementById('studentEditModal').classList.remove('show');
-            editingStudentId = null;
+            t.querySelectorAll('.btn-edit-row').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    editStudent(id);
+                });
+            });
+            t.querySelectorAll('.btn-del-row').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    deleteStudent(id);
+                });
+            });
         }
 
         function generateStudentFormHTML(st) { 
