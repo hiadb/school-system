@@ -748,21 +748,25 @@
                 t.innerHTML = `<tr><td colspan="${studentFields.length+2}" class="empty-state">暂无学生数据</td></tr>`; 
                 return; 
             } 
-            t.innerHTML = filteredRosterStudents.map((s, i) => `
+            t.innerHTML = filteredRosterStudents.map((s, i) => {
+                const sId = s.studentId || '';
+                // 生成数据行
+                return `
                 <tr>
                     <td class="col-frozen col-frozen-1">${i+1}</td>
-                    <td class="col-frozen col-frozen-2">${s.studentId||''}</td>
+                    <td class="col-frozen col-frozen-2">${sId}</td>
                     <td class="col-frozen col-frozen-3">${s.name||''}</td>
                     ${studentFields.slice(3).map(f => {
                         const colorStyle = f.key === 'allergyHistory' ? 'color:red;font-weight:bold;' : '';
                         return `<td style="${colorStyle}">${s[f.key]||''}</td>`;
                     }).join('')}
                     <td style="position:sticky; right:0; background:#fff; z-index:15; box-shadow:-2px 0 5px rgba(0,0,0,0.1); white-space:nowrap;">
-                        <button class="btn btn-edit" onclick="editStudent('${s.studentId}')">编辑</button> 
-                        <button class="btn btn-delete" onclick="deleteStudent('${s.studentId}')">删除</button>
+                        <button class="btn btn-edit" onclick="editStudent('${sId}')">编辑</button> 
+                        <button class="btn btn-delete" onclick="deleteStudent('${sId}')">删除</button>
                     </td>
                 </tr>
-            `).join(''); 
+                `;
+            }).join(''); 
         }
 
         function showRosterModule() { 
@@ -889,7 +893,19 @@
             setTimeout(() => toast.remove(), 2000);
         }
         
-        function deleteStudent(id) { rosterStudents = rosterStudents.filter(s => s.studentId !== id); saveRosterStudents(); applyFilters(); showRosterModule(); }
+        function deleteStudent(id) { 
+            if (!confirm('确定要删除该学生吗？此操作不可恢复！')) return;
+            rosterStudents = rosterStudents.filter(s => s.studentId !== id); 
+            saveRosterStudents(); 
+            applyFilters(); 
+            showRosterModule(); 
+            
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#f44336;color:white;padding:12px 20px;border-radius:6px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+            toast.textContent = '🗑️ 已删除该学生';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
         function downloadExcelTemplate() { const t = [{}]; studentFields.forEach(f => t[0][f.label] = ''); const ws = XLSX.utils.json_to_sheet(t); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '模板'); XLSX.writeFile(wb, currentClass + '_花名册模板.xlsx'); }
         function exportRosterExcel() { const d = filteredRosterStudents.map(s => { const r = {}; studentFields.forEach(f => r[f.label] = s[f.key] || ''); return r; }); const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '学生花名册'); XLSX.writeFile(wb, currentClass + '_花名册.xlsx'); }
         function showImportRosterForm() { document.getElementById('importRosterContainer').innerHTML = `<div style="background:#e0f7fa;border:2px solid #00bcd4;border-radius:5px;padding:10px;margin-bottom:10px;"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><input type="file" id="importRosterFileInput" accept=".xlsx,.xls" onchange="handleImportRosterExcel(this)"><button class="btn btn-cancel-inline" onclick="cancelImportRoster()">取消</button></div><p style="font-size:12px;color:#666;margin-top:5px;">支持 .xlsx 和 .xls 格式</p></div>`; }
