@@ -829,7 +829,109 @@
             `; 
             renderRosterTable(); 
         }
+
         function showAddStudentForm() { 
+            editingStudentId = null; 
+            document.getElementById('studentModalTitle').textContent = '添加新学生';
+            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML({ studentId: generateStudentId() }); 
+            document.getElementById('studentEditModal').classList.add('show');
+        }
+
+        function editStudent(id) { 
+            const s = rosterStudents.find(x => x.studentId === id); 
+            if (!s) return; 
+            editingStudentId = id; 
+            document.getElementById('studentModalTitle').textContent = '编辑学生信息 - ' + s.name;
+            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML(s); 
+            document.getElementById('studentEditModal').classList.add('show');
+        }
+        
+        function closeEditModal() {
+            document.getElementById('studentEditModal').classList.remove('show');
+            editingStudentId = null;
+        }
+
+        function generateStudentFormHTML(st) { 
+            const sf = { gender:['','男','女'], birthdayType:['公历','农历'], householdType:['','农业','非农业','居民户'], isLeftBehind:['是','否'], isOrphan:['是','否'], isOnlyChild:['是','否'], isMartyrChild:['是','否'], politicalStatus:['群众','少先队员','共青团员','中共党员'], transportMode:['','步行','公交','家长接送','校车','拼车'], isBoarding:['住校','走读'], bloodType:['','A型','B型','AB型','O型','未知'], psychologicalLevel:['一般','重点关注','预警'] }; 
+            
+            // 字段分组
+            const group1 = ['studentId', 'name', 'gender', 'ethnicity', 'idCard', 'birthday', 'birthdayType', 'householdType'];
+            const group2 = ['politicalStatus', 'joinTeamDate', 'joinLeagueDate', 'joinPartyDate', 'teamPosition', 'enrollmentYear', 'isBoarding'];
+            const group3 = ['firstContactName', 'firstContactPhone', 'firstContactIdCard', 'secondContactName', 'secondContactPhone', 'secondContactIdCard', 'emergencyContact'];
+            const group4 = ['homeAddress', 'currentAddress', 'householdAddress', 'transportMode', 'transportDetail', 'subsidyStatus'];
+            const group5 = ['bloodType', 'majorDisease', 'allergyHistory', 'specialConstitution', 'medicationInfo', 'psychologicalLevel', 'isLeftBehind', 'isOrphan', 'isOnlyChild', 'isMartyrChild', 'disabilityType'];
+
+            function renderFields(keys) {
+                let html = '';
+                keys.forEach(key => {
+                    const f = studentFields.find(x => x.key === key);
+                    if (!f) return;
+                    const v = st[f.key] || '';
+                    let fh = '';
+                    if (f.key === 'studentId') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}（自动生成）</label><input type="text" id="f_${f.key}" value="${v}" readonly style="background:#e9ecef;"></div>`;
+                    else if (sf[f.key]) { const opts = sf[f.key].map(o => `<option value="${o}" ${v===o?'selected':''}>${o||'请选择'}</option>`).join(''); fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><select id="f_${f.key}">${opts}</select></div>`; }
+                    else if (f.key === 'birthday' || f.key === 'joinLeagueDate' || f.key === 'joinPartyDate') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><input type="date" id="f_${f.key}" value="${v}"></div>`;
+                    else if (f.key === 'joinTeamDate') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><input type="month" id="f_${f.key}" value="${v}"></div>`;
+                    else if (f.key === 'allergyHistory') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}（红色加粗）</label><input type="text" id="f_${f.key}" value="${v}" style="color:red;font-weight:bold;"></div>`;
+                    else if (f.key === 'name') fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label} *</label><input type="text" id="f_${f.key}" value="${v}" required></div>`;
+                    else fh = `<div class="form-group" style="margin-bottom:0;"><label>${f.label}</label><input type="text" id="f_${f.key}" value="${v}"></div>`;
+                    html += fh;
+                });
+                return html;
+            }
+
+            let h = `<div class="student-edit-grid">`;
+            h += `<div class="form-section-title">📌 基本信息</div>` + renderFields(group1);
+            h += `<div class="form-section-title">🎓 学籍与政治面貌</div>` + renderFields(group2);
+            h += `<div class="form-section-title">📞 联系人信息</div>` + renderFields(group3);
+            h += `<div class="form-section-title">🏠 住址与通勤</div>` + renderFields(group4);
+            h += `<div class="form-section-title">🏥 健康与特殊体质</div>` + renderFields(group5);
+            h += `</div>`;
+            return h; 
+        }
+        
+        function saveStudentModal() { 
+            const n = document.getElementById('f_name').value.trim(); 
+            if (!n) { alert('请输入学生姓名'); return; } 
+            const d = {}; 
+            studentFields.forEach(f => { 
+                const el = document.getElementById('f_' + f.key); 
+                if (el) d[f.key] = el.value.trim(); 
+            }); 
+            d.class = currentClass; 
+            if (editingStudentId) { 
+                const i = rosterStudents.findIndex(s => s.studentId === editingStudentId); 
+                if (i !== -1) rosterStudents[i] = { ...rosterStudents[i], ...d }; 
+            } else {
+                rosterStudents.push(d); 
+            }
+            saveRosterStudents(); 
+            applyFilters(); 
+            closeEditModal(); 
+            showRosterModule(); 
+            
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:12px 20px;border-radius:6px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+            toast.textContent = '✅ 学生信息已保存';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+        
+        function cancelStudentForm() { closeEditModal(); }
+        function showAddStudentForm() { 
+                    function editStudent(id) { 
+            const s = rosterStudents.find(x => x.studentId === id); 
+            if (!s) return; 
+            editingStudentId = id; 
+            document.getElementById('studentModalTitle').textContent = '编辑学生信息 - ' + s.name;
+            document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML(s); 
+            document.getElementById('studentEditModal').classList.add('show');
+        }
+        
+        function closeEditModal() {
+            document.getElementById('studentEditModal').classList.remove('show');
+            editingStudentId = null;
+        }
             editingStudentId = null; 
             document.getElementById('studentModalTitle').textContent = '添加新学生';
             document.getElementById('studentModalBody').innerHTML = generateStudentFormHTML({ studentId: generateStudentId() }); 
@@ -904,7 +1006,6 @@
         }
         
         function cancelStudentForm() { closeEditModal(); }
-        function cancelStudentForm() { document.getElementById('studentFormContainer').classList.remove('show'); }
         function deleteStudent(id) { rosterStudents = rosterStudents.filter(s => s.studentId !== id); saveRosterStudents(); applyFilters(); showRosterModule(); }
         function downloadExcelTemplate() { const t = [{}]; studentFields.forEach(f => t[0][f.label] = ''); const ws = XLSX.utils.json_to_sheet(t); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '模板'); XLSX.writeFile(wb, currentClass + '_花名册模板.xlsx'); }
         function exportRosterExcel() { const d = filteredRosterStudents.map(s => { const r = {}; studentFields.forEach(f => r[f.label] = s[f.key] || ''); return r; }); const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '学生花名册'); XLSX.writeFile(wb, currentClass + '_花名册.xlsx'); }
