@@ -823,16 +823,14 @@
             `).join(''); 
 
             t.querySelectorAll('.btn-edit-row').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    editStudent(id);
-                });
+                btn.onclick = function() {
+                    editStudent(this.getAttribute('data-id'));
+                };
             });
             t.querySelectorAll('.btn-del-row').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    deleteStudent(id);
-                });
+                btn.onclick = function() {
+                    deleteStudent(this.getAttribute('data-id'));
+                };
             });
         }
 
