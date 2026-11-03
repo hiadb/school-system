@@ -1181,6 +1181,18 @@
             } catch (e) { c.innerHTML = `<div class="empty-state">加载失败：${e.message}</div>`; }
         }
 
+        // 补充：查看考试详情的跳转逻辑
+        function viewExamDetails(examId) {
+            // 跳转到单次分析，并自动选中该考试
+            showExamAnalysisModule().then(() => {
+                const sel = document.getElementById('analysisExamSelect');
+                if (sel) {
+                    sel.value = examId;
+                    renderExamAnalysis();
+                }
+            });
+        }
+
         // 2. 成绩录入
         function showScoreEntryModule() {
             const c = document.getElementById('mainContent');
@@ -1320,6 +1332,20 @@
         async function showTrendAnalysisModule() {
             const c = document.getElementById('mainContent');
             let studentOptions = rosterStudents.map(s => `<option value="${s.studentId}">${s.name || ''} (${s.studentId})</option>`).join('');
+            
+            c.innerHTML = `
+                <div class="points-header">
+                    <h2>📈 个人趋势分析</h2>
+                    <div class="points-actions">
+                        <select id="trendStudentSelect" style="padding:10px;border-radius:5px;border:2px solid #667eea;" onchange="renderStudentTrend()">
+                            ${studentOptions}
+                        </select>
+                    </div>
+                </div>
+                <div id="trendChartContainer" style="margin-top:30px; display:flex; justify-content:center;"></div>
+            `;
+            renderStudentTrend();
+        }
 
         async function renderStudentTrend() {
             const studentId = document.getElementById('trendStudentSelect').value;
