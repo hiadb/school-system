@@ -589,7 +589,14 @@
         let batchDateState = { year: 2026, month: 9, day: 1 };
         let batchEditingDateType = null;
         
-        const gradeMap = { '一': '01', '二': '02', '三': '03', '四': '04', '五': '05', '六': '06', '七': '07', '八': '08', '九': '09', '初一': '07', '初二': '08', '初三': '09', '高一': '10', '高二': '11', '高三': '12' };
+        // 【修复点1】加入 701-702、901 等特殊学号前缀映射
+        const gradeMap = { 
+            '一': '01', '二': '02', '三': '03', '四': '04', '五': '05', '六': '06', '七': '07', '八': '08', '九': '09', 
+            '初一': '07', '初二': '08', '初三': '09', '高一': '10', '高二': '11', '高三': '12',
+            '701': '25', '702': '25', '703': '25', '704': '25', 
+            '801': '24', '802': '24', '803': '24', '804': '24',
+            '901': '24', '902': '24', '903': '24', '904': '24'
+        };
         
         const semesterWeeks = [
             { week: 1, label: '第一周', start: '09-01', end: '09-05' },
@@ -729,11 +736,76 @@
         function changeCurrentClass() { currentClass = document.getElementById('classSelect').value; activeFilters = {}; loadAllSchedules(); loadRosterStudents(); loadCommitteeRosterData(); loadPointsDetailsData(); loadMainSchedule(); }
         function encryptData(d) { return CryptoJS.AES.encrypt(JSON.stringify(d), ENCRYPTION_KEY).toString(); }
         function decryptData(e) { try { const b = CryptoJS.AES.decrypt(e, ENCRYPTION_KEY); return JSON.parse(b.toString(CryptoJS.enc.Utf8)); } catch { return null; } }
-        function generateStudentId() { let g = '', c = ''; for (const [k, v] of Object.entries(gradeMap)) { if (currentClass.includes(k)) { g = v; break; } } if (!g) { const m = currentClass.match(/(\d+)/); if (m) g = m[1].padStart(2, '0'); } const cm = currentClass.match(/(\d+)班/); if (cm) c = cm[1].padStart(2, '0'); if (!g) g = '01'; if (!c) c = '01'; const cnt = rosterStudents.filter(s => s.studentId && s.studentId.startsWith(g + c)).length; return g + c + String(cnt + 1).padStart(2, '0'); }
+        
+        // 【修复点1】优化生成规则，如果特定班级没有映射，则按年份推算
+        function generateStudentId() { 
+            let prefix = '';
+            
+            // 1. 检查是否有明确映射的班级（如 702）
+            for (const [k, v] of Object.entries(gradeMap)) {
+                if (currentClass === k || currentClass.includes(k)) {
+                    prefix = v;
+                    break;
+                }
+            }
+            
+            // 2. 如果没有明确映射，则利用当前年份推算（25xx, 24xx）
+            if (!prefix) {
+                const yearStr = String(new Date().getFullYear()).slice(-2);
+                let g = '', c = '';
+                const cm = currentClass.match(/(\d+)班/);
+                if (cm) c = cm[1].padStart(2, '0');
+                
+                if (currentClass.includes('七') || currentClass.includes('高一')) g = String(parseInt(yearStr) - 2).padStart(2, '0');
+                else if (currentClass.includes('八') || currentClass.includes('高二')) g = String(parseInt(yearStr) - 1).padStart(2, '0');
+                else if (currentClass.includes('九') || currentClass.includes('高三')) g = yearStr;
+                
+                if (g && c) prefix = g + c;
+            }
+            
+            // 3. 兜底处理，如果还不能生成，就去匹配花名册当前最大的前4位
+            if (!prefix) {
+                const existingIds = rosterStudents.map(s => s.studentId).filter(id => id && id.length >= 4);
+                if (existingIds.length > 0) {
+                    prefix = existingIds[0].substring(0, 4);
+                } else {
+                    prefix = '0101';
+                }
+            }
+            
+            // 4. 在花名册中找出现有前缀的编号，递增生成
+            const cnt = rosterStudents.filter(s => s.studentId && s.studentId.startsWith(prefix)).length;
+            return prefix + String(cnt + 1).padStart(2, '0');
+        }
+        
         function addMinutes(t, m) { const [h, mi] = t.split(':').map(Number); const total = h * 60 + mi + m; return String(Math.floor(total / 60) % 24).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0'); }
         
         // ==================== 学生花名册模块 ====================
-        function loadRosterStudents() { const s = localStorage.getItem('roster_encrypted_' + currentClass); if (s) { const d = decryptData(s); rosterStudents = (d && Array.isArray(d)) ? d : []; } else { const o = localStorage.getItem('roster_' + currentClass); if (o) { rosterStudents = JSON.parse(o); saveRosterStudents(); } else { rosterStudents = allStudents.filter(x => x.class === currentClass).map(x => ({ studentId: x.studentId || x.id || generateStudentId(), name: x.name || '', username: x.username || '', class: x.class || currentClass, gender: '', ethnicity: '', idCard: '', birthday: '', birthdayType: '公历', householdType: '', currentAddress: '', householdAddress: '', isLeftBehind: '否', isOrphan: '否', isOnlyChild: '否', isMartyrChild: '否', disabilityType: '无', politicalStatus: '群众', joinTeamDate: '', joinLeagueDate: '', joinPartyDate: '', teamPosition: '', enrollmentYear: '', subsidyStatus: '无', transportMode: '', firstContactName: '', firstContactPhone: '', firstContactIdCard: '', secondContactName: '', secondContactPhone: '', secondContactIdCard: '', emergencyContact: '', homeAddress: '', isBoarding: '走读', bloodType: '', majorDisease: '', allergyHistory: '', specialConstitution: '', transportDetail: '', medicationInfo: '', psychologicalLevel: '一般', isLeftBehindDuplicate: '否' })); saveRosterStudents(); } } filteredRosterStudents = [...rosterStudents]; }
+        function loadRosterStudents() { 
+            const s = localStorage.getItem('roster_encrypted_' + currentClass); 
+            if (s) { 
+                const d = decryptData(s); 
+                rosterStudents = (d && Array.isArray(d)) ? d : []; 
+            } else { 
+                const o = localStorage.getItem('roster_' + currentClass); 
+                if (o) { 
+                    rosterStudents = JSON.parse(o); 
+                    saveRosterStudents(); 
+                } else { 
+                    rosterStudents = allStudents.filter(x => x.class === currentClass).map(x => ({ 
+                        studentId: x.studentId || x.id || generateStudentId(), name: x.name || '', username: x.username || '', class: x.class || currentClass, 
+                        gender: '', ethnicity: '', idCard: '', birthday: '', birthdayType: '公历', householdType: '', currentAddress: '', householdAddress: '', 
+                        isLeftBehind: '否', isOrphan: '否', isOnlyChild: '否', isMartyrChild: '否', disabilityType: '无', politicalStatus: '群众', 
+                        joinTeamDate: '', joinLeagueDate: '', joinPartyDate: '', teamPosition: '', enrollmentYear: '', subsidyStatus: '无', transportMode: '', 
+                        firstContactName: '', firstContactPhone: '', firstContactIdCard: '', secondContactName: '', secondContactPhone: '', secondContactIdCard: '', 
+                        emergencyContact: '', homeAddress: '', isBoarding: '走读', bloodType: '', majorDisease: '', allergyHistory: '', specialConstitution: '', 
+                        transportDetail: '', medicationInfo: '', psychologicalLevel: '一般', isLeftBehindDuplicate: '否' 
+                    })); 
+                    saveRosterStudents(); 
+                } 
+            } 
+            filteredRosterStudents = [...rosterStudents]; 
+        }
         function saveRosterStudents() { localStorage.setItem('roster_encrypted_' + currentClass, encryptData(rosterStudents)); localStorage.removeItem('roster_' + currentClass); }
         function applyFilters() { filteredRosterStudents = rosterStudents.filter(s => Object.entries(activeFilters).every(([k, v]) => { if (!v) return true; return (s[k] || '').toString().includes(v); })); }
         function showFilterDropdown(k, e) { e.stopPropagation(); document.querySelectorAll('.filter-dropdown').forEach(x => x.remove()); const rect = e.target.getBoundingClientRect(); const d = document.createElement('div'); d.className = 'filter-dropdown'; d.style.cssText = `position:fixed;top:${rect.bottom+5}px;left:${rect.left}px;z-index:1000;`; const vals = [...new Set(rosterStudents.map(s => s[k] || '').filter(v => v))]; let h = `<input type="text" placeholder="搜索..." oninput="filterDropdownOptions(this,'${k}')"><label><input type="checkbox" ${!activeFilters[k]?'checked':''} onchange="clearFilter('${k}')"> 全部</label>`; vals.forEach(v => h += `<label><input type="checkbox" value="${v}" ${activeFilters[k]===v?'checked':''} onchange="setFilter('${k}','${v}',this.checked)"> ${v}</label>`); d.innerHTML = h; document.body.appendChild(d); setTimeout(() => document.addEventListener('click', function close(e) { if (!d.contains(e.target)) { d.remove(); document.removeEventListener('click', close); } }), 10); }
@@ -920,10 +992,83 @@
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
         }
-        function downloadExcelTemplate() { const t = [{}]; studentFields.forEach(f => t[0][f.label] = ''); const ws = XLSX.utils.json_to_sheet(t); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '模板'); XLSX.writeFile(wb, currentClass + '_花名册模板.xlsx'); }
-        function exportRosterExcel() { const d = filteredRosterStudents.map(s => { const r = {}; studentFields.forEach(f => r[f.label] = s[f.key] || ''); return r; }); const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '学生花名册'); XLSX.writeFile(wb, currentClass + '_花名册.xlsx'); }
+        
+        // 【修复点3】导出Excel和下载模板无反应问题
+        function downloadExcelTemplate() { 
+            try {
+                const t = [{}]; 
+                studentFields.forEach(f => t[0][f.label] = ''); 
+                const ws = XLSX.utils.json_to_sheet(t); 
+                const wb = XLSX.utils.book_new(); 
+                XLSX.utils.book_append_sheet(wb, ws, '模板'); 
+                XLSX.writeFile(wb, currentClass + '_花名册模板.xlsx'); 
+                alert('模板已开始下载，请留意浏览器下载栏。');
+            } catch (err) {
+                console.error('模板生成失败:', err);
+                alert('模板生成失败：' + err.message);
+            }
+        }
+        
+        function exportRosterExcel() { 
+            try {
+                if (filteredRosterStudents.length === 0) { alert('当前没有学生数据可导出'); return; }
+                const d = filteredRosterStudents.map(s => { 
+                    const r = {}; 
+                    studentFields.forEach(f => r[f.label] = s[f.key] || ''); 
+                    return r; 
+                }); 
+                const ws = XLSX.utils.json_to_sheet(d); 
+                const wb = XLSX.utils.book_new(); 
+                XLSX.utils.book_append_sheet(wb, ws, '学生花名册'); 
+                XLSX.writeFile(wb, currentClass + '_花名册.xlsx'); 
+                alert('花名册已开始下载，请留意浏览器下载栏。');
+            } catch (err) {
+                console.error('导出失败:', err);
+                alert('导出失败：' + err.message);
+            }
+        }
+        
         function showImportRosterForm() { document.getElementById('importRosterContainer').innerHTML = `<div style="background:#e0f7fa;border:2px solid #00bcd4;border-radius:5px;padding:10px;margin-bottom:10px;"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><input type="file" id="importRosterFileInput" accept=".xlsx,.xls" onchange="handleImportRosterExcel(this)"><button class="btn btn-cancel-inline" onclick="cancelImportRoster()">取消</button></div><p style="font-size:12px;color:#666;margin-top:5px;">支持 .xlsx 和 .xls 格式</p></div>`; }
-        function handleImportRosterExcel(i) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = new Uint8Array(e.target.result); const wb = XLSX.read(d, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const jd = XLSX.utils.sheet_to_json(ws); if (!jd || !jd.length) { alert('Excel文件为空'); return; } rosterStudents = jd.map(row => { const s = {}; studentFields.forEach(f => s[f.key] = row[f.label] || ''); s.class = currentClass; return s; }); saveRosterStudents(); applyFilters(); document.getElementById('importRosterContainer').innerHTML = ''; showRosterModule(); alert('导入成功！'); } catch { alert('文件解析失败'); } }; r.readAsArrayBuffer(f); }
+        
+        // 【修复点2】Excel解析失败问题
+        function handleImportRosterExcel(input) { 
+            const f = input.files[0]; 
+            if (!f) return; 
+            
+            const r = new FileReader(); 
+            r.onload = function(e) { 
+                try { 
+                    // 使用 Uint8Array 将 ArrayBuffer 转为二进制数组
+                    const d = new Uint8Array(e.target.result); 
+                    const wb = XLSX.read(d, { type: 'array' }); 
+                    const ws = wb.Sheets[wb.SheetNames[0]]; 
+                    const jd = XLSX.utils.sheet_to_json(ws); 
+                    
+                    if (!jd || !jd.length) { alert('Excel文件为空'); return; } 
+                    
+                    rosterStudents = jd.map(row => { 
+                        const s = {}; 
+                        studentFields.forEach(f => s[f.key] = String(row[f.label] || '')); 
+                        s.class = currentClass; 
+                        return s; 
+                    }).filter(s => s.name); // 过滤掉没有姓名的无效行
+                    
+                    if (rosterStudents.length === 0) { alert('未从Excel中解析到有效学生数据，请检查表头是否与模板一致'); return; }
+                    
+                    saveRosterStudents(); 
+                    applyFilters(); 
+                    document.getElementById('importRosterContainer').innerHTML = ''; 
+                    showRosterModule(); 
+                    alert('导入成功！共导入 ' + rosterStudents.length + ' 名学生。'); 
+                } catch (err) { 
+                    console.error('导入解析错误:', err);
+                    alert('文件解析失败：' + err.message); 
+                } 
+            }; 
+            // 必须用 readAsArrayBuffer
+            r.readAsArrayBuffer(f); 
+        }
+        
         function cancelImportRoster() { document.getElementById('importRosterContainer').innerHTML = ''; }
 
         // ==================== 班级值日（原积分制度班委模块） ====================
@@ -1072,8 +1217,8 @@
             showDutyModule(); 
         }
         
-        function exportCommitteeRoster() { const d = committeeRosterData.map(m => ({ '学号': m.studentId, '姓名': m.studentName, '职务': m.position || '', '职务别名': m.alias || '', '工作内容': m.duty || '', '积分': m.points || 0 })); const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '班级值日'); XLSX.writeFile(wb, currentClass + '_班级值日.xlsx'); }
-        function importCommitteeRoster() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.xlsx,.xls'; i.onchange = function(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = new Uint8Array(e.target.result); const wb = XLSX.read(d, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const jd = XLSX.utils.sheet_to_json(ws); committeeRosterData = jd.map(row => ({ studentId: row['学号'] || '', studentName: row['姓名'] || '', position: row['职务'] || '', alias: row['职务别名'] || '', duty: row['工作内容'] || '', points: parseInt(row['积分']) || 0 })); saveCommitteeRosterData(); showDutyModule(); alert('导入成功！'); } catch { alert('文件解析失败'); } }; r.readAsArrayBuffer(f); }; i.click(); }
+        function exportCommitteeRoster() { try { const d = committeeRosterData.map(m => ({ '学号': m.studentId, '姓名': m.studentName, '职务': m.position || '', '职务别名': m.alias || '', '工作内容': m.duty || '', '积分': m.points || 0 })); const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '班级值日'); XLSX.writeFile(wb, currentClass + '_班级值日.xlsx'); alert('导出成功，请留意浏览器下载栏。'); } catch(e) { alert('导出失败：' + e.message); } }
+        function importCommitteeRoster() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.xlsx,.xls'; i.onchange = function(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = new Uint8Array(e.target.result); const wb = XLSX.read(d, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const jd = XLSX.utils.sheet_to_json(ws); committeeRosterData = jd.map(row => ({ studentId: row['学号'] || '', studentName: row['姓名'] || '', position: row['职务'] || '', alias: row['职务别名'] || '', duty: row['工作内容'] || '', points: parseInt(row['积分']) || 0 })); saveCommitteeRosterData(); showDutyModule(); alert('导入成功！'); } catch (err) { alert('文件解析失败：' + err.message); } }; r.readAsArrayBuffer(f); }; i.click(); }
         
         // 批量加分小窗口逻辑
         function openBatchModal() {
@@ -1383,11 +1528,16 @@
         }
         
         function exportPointsDetails() {
-            const d = pointsDetailsData.map(p => ({ '周次': getWeekByDate(p.date), '日期': p.date || '', '学号': p.studentId || '', '姓名': p.studentName || '', '积分': p.points, '加分原因': p.reason || '' }));
-            const ws = XLSX.utils.json_to_sheet(d);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, '积分明细');
-            XLSX.writeFile(wb, currentClass + '_积分明细.xlsx');
+            try {
+                const d = pointsDetailsData.map(p => ({ '周次': getWeekByDate(p.date), '日期': p.date || '', '学号': p.studentId || '', '姓名': p.studentName || '', '积分': p.points, '加分原因': p.reason || '' }));
+                const ws = XLSX.utils.json_to_sheet(d);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, '积分明细');
+                XLSX.writeFile(wb, currentClass + '_积分明细.xlsx');
+                alert('积分明细已开始下载。');
+            } catch (err) {
+                alert('导出失败：' + err.message);
+            }
         }
         
         function importPointsDetails() {
@@ -1502,23 +1652,28 @@
         }
         
         function exportPointsList() {
-            const studentTotals = {};
-            pointsDetailsData.forEach(p => {
-                const key = p.studentId || 'unknown';
-                if (!studentTotals[key]) {
-                    studentTotals[key] = { studentId: p.studentId || '', studentName: p.studentName || '', total: 0, addTotal: 0, minusTotal: 0, count: 0 };
-                }
-                studentTotals[key].total += p.points;
-                if (p.points > 0) studentTotals[key].addTotal += p.points;
-                else studentTotals[key].minusTotal += p.points;
-                studentTotals[key].count++;
-            });
-            const list = Object.values(studentTotals).sort((a, b) => b.total - a.total);
-            const d = list.map((s, i) => ({ '排名': i + 1, '学号': s.studentId, '姓名': s.studentName, '记录数': s.count, '累计加分': s.addTotal, '累计扣分': s.minusTotal, '净积分': s.total }));
-            const ws = XLSX.utils.json_to_sheet(d);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, '积分汇总');
-            XLSX.writeFile(wb, currentClass + '_积分汇总.xlsx');
+            try {
+                const studentTotals = {};
+                pointsDetailsData.forEach(p => {
+                    const key = p.studentId || 'unknown';
+                    if (!studentTotals[key]) {
+                        studentTotals[key] = { studentId: p.studentId || '', studentName: p.studentName || '', total: 0, addTotal: 0, minusTotal: 0, count: 0 };
+                    }
+                    studentTotals[key].total += p.points;
+                    if (p.points > 0) studentTotals[key].addTotal += p.points;
+                    else studentTotals[key].minusTotal += p.points;
+                    studentTotals[key].count++;
+                });
+                const list = Object.values(studentTotals).sort((a, b) => b.total - a.total);
+                const d = list.map((s, i) => ({ '排名': i + 1, '学号': s.studentId, '姓名': s.studentName, '记录数': s.count, '累计加分': s.addTotal, '累计扣分': s.minusTotal, '净积分': s.total }));
+                const ws = XLSX.utils.json_to_sheet(d);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, '积分汇总');
+                XLSX.writeFile(wb, currentClass + '_积分汇总.xlsx');
+                alert('积分汇总已开始下载。');
+            } catch (err) {
+                alert('导出失败：' + err.message);
+            }
         }
         
         function showPointsAssessmentModule() { document.getElementById('mainContent').innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:20px;">📊</div><h2>积分考核</h2><p style="color:#999;">该功能正在开发中</p></div>'; }
@@ -1590,9 +1745,9 @@
         function editCourseInline(d, p) { const cell = event.target.closest('.course-cell'); if (!cell) return; const ec = scheduleData.find(x => x.day === d && x.period === p); cell.innerHTML = `<input type="text" class="inline-editor" id="editCourseNameInput" value="${ec?ec.courseName:''}" placeholder="课程名"><input type="text" class="inline-editor" id="editClassNameInput" value="${ec?ec.className:''}" placeholder="班级"><div class="inline-edit-actions"><button class="btn btn-confirm" onclick="saveCourseInline(${d},${p})">确定</button><button class="btn btn-cancel-inline" onclick="renderMainSchedule()">取消</button></div>`; setTimeout(() => { const i = document.getElementById('editCourseNameInput'); if (i) i.focus(); }, 50); }
         function saveCourseInline(d, p) { const cn = document.getElementById('editCourseNameInput').value.trim(); const cl = document.getElementById('editClassNameInput').value.trim(); if (!cn) return; const ec = scheduleData.find(x => x.day === d && x.period === p); if (ec) { ec.courseName = cn; ec.className = cl; } else scheduleData.push({ day: d, period: p, courseName: cn, className: cl }); localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); renderMainSchedule(); }
         function saveSchedule() { if (!currentClass) return; const ti = document.getElementById('scheduleTitleInput'); const nn = ti ? ti.value.trim() : currentScheduleName; if (!nn) return; if (nn !== currentScheduleName) { const od = allSchedules[currentScheduleName]; delete allSchedules[currentScheduleName]; allSchedules[nn] = od; currentScheduleName = nn; } if (!allSchedules[currentScheduleName]) allSchedules[currentScheduleName] = { periodTimes: [], courses: [] }; allSchedules[currentScheduleName].courses = scheduleData; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); const btn = event.target; const ot = btn.textContent; btn.textContent = '✅ 已保存'; btn.style.background = '#4CAF50'; setTimeout(() => { btn.textContent = ot; btn.style.background = ''; }, 2000); renderMainSchedule(); }
-        function exportSchedule() { const cs = allSchedules[currentScheduleName]; const d = { scheduleName: currentScheduleName, periodTimes: cs.periodTimes || [], courses: scheduleData, exportedAt: new Date().toISOString() }; const json = JSON.stringify(d, null, 2); const blob = new Blob([json], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = currentScheduleName + '_' + currentClass + '.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+        function exportSchedule() { try { const cs = allSchedules[currentScheduleName]; const d = { scheduleName: currentScheduleName, periodTimes: cs.periodTimes || [], courses: scheduleData, exportedAt: new Date().toISOString() }; const json = JSON.stringify(d, null, 2); const blob = new Blob([json], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = currentScheduleName + '_' + currentClass + '.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); alert('课表已导出。'); } catch(e) { alert('导出失败：' + e.message); } }
         function showImportForm() { document.getElementById('importFormContainer').innerHTML = `<div style="background:#e0f7fa;border:2px solid #00bcd4;border-radius:5px;padding:10px;margin-bottom:10px;"><div class="new-schedule-form"><input type="file" id="importFileInput" accept=".json" onchange="handleImportFile(this)"><button class="btn btn-cancel-inline" onclick="cancelImport()">取消</button></div></div>`; }
-        function handleImportFile(i) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = JSON.parse(e.target.result); if (!d.periodTimes || !d.courses) { alert('无效文件'); return; } let nn = d.scheduleName || '导入的课表'; let idx = 1; while (allSchedules[nn]) { nn = d.scheduleName + '_' + idx; idx++; } allSchedules[nn] = { periodTimes: d.periodTimes, courses: d.courses }; currentScheduleName = nn; scheduleData = d.courses; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('importFormContainer').innerHTML = ''; renderMainSchedule(); } catch { alert('解析失败'); } }; r.readAsText(f); }
+        function handleImportFile(i) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(e) { try { const d = JSON.parse(e.target.result); if (!d.periodTimes || !d.courses) { alert('无效文件'); return; } let nn = d.scheduleName || '导入的课表'; let idx = 1; while (allSchedules[nn]) { nn = d.scheduleName + '_' + idx; idx++; } allSchedules[nn] = { periodTimes: d.periodTimes, courses: d.courses }; currentScheduleName = nn; scheduleData = d.courses; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('importFormContainer').innerHTML = ''; renderMainSchedule(); alert('课表导入成功！'); } catch (err) { alert('解析失败：' + err.message); } }; r.readAsText(f); }
         function cancelImport() { document.getElementById('importFormContainer').innerHTML = ''; }
         function showClearConfirm() { document.getElementById('clearConfirmContainer').innerHTML = `<div style="background:#fff3e0;border:2px solid #ff9800;border-radius:5px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span>确定要清空当前课程表的所有课程吗？（保留节次）</span><button class="btn btn-clear" onclick="confirmClearSchedule()">确定清空</button><button class="btn btn-cancel-inline" onclick="cancelClearConfirm()">取消</button></div>`; }
         function confirmClearSchedule() { const cs = allSchedules[currentScheduleName]; if (cs) { cs.courses = []; } scheduleData = []; localStorage.setItem('all_schedules_' + currentClass, JSON.stringify(allSchedules)); document.getElementById('clearConfirmContainer').innerHTML = ''; renderMainSchedule(); }
