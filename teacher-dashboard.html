@@ -1209,6 +1209,7 @@
                             <option value="自定义">--- 自定义 ---</option>
                         </select>
                         <input type="text" id="customExamName" style="padding:8px;border-radius:5px;border:1px solid #ddd;display:none;" placeholder="输入自定义考试名称">
+                        
                         <label style="font-weight:bold;margin-left:20px;">科目：</label>
                         <select id="entrySubjectSelect" style="padding:8px;border-radius:5px;border:1px solid #ddd;">
                             <option value="语文">语文</option>
@@ -1220,7 +1221,10 @@
                             <option value="历史">历史</option>
                             <option value="地理">地理</option>
                             <option value="政治">政治</option>
+                            <option value="自定义科目">--- 自定义科目 ---</option>
                         </select>
+                        <input type="text" id="customSubjectName" style="padding:8px;border-radius:5px;border:1px solid #ddd;display:none;" placeholder="输入自定义科目名称">
+
                         <button class="btn-add" style="margin-bottom:0;" onclick="renderScoreEntryTable()">生成录入表</button>
                         <button class="btn-import" style="margin-bottom:0;" onclick="importScoreExcel()">📥 导入成绩Excel</button>
                     </div>
@@ -1229,12 +1233,18 @@
                 <div id="scoreEntryTableContainer"></div>
             `;
             document.getElementById('entryExamSelect').addEventListener('change', function() { document.getElementById('customExamName').style.display = this.value === '自定义' ? 'inline-block' : 'none'; });
+            document.getElementById('entrySubjectSelect').addEventListener('change', function() { document.getElementById('customSubjectName').style.display = this.value === '自定义科目' ? 'inline-block' : 'none'; });
         }
 
         function renderScoreEntryTable() {
-            const examName = document.getElementById('entryExamSelect').value === '自定义' ? document.getElementById('customExamName').value : document.getElementById('entryExamSelect').value;
+            let examName = document.getElementById('entryExamSelect').value;
+            if (examName === '自定义') examName = document.getElementById('customExamName').value;
             if (!examName) { alert('请输入或选择考试名称'); return; }
-            const subject = document.getElementById('entrySubjectSelect').value;
+
+            let subject = document.getElementById('entrySubjectSelect').value;
+            if (subject === '自定义科目') subject = document.getElementById('customSubjectName').value;
+            if (!subject) { alert('请输入或选择科目'); return; }
+
             const container = document.getElementById('scoreEntryTableContainer');
             if (rosterStudents.length === 0) { container.innerHTML = `<div class="empty-state">当前班级暂无花名册学生，请先添加学生</div>`; return; }
             let h = `<div style="margin-top:20px;"><h3 style="margin-bottom:10px;">${examName} - ${subject} 成绩录入表</h3><table class="points-table"><thead><tr><th>学号</th><th>姓名</th><th>分数 (0-100)</th></tr></thead><tbody>`;
@@ -1269,7 +1279,9 @@
         function importScoreExcel() {
             const examName = document.getElementById('entryExamSelect').value === '自定义' ? document.getElementById('customExamName').value : document.getElementById('entryExamSelect').value;
             if (!examName) { alert('请先选择或输入考试名称'); return; }
-            const subject = document.getElementById('entrySubjectSelect').value;
+            const subject = document.getElementById('entrySubjectSelect').value === '自定义科目' ? document.getElementById('customSubjectName').value : document.getElementById('entrySubjectSelect').value;
+            if (!subject) { alert('请先选择或输入科目'); return; }
+
             const input = document.createElement('input');
             input.type = 'file'; input.accept = '.xlsx,.xls';
             input.onchange = function(e) {
@@ -1328,7 +1340,7 @@
             container.innerHTML = h;
         }
 
-        // 4. 个人趋势 (雷达图)
+        // 4. 个人趋势 (雷达图/折线图)
         async function showTrendAnalysisModule() {
             const c = document.getElementById('mainContent');
             let studentOptions = rosterStudents.map(s => `<option value="${s.studentId}">${s.name || ''} (${s.studentId})</option>`).join('');
@@ -1355,18 +1367,52 @@
             try {
                 const t = getToken();
                 const r = await fetch(API_BASE + `/scores/student/${studentId}?className=${encodeURIComponent(currentClass)}`, { headers: { 'Authorization': 'Bearer ' + t } });
+                
+                // 修复 data.forEach is not a function：如果后端返回错误，直接抛出
                 const data = await r.json();
+                if (!Array.isArray(data)) {
+                    container.innerHTML = `<div class="empty-state" style="color:red;">获取失败：${data.error || '接口返回格式错误'}</div>`; 
+                    return;
+                }
+
                 if (data.length === 0) { container.innerHTML = `<div class="empty-state">该生暂无成绩记录</div>`; return; }
+                
                 const examMap = {};
                 data.forEach(d => { if (!examMap[d.exam_name]) examMap[d.exam_name] = {}; examMap[d.exam_name][d.subject] = d.score; });
                 const examNames = Object.keys(examMap);
                 const latestExam = examNames[examNames.length - 1];
                 const latestScores = examMap[latestExam];
                 const subjects = Object.keys(latestScores);
-                if (subjects.length < 3) { container.innerHTML = `<div class="empty-state">科目少于 3 门，无法绘制雷达图。最近一次考试 (${latestExam}) 成绩：<br><br>` + subjects.map(s => `<b>${s}</b>: ${latestScores[s]}分`).join(' | ') + `</div>`; return; }
+                
+                // 如果只有1门或2门课，用柱状图展示，否则用雷达图
+                if (subjects.length < 3) { 
+                    let barsHtml = subjects.map(s => `
+                        <div style="margin:15px 0; display:flex; align-items:center; justify-content:center; gap:15px;">
+                            <span style="width:80px; text-align:right; font-weight:bold; color:#555;">${s}</span>
+                            <div style="width:250px; background:#eee; height:20px; border-radius:10px; overflow:hidden; position:relative;">
+                                <div style="height:100%; width:${latestScores[s]}%; background:linear-gradient(90deg, #667eea, #764ba2); border-radius:10px;"></div>
+                            </div>
+                            <span style="width:40px; text-align:left; color:#667eea; font-weight:bold;">${latestScores[s]}分</span>
+                        </div>
+                    `).join('');
+                    
+                    container.innerHTML = `
+                        <div style="text-align:center; width:100%;">
+                            <h3 style="margin-bottom:20px;">${latestExam} 成绩概况</h3>
+                            <div style="background:white; padding:20px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.05); max-width:500px; margin:0 auto;">
+                                ${barsHtml}
+                            </div>
+                            <p style="color:#999; margin-top:20px; font-size:12px;">说明：科目少于 3 门，暂不显示雷达图。</p>
+                        </div>
+                    `; 
+                    return; 
+                }
+                
                 container.innerHTML = `<div style="text-align:center;"><h3 style="margin-bottom:15px;">${latestExam} 成绩雷达图</h3><canvas id="radarCanvas" width="400" height="400"></canvas><div style="margin-top:20px; color:#666;">${subjects.map(s => `<span style="margin:0 10px;">${s}: <b>${latestScores[s]}</b>分</span>`).join('')}</div></div>`;
                 drawRadarChart('radarCanvas', subjects, subjects.map(s => latestScores[s]));
-            } catch (e) { container.innerHTML = `<div class="empty-state">加载失败：${e.message}</div>`; }
+            } catch (e) { 
+                container.innerHTML = `<div class="empty-state" style="color:red;">加载失败：${e.message}</div>`; 
+            }
         }
 
         function drawRadarChart(canvasId, labels, data) {
@@ -1421,18 +1467,148 @@
             }
         }
 
-        // 5. 考试情况（替代原科目设置）
-        function showSubjectSettingsModule() {
+        // 5. 考试情况（成绩单页面）
+        async function showSubjectSettingsModule() {
             const c = document.getElementById('mainContent');
+            
+            // 如果没有加载过考试列表，先加载
+            if (currentExamList.length === 0) {
+                c.innerHTML = `<div class="loading">加载中...</div>`;
+                try {
+                    const t = getToken();
+                    const r = await fetch(API_BASE + `/exams?className=${encodeURIComponent(currentClass)}`, { headers: { 'Authorization': 'Bearer ' + t } });
+                    currentExamList = await r.json();
+                } catch (e) {
+                    c.innerHTML = `<div class="empty-state">加载失败</div>`;
+                    return;
+                }
+            }
+
+            if (currentExamList.length === 0) {
+                c.innerHTML = `<div class="empty-state">暂无考试数据，请先录入成绩</div>`;
+                return;
+            }
+
+            let examOptions = currentExamList.map(e => `<option value="${e.examId}">${e.examName}</option>`).join('');
+
             c.innerHTML = `
-                <div class="points-header"><h2>⚙️ 考试情况设置</h2></div>
-                <div class="class-info-banner"><span style="font-size:15px;color:#666;">当前班级：<b>${currentClass}</b></span></div>
-                <div style="padding:20px; text-align:center; color:#999;">
-                    <p>考试情况用于配置本班考试科目及满分标准。</p>
-                    <p style="margin-top:10px;">该模块目前采用默认国标（优秀≥85，及格≥60，满分100）。</p>
-                    <p style="margin-top:10px;">后续拓展可在此配置不同科目的满分阈值。</p>
+                <div class="points-header">
+                    <h2>⚙️ 考试情况 (全班成绩单)</h2>
+                    <div class="points-actions">
+                        <select id="reportExamSelect" style="padding:10px; border-radius:5px; border:2px solid #667eea; font-size:14px;" onchange="renderExamReport()">
+                            ${examOptions}
+                        </select>
+                        <button class="btn-export" onclick="exportExamReport()">📤 导出成绩单</button>
+                    </div>
                 </div>
+                <div id="examReportContent"></div>
             `;
+            renderExamReport();
+        }
+
+        async function renderExamReport() {
+            const examId = document.getElementById('reportExamSelect').value;
+            const exam = currentExamList.find(e => e.examId === examId);
+            if (!exam) return;
+            
+            const container = document.getElementById('examReportContent');
+            container.innerHTML = `<div class="loading">正在生成成绩单...</div>`;
+
+            try {
+                const t = getToken();
+                const r = await fetch(API_BASE + `/scores/exam/${examId}`, { headers: { 'Authorization': 'Bearer ' + t } });
+                const data = await r.json(); // 获取该考试的所有原始成绩
+
+                if (!Array.isArray(data)) {
+                    container.innerHTML = `<div class="empty-state" style="color:red;">获取失败：${data.error}</div>`; 
+                    return;
+                }
+
+                // 将数据转换为学生维度的成绩单
+                const studentMap = {};
+                const subjectSet = new Set();
+
+                data.forEach(d => {
+                    if (!studentMap[d.student_id]) {
+                        studentMap[d.student_id] = { studentId: d.student_id, studentName: d.student_name, scores: {}, total: 0 };
+                    }
+                    studentMap[d.student_id].scores[d.subject] = d.score;
+                    studentMap[d.student_id].total += d.score;
+                    subjectSet.add(d.subject);
+                });
+
+                const subjects = Array.from(subjectSet);
+                const students = Object.values(studentMap);
+                
+                // 按总分降序排序
+                students.sort((a, b) => b.total - a.total);
+
+                // 渲染表格
+                let h = `<div class="points-table-container"><table class="points-table"><thead><tr><th style="width:80px;">排名</th><th>学号</th><th>姓名</th>`;
+                subjects.forEach(sub => h += `<th>${sub}</th>`);
+                h += `<th style="color:#FFD700; font-weight:bold;">总分</th></tr></thead><tbody>`;
+
+                students.forEach((s, index) => {
+                    const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'rank-normal';
+                    h += `<tr>
+                        <td><span class="rank-badge ${rankClass}">${index + 1}</span></td>
+                        <td>${s.studentId}</td>
+                        <td><strong>${s.studentName}</strong></td>`;
+                    
+                    subjects.forEach(sub => {
+                        const score = s.scores[sub] !== undefined ? s.scores[sub] : '-';
+                        const color = score >= 85 ? '#4CAF50' : score < 60 ? '#f44336' : '#333';
+                        h += `<td style="color:${color}; font-weight:bold;">${score}</td>`;
+                    });
+
+                    h += `<td style="color:#667eea; font-weight:bold; font-size:15px;">${s.total}</td></tr>`;
+                });
+                
+                h += `</tbody></table></div>`;
+                container.innerHTML = h;
+
+            } catch (e) {
+                container.innerHTML = `<div class="empty-state" style="color:red;">加载失败：${e.message}</div>`;
+            }
+        }
+
+        function exportExamReport() {
+            const examId = document.getElementById('reportExamSelect').value;
+            const exam = currentExamList.find(e => e.examId === examId);
+            if (!exam) return;
+            
+            try {
+                const t = getToken(); // 这里用同步方式可能不安全，但为了简化，我们直接调用接口
+                fetch(API_BASE + `/scores/exam/${examId}`, { headers: { 'Authorization': 'Bearer ' + t } })
+                .then(r => r.json())
+                .then(data => {
+                    if (!Array.isArray(data)) { alert('数据获取失败'); return; }
+
+                    const studentMap = {};
+                    const subjectSet = new Set();
+                    data.forEach(d => {
+                        if (!studentMap[d.student_id]) studentMap[d.student_id] = { '学号': d.student_id, '姓名': d.student_name, '总分': 0 };
+                        studentMap[d.student_id][d.subject] = d.score;
+                        studentMap[d.student_id]['总分'] += d.score;
+                        subjectSet.add(d.subject);
+                    });
+
+                    const students = Object.values(studentMap);
+                    students.sort((a, b) => b['总分'] - a['总分']);
+                    
+                    const exportData = students.map((s, i) => {
+                        return { '排名': i + 1, ...s };
+                    });
+
+                    const ws = XLSX.utils.json_to_sheet(exportData);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, '成绩单');
+                    XLSX.writeFile(wb, `${currentClass}_${exam.examName}_成绩单.xlsx`);
+                })
+                .catch(err => alert('导出失败：' + err.message));
+            } catch (e) {
+                alert('导出失败：' + e.message);
+            }
         }
 
         // ==================== 课程表模块 ====================
