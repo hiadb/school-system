@@ -1,3 +1,4 @@
+<!-- 管理员工作台 - 学校管理系统 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -272,6 +273,16 @@
                 </div>
                 <div class="invite-section">
                     <div class="section-header">
+                        <div class="section-title">👨‍👩‍👦 家长邀请码</div>
+                        <button class="btn-generate" onclick="generateAllParentInviteCodes()">🎫 一键生成全部</button>
+                    </div>
+                    <table>
+                        <thead><tr><th>年级</th><th>班级</th><th>邀请码</th><th>状态</th><th>操作</th></tr></thead>
+                        <tbody id="parentInviteList"><tr><td colspan="5" class="loading">加载中...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="invite-section">
+                    <div class="section-header">
                         <div class="section-title">👨‍🏫 教师邀请码</div>
                         <button class="btn-generate" onclick="generateTeacherInviteCode()">🎫 生成/刷新</button>
                     </div>
@@ -367,7 +378,7 @@
             return code;
         }
         
-        // ============ 修复点1：统一加载年级数据 ============
+        // ============ 统一加载年级数据 ============
         async function loadAllGradesData() {
             try {
                 const token = getToken();
@@ -376,7 +387,6 @@
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    // 重要：同步到全局变量
                     allGrades = Array.isArray(data) ? data : [];
                 } else {
                     allGrades = [];
@@ -388,7 +398,7 @@
             return allGrades;
         }
         
-        // ============ 修复点2：统一加载教师数据 ============
+        // ============ 统一加载教师数据 ============
         async function loadAllTeachersData() {
             try {
                 const users = await loadAllUsers();
@@ -495,7 +505,6 @@
             tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
-                // 重要：同步加载年级数据，保证设置身份时下拉框有数据
                 await loadAllGradesData();
                 
                 const users = await loadAllUsers();
@@ -633,17 +642,14 @@
                 await loadAllTeachersData();
                 await loadAllStudentsData();
                 
-                // 获取该班级的班主任
                 const classTeacher = allTeachers.find(t => 
                     t.classTeacherOf && t.classTeacherOf.includes(selectedClass)
                 );
                 
-                // 获取该班级的任课教师
                 const subjectTeachers = allTeachers.filter(t => 
                     t.subjectTeacherOf && t.subjectTeacherOf.some(s => s.startsWith(selectedClass))
                 );
                 
-                // 获取该班级的学生
                 const classStudents = allStudents.filter(s => {
                     const studentFullClass = s.class || '';
                     return studentFullClass === selectedClass || studentFullClass.includes(selectedClass);
@@ -651,7 +657,6 @@
                 
                 let html = '';
                 
-                // 任课教师名单（班主任在最前面）
                 html += `
                     <div class="teacher-list-section">
                         <div class="list-title">👨‍🏫 任课教师名单</div>
@@ -660,7 +665,6 @@
                             <tbody>
                 `;
                 
-                // 班主任在最前面
                 if (classTeacher) {
                     html += `
                         <tr>
@@ -671,7 +675,6 @@
                     `;
                 }
                 
-                // 任课教师
                 if (subjectTeachers.length > 0) {
                     subjectTeachers.forEach(teacher => {
                         const subjectIdentity = teacher.subjectTeacherOf.find(s => s.startsWith(selectedClass));
@@ -694,7 +697,6 @@
                 
                 html += '</tbody></table></div>';
                 
-                // 学生名单
                 html += `
                     <div class="student-list-section">
                         <div class="list-title">👨‍🎓 学生名单（${classStudents.length}人）</div>
@@ -727,7 +729,7 @@
             }
         }
         
-        // ============ 修复点3：打开教师设置时确保年级数据已加载 ============
+        // ============ 教师身份设置 ============
         async function openTeacherSetting(teacherId) {
             const teacher = allTeachers.find(t => t.userId === teacherId);
             if (!teacher) {
@@ -735,12 +737,10 @@
                 return;
             }
             
-            // 重要：确保年级数据已加载
             if (!allGrades || allGrades.length === 0) {
                 await loadAllGradesData();
             }
             
-            // 如果依然为空，提示管理员先去年级管理添加
             if (!allGrades || allGrades.length === 0) {
                 alert('还没有任何年级/班级，请先在「年级管理」中添加年级和班级');
                 return;
@@ -1011,14 +1011,13 @@
             }
         }
         
-        // ============ 修复点4：loadGrades 同步 allTeachers ============
+        // ============ 年级管理 ============
         async function loadGrades() {
             const gradeGrid = document.getElementById('gradeGrid');
             gradeGrid.innerHTML = '<div class="loading">加载中...</div>';
             
             try {
                 await loadAllGradesData();
-                // 重要：同步教师全局变量
                 await loadAllTeachersData();
                 
                 const grades = allGrades;
@@ -1168,7 +1167,7 @@
         
         // ============ 邀请码管理 ============
         async function loadAllInviteCodes() {
-            await Promise.all([loadStudentInviteCodes(), loadTeacherInviteCode()]);
+            await Promise.all([loadStudentInviteCodes(), loadParentInviteCodes(), loadTeacherInviteCode()]);
         }
         
         async function loadStudentInviteCodes() {
@@ -1192,7 +1191,8 @@
                     for (const grade of grades) {
                         if (grade.classes) {
                             for (const cls of grade.classes) {
-                                const code = codes.find(c => c.gradeId === grade.gradeId && c.target === cls.className);
+                                // 筛选角色为学生（原有逻辑不变）
+                                const code = codes.find(c => c.gradeId === grade.gradeId && c.target === cls.className && c.role === 'student');
                                 classList.push({
                                     gradeId: grade.gradeId,
                                     gradeName: grade.gradeName,
@@ -1231,6 +1231,144 @@
             }
         }
         
+        // ============ 家长邀请码 ============
+        async function loadParentInviteCodes() {
+            const tbody = document.getElementById('parentInviteList');
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
+            
+            try {
+                const token = getToken();
+                const gradesResponse = await fetch(API_BASE + '/admin/grades', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const codesResponse = await fetch(API_BASE + '/admin/invite-codes?type=class', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                if (gradesResponse.ok && codesResponse.ok) {
+                    const grades = await gradesResponse.json();
+                    const codes = await codesResponse.json();
+                    
+                    const classList = [];
+                    for (const grade of grades) {
+                        if (grade.classes) {
+                            for (const cls of grade.classes) {
+                                // 筛选角色为家长
+                                const code = codes.find(c => c.gradeId === grade.gradeId && c.target === cls.className && c.role === 'parent');
+                                classList.push({
+                                    gradeId: grade.gradeId,
+                                    gradeName: grade.gradeName,
+                                    className: cls.className,
+                                    inviteCode: code ? code.code : null,
+                                    status: code ? code.status : 'none'
+                                });
+                            }
+                        }
+                    }
+                    
+                    if (classList.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无班级，请先在年级管理中添加</td></tr>';
+                    } else {
+                        tbody.innerHTML = classList.map(item => `
+                            <tr>
+                                <td>${item.gradeName}</td>
+                                <td>${item.className}</td>
+                                <td>${item.inviteCode ? `<span class="invite-code-display">${item.inviteCode}</span>` : '<span style="color:#999;">未生成</span>'}</td>
+                                <td>${item.inviteCode ? `<span class="invite-status ${item.status === 'unused' ? 'status-unused' : 'status-used'}">${item.status === 'unused' ? '未使用' : '已使用'}</span>` : '<span style="color:#999;">-</span>'}</td>
+                                <td>
+                                    ${item.inviteCode ? `
+                                        <button class="btn btn-refresh" onclick="refreshParentCode('${item.gradeId}', '${item.className}')">刷新</button>
+                                        <button class="btn btn-copy" onclick="copyInviteCode('${item.inviteCode}')">复制</button>
+                                    ` : `
+                                        <button class="btn btn-generate" onclick="generateParentCode('${item.gradeId}', '${item.className}')">生成</button>
+                                    `}
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('加载家长邀请码失败:', error);
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">加载失败</td></tr>';
+            }
+        }
+        
+        async function generateParentCode(gradeId, className) {
+            const code = generateInviteCode();
+            try {
+                const token = getToken();
+                const response = await fetch(API_BASE + '/admin/invite-codes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ type: 'class', target: className, gradeId, role: 'parent', codes: [code] })
+                });
+                if (response.ok) await loadParentInviteCodes();
+            } catch (error) {
+                alert('生成失败');
+            }
+        }
+        
+        async function refreshParentCode(gradeId, className) {
+            if (!confirm('确定要刷新这个家长邀请码吗？')) return;
+            try {
+                const token = getToken();
+                // 删除原有家长邀请码
+                await fetch(`${API_BASE}/admin/invite-codes/class/${gradeId}/${className}?role=parent`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                await generateParentCode(gradeId, className);
+            } catch (error) {
+                alert('刷新失败');
+            }
+        }
+        
+        async function generateAllParentInviteCodes() {
+            if (!confirm('确定要为所有未生成家长邀请码的班级生成邀请码吗？')) return;
+            try {
+                const token = getToken();
+                const gradesResponse = await fetch(API_BASE + '/admin/grades', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const codesResponse = await fetch(API_BASE + '/admin/invite-codes?type=class', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                if (gradesResponse.ok && codesResponse.ok) {
+                    const grades = await gradesResponse.json();
+                    const existingCodes = await codesResponse.json();
+                    
+                    for (const grade of grades) {
+                        if (grade.classes) {
+                            for (const cls of grade.classes) {
+                                // 检查是否已存在家长邀请码
+                                const hasCode = existingCodes.some(c => c.gradeId === grade.gradeId && c.target === cls.className && c.role === 'parent');
+                                if (!hasCode) {
+                                    const code = generateInviteCode();
+                                    await fetch(API_BASE + '/admin/invite-codes', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': 'Bearer ' + token
+                                        },
+                                        body: JSON.stringify({ type: 'class', target: cls.className, gradeId: grade.gradeId, role: 'parent', codes: [code] })
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    await loadParentInviteCodes();
+                    alert('已为所有班级生成家长邀请码！');
+                }
+            } catch (error) {
+                alert('生成失败');
+            }
+        }
+        
+        // ============ 教师邀请码 ============
         async function loadTeacherInviteCode() {
             const tbody = document.getElementById('teacherInviteList');
             tbody.innerHTML = '<tr><td colspan="3" class="loading">加载中...</td></tr>';
@@ -1286,7 +1424,7 @@
             if (!confirm('确定要刷新这个邀请码吗？')) return;
             try {
                 const token = getToken();
-                await fetch(`${API_BASE}/admin/invite-codes/class/${gradeId}/${className}`, {
+                await fetch(`${API_BASE}/admin/invite-codes/class/${gradeId}/${className}?role=student`, {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -1314,7 +1452,7 @@
                     for (const grade of grades) {
                         if (grade.classes) {
                             for (const cls of grade.classes) {
-                                const hasCode = existingCodes.some(c => c.gradeId === grade.gradeId && c.target === cls.className);
+                                const hasCode = existingCodes.some(c => c.gradeId === grade.gradeId && c.target === cls.className && c.role === 'student');
                                 if (!hasCode) {
                                     const code = generateInviteCode();
                                     await fetch(API_BASE + '/admin/invite-codes', {
@@ -1330,7 +1468,7 @@
                         }
                     }
                     await loadStudentInviteCodes();
-                    alert('已为所有班级生成邀请码！');
+                    alert('已为所有班级生成学生邀请码！');
                 }
             } catch (error) {
                 alert('生成失败');
@@ -1417,7 +1555,6 @@
             
             document.getElementById('userName').textContent = user.realName || '管理员';
             loadStats();
-            // 重要：初始化时预加载年级和教师数据
             Promise.all([loadAllGradesData(), loadAllTeachersData()]).then(() => {
                 showUserTab('student');
             });
