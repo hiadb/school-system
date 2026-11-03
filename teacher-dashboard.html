@@ -1226,7 +1226,9 @@
             const container = document.getElementById('scoreEntryTableContainer');
             if (rosterStudents.length === 0) { container.innerHTML = `<div class="empty-state">当前班级暂无花名册学生，请先添加学生</div>`; return; }
             let h = `<div style="margin-top:20px;"><h3 style="margin-bottom:10px;">${examName} - ${subject} 成绩录入表</h3><table class="points-table"><thead><tr><th>学号</th><th>姓名</th><th>分数 (0-100)</th></tr></thead><tbody>`;
-            rosterStudents.forEach(s => { h += `<tr><td>${s.studentId}</td><td>${s.studentName}</td><td><input type="number" class="score-input" data-sid="${s.studentId}" data-sname="${s.studentName}" data-subject="${subject}" min="0" max="100" placeholder="输入分数" style="width:100px;padding:5px;"></td></tr>`; });
+            rosterStudents.forEach(s => { 
+                h += `<tr><td>${s.studentId}</td><td>${s.name || ''}</td><td><input type="number" class="score-input" data-sid="${s.studentId}" data-sname="${s.name || ''}" data-subject="${subject}" min="0" max="100" placeholder="输入分数" style="width:100px;padding:5px;"></td></tr>`; 
+            });
             h += `</tbody></table><div style="margin-top:20px; text-align:right;"><button class="btn-save" onclick="saveBatchScores('${examName}')">💾 保存该科成绩</button></div></div>`;
             container.innerHTML = h;
         }
@@ -1317,10 +1319,7 @@
         // 4. 个人趋势 (雷达图)
         async function showTrendAnalysisModule() {
             const c = document.getElementById('mainContent');
-            let studentOptions = rosterStudents.map(s => `<option value="${s.studentId}">${s.studentName} (${s.studentId})</option>`).join('');
-            c.innerHTML = `<div class="points-header"><h2>📈 个人趋势分析</h2><div class="points-actions"><select id="trendStudentSelect" style="padding:10px;border-radius:5px;border:2px solid #667eea;" onchange="renderStudentTrend()">${studentOptions}</select></div></div><div id="trendChartContainer" style="margin-top:30px; display:flex; justify-content:center;"></div>`;
-            renderStudentTrend();
-        }
+            let studentOptions = rosterStudents.map(s => `<option value="${s.studentId}">${s.name || ''} (${s.studentId})</option>`).join('');
 
         async function renderStudentTrend() {
             const studentId = document.getElementById('trendStudentSelect').value;
