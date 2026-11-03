@@ -1,3 +1,4 @@
+<!-- 注册页面 - 学校管理系统 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -99,7 +100,7 @@
                 </div>
             </div>
             
-            <!-- 邀请码输入框（学生和教师显示） -->
+            <!-- 邀请码输入框（学生、教师、家长显示） -->
             <div class="form-group" id="inviteCodeGroup">
                 <label for="inviteCode">邀请码 *</label>
                 <input type="text" id="inviteCode" placeholder="请输入邀请码">
@@ -144,8 +145,8 @@
             });
             event.currentTarget.classList.add('selected');
             
-            // 学生和教师需要邀请码
-            if (role === 'student' || role === 'teacher') {
+            // 学生、教师、家长均需要邀请码
+            if (role === 'student' || role === 'teacher' || role === 'parent') {
                 document.getElementById('inviteCodeGroup').style.display = 'block';
             } else {
                 document.getElementById('inviteCodeGroup').style.display = 'none';
@@ -174,8 +175,8 @@
                 return;
             }
             
-            // 学生和教师必须输入邀请码
-            if ((role === 'student' || role === 'teacher') && !inviteCode) {
+            // 学生、教师、家长必须输入邀请码
+            if ((role === 'student' || role === 'teacher' || role === 'parent') && !inviteCode) {
                 showError('请输入邀请码');
                 return;
             }
