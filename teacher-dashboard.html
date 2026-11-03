@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>教师工作台 - 学校管理系统</title>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1035,26 +1035,50 @@
             const f = input.files[0]; 
             if (!f) return; 
             
+            // 检查 XLSX 是否加载成功
+            if (typeof XLSX === 'undefined') {
+                alert('Excel 处理组件尚未加载成功，请检查网络后刷新页面重试。');
+                return;
+            }
+
             const r = new FileReader(); 
             r.onload = function(e) { 
                 try { 
-                    // 使用 Uint8Array 将 ArrayBuffer 转为二进制数组
-                    const d = new Uint8Array(e.target.result); 
-                    const wb = XLSX.read(d, { type: 'array' }); 
+                    // 将 ArrayBuffer 转为二进制字符串读取，兼容性更好
+                    const data = new Uint8Array(e.target.result); 
+                    const wb = XLSX.read(data, { type: 'array' }); 
                     const ws = wb.Sheets[wb.SheetNames[0]]; 
-                    const jd = XLSX.utils.sheet_to_json(ws); 
+                    const jd = XLSX.utils.sheet_to_json(ws, { defval: "" }); // defval 防止空单元格为 undefined
                     
-                    if (!jd || !jd.length) { alert('Excel文件为空'); return; } 
+                    if (!jd || jd.length === 0) { alert('Excel文件为空或格式不正确'); return; } 
                     
-                    rosterStudents = jd.map(row => { 
+                    const importedStudents = jd.map(row => { 
                         const s = {}; 
-                        studentFields.forEach(f => s[f.key] = String(row[f.label] || '')); 
+                        studentFields.forEach(field => {
+                            // 兼容 Excel 表头可能带空格的情况
+                            let val = row[field.label];
+                            if (val === undefined) {
+                                // 尝试去掉空格再找一次
+                                const key = Object.keys(row).find(k => k.trim() === field.label);
+                                if (key) val = row[key];
+                            }
+                            s[field.key] = String(val || '').trim(); 
+                        }); 
                         s.class = currentClass; 
                         return s; 
-                    }).filter(s => s.name); // 过滤掉没有姓名的无效行
+                    }).filter(s => s.name); // 过滤掉没有姓名的行
                     
-                    if (rosterStudents.length === 0) { alert('未从Excel中解析到有效学生数据，请检查表头是否与模板一致'); return; }
+                    if (importedStudents.length === 0) { 
+                        alert('未从Excel中解析到有效学生数据，请检查表头是否与模板完全一致（如“学号”、“姓名”）。'); 
+                        return; 
+                    }
                     
+                    // 确认是否覆盖
+                    if (rosterStudents.length > 0 && !confirm(`当前已有 ${rosterStudents.length} 名学生数据，导入将覆盖原有数据，确定继续吗？`)) {
+                        return;
+                    }
+
+                    rosterStudents = importedStudents;
                     saveRosterStudents(); 
                     applyFilters(); 
                     document.getElementById('importRosterContainer').innerHTML = ''; 
@@ -1062,10 +1086,9 @@
                     alert('导入成功！共导入 ' + rosterStudents.length + ' 名学生。'); 
                 } catch (err) { 
                     console.error('导入解析错误:', err);
-                    alert('文件解析失败：' + err.message); 
+                    alert('文件解析失败，请确保上传的是标准的 .xlsx 或 .xls 文件。\n错误信息：' + err.message); 
                 } 
             }; 
-            // 必须用 readAsArrayBuffer
             r.readAsArrayBuffer(f); 
         }
         
