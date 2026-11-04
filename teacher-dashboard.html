@@ -1022,12 +1022,17 @@
                 console.error('保存积分失败:', e);
             }
         }
+        // 积分明细模块（带多选筛选功能）
         function showPointsDetailsModule() {
             loadPointsDetailsData();
             const c = document.getElementById('mainContent');
             const totalAdd = pointsDetailsData.filter(p => p.points > 0).reduce((s, p) => s + p.points, 0);
             const totalMinus = pointsDetailsData.filter(p => p.points < 0).reduce((s, p) => s + p.points, 0);
             const netTotal = totalAdd + totalMinus;
+            
+            // 获取当前生效的筛选条件
+            const filters = window.pointsFilters || {};
+
             c.innerHTML = `
                 <div id="module-points-details" class="points-details-container">
                     <div class="points-header">
@@ -1053,33 +1058,166 @@
                             <thead>
                                 <tr>
                                     <th style="width:50px;">序号</th>
-                                    <th style="width:90px;">周次</th>
-                                    <th style="width:90px;">日期</th>
-                                    <th style="width:90px;">学号</th>
-                                    <th style="width:80px;">姓名</th>
-                                    <th style="width:80px;">积分</th>
-                                    <th>加分原因</th>
+                                    <th style="width:90px;">周次 <button class="filter-btn" style="color:#333" onclick="showPointsFilter('week', event)">🔽</button></th>
+                                    <th style="width:110px;">日期 <button class="filter-btn" style="color:#333" onclick="showPointsFilter('date', event)">🔽</button></th>
+                                    <th style="width:90px;">学号 <button class="filter-btn" style="color:#333" onclick="showPointsFilter('studentId', event)">🔽</button></th>
+                                    <th style="width:80px;">姓名 <button class="filter-btn" style="color:#333" onclick="showPointsFilter('studentName', event)">🔽</button></th>
+                                    <th style="width:80px;">积分 <button class="filter-btn" style="color:#333" onclick="showPointsFilter('points', event)">🔽</button></th>
+                                    <th>加分原因 <button class="filter-btn" style="color:#333" onclick="showPointsFilter('reason', event)">🔽</button></th>
                                     <th style="width:80px;">操作</th>
                                 </tr>
                             </thead>
                             <tbody id="pointsDetailsBody">
-                                ${pointsDetailsData.length === 0 ? '<tr><td colspan="8" class="points-empty"><div class="icon">📝</div><p>暂无积分记录，点击上方“添加积分”开始记录</p></td></tr>' : pointsDetailsData.map((p, i) => `
-                                    <tr>
-                                        <td>${i + 1}</td>
-                                        <td>${getWeekByDate(p.date)}</td>
-                                        <td>${p.date || ''}</td>
-                                        <td>${p.studentId || ''}</td>
-                                        <td>${p.studentName || ''}</td>
-                                        <td class="${p.points > 0 ? 'points-positive' : 'points-negative'}">${p.points > 0 ? '+' + p.points.toFixed(1).replace(/\.0$/, '') : p.points.toFixed(1).replace(/\.0$/, '')}</td>
-                                        <td class="points-reason" title="${String(p.reason || '').replace(/"/g, '&quot;')}">${p.reason || ''}</td>
-                                        <td><button class="btn btn-delete" onclick="deletePointsRecord(${i})">删除</button></td>
-                                    </tr>
-                                `).join('')}
+                                ${renderPointsDetailsRows()}
                             </tbody>
                         </table>
                     </div>
                 </div>
             `;
+        }
+
+        // 渲染表格数据（应用筛选）
+        function renderPointsDetailsRows() {
+            const filters = window.pointsFilters || {};
+            let filteredData = pointsDetailsData;
+
+            // 根据筛选条件过滤数据
+            Object.keys(filters).forEach(key => {
+                if (filters[key] && filters[key].length > 0) {
+                    const filterValues = filters[key];
+                    filteredData = filteredData.filter(p => {
+                        let val = '';
+                        if (key === 'week') val = getWeekByDate(p.date);
+                        else if (key === 'date') val = p.date || '';
+                        else if (key === 'studentId') val = p.studentId || '';
+                        else if (key === 'studentName') val = p.studentName || '';
+                        else if (key === 'points') val = p.points > 0 ? '+' + p.points.toFixed(1).replace(/\.0$/, '') : p.points.toFixed(1).replace(/\.0$/, '');
+                        else if (key === 'reason') val = String(p.reason || '');
+                        return filterValues.includes(val);
+                    });
+                }
+            });
+
+            if (filteredData.length === 0) {
+                return `<tr><td colspan="8" class="points-empty"><div class="icon">📝</div><p>没有匹配的积分记录</p></td></tr>`;
+            }
+
+            return filteredData.map((p, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${getWeekByDate(p.date)}</td>
+                    <td>${p.date || ''}</td>
+                    <td>${p.studentId || ''}</td>
+                    <td>${p.studentName || ''}</td>
+                    <td class="${p.points > 0 ? 'points-positive' : 'points-negative'}">${p.points > 0 ? '+' + p.points.toFixed(1).replace(/\.0$/, '') : p.points.toFixed(1).replace(/\.0$/, '')}</td>
+                    <td class="points-reason" title="${String(p.reason || '').replace(/"/g, '&quot;')}">${String(p.reason || '')}</td>
+                    <td><button class="btn btn-delete" onclick="deletePointsRecord(${i})">删除</button></td>
+                </tr>
+            `).join('');
+        }
+
+        // 显示筛选下拉菜单
+        function showPointsFilter(key, event) {
+            event.stopPropagation();
+            document.querySelectorAll('.filter-dropdown').forEach(x => x.remove());
+
+            const rect = event.target.getBoundingClientRect();
+            const dropdown = document.createElement('div');
+            dropdown.className = 'filter-dropdown';
+            dropdown.style.cssText = `position:fixed;top:${rect.bottom+5}px;left:${rect.left}px;z-index:1000;width:220px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:10px;`;
+            
+            // 获取该列所有唯一值
+            const uniqueValues = [...new Set(pointsDetailsData.map(p => {
+                if (key === 'week') return getWeekByDate(p.date);
+                if (key === 'date') return p.date || '';
+                if (key === 'studentId') return p.studentId || '';
+                if (key === 'studentName') return p.studentName || '';
+                if (key === 'points') return p.points > 0 ? '+' + p.points.toFixed(1).replace(/\.0$/, '') : p.points.toFixed(1).replace(/\.0$/, '');
+                if (key === 'reason') return String(p.reason || '');
+                return '';
+            }).filter(v => v))].sort();
+
+            const currentFilters = window.pointsFilters && window.pointsFilters[key] ? window.pointsFilters[key] : [];
+
+            let html = `<input type="text" placeholder="搜索选项..." oninput="filterDropdownOptions(this, '${key}')" style="width:100%;padding:5px;margin-bottom:8px;border:1px solid #ddd;border-radius:4px;font-size:12px;">`;
+            html += `<label style="display:flex;align-items:center;gap:5px;padding:4px 0;font-size:12px;cursor:pointer;font-weight:bold;border-bottom:1px solid #eee;margin-bottom:5px;">
+                        <input type="checkbox" onchange="toggleAllPointsFilter('${key}', this.checked)" ${currentFilters.length === 0 || currentFilters.length === uniqueValues.length ? 'checked' : ''}> 全选 / 取消全选
+                    </label>`;
+
+            uniqueValues.forEach(val => {
+                const checked = currentFilters.length === 0 || currentFilters.includes(val) ? 'checked' : '';
+                html += `<label style="display:flex;align-items:center;gap:5px;padding:4px 0;font-size:12px;cursor:pointer;">
+                            <input type="checkbox" value="${val}" ${checked} onchange="updatePointsFilter('${key}', '${val.replace(/'/g, "\\'")}', this.checked)"> ${val}
+                        </label>`;
+            });
+
+            dropdown.innerHTML = html;
+            document.body.appendChild(dropdown);
+
+            // 点击外部关闭
+            setTimeout(() => {
+                document.addEventListener('click', function close(e) {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.remove();
+                        document.removeEventListener('click', close);
+                    }
+                });
+            }, 10);
+        }
+
+        // 更新筛选条件（勾选/取消勾选）
+        function updatePointsFilter(key, val, checked) {
+            if (!window.pointsFilters) window.pointsFilters = {};
+            if (!window.pointsFilters[key]) window.pointsFilters[key] = [];
+
+            if (checked) {
+                if (!window.pointsFilters[key].includes(val)) {
+                    window.pointsFilters[key].push(val);
+                }
+            } else {
+                window.pointsFilters[key] = window.pointsFilters[key].filter(v => v !== val);
+            }
+
+            // 如果取消全选了，但数组为空，则视为全选（不过滤）
+            // 如果用户只勾选了一个，而原本是全选（数组为空），则需要先全选，再剔除那个没勾的
+            // 为了简化逻辑，我们规定：如果数组长度为 0，则表示全选；如果有值，则只显示包含的值。
+            // 如果要支持一开始全选，取消勾选其中一个，需要特殊处理。
+            // 这里采用简单逻辑：勾选谁就显示谁（除非全选被勾上了，那就清空数组）。
+            // 由于上面的全选 checkbox 会在全选时清空数组，所以这里只需要正常维护数组即可。
+            
+            // 如果当前列表全被取消了，清理该 key，表示不过滤
+            if (window.pointsFilters[key].length === 0) {
+                delete window.pointsFilters[key];
+            }
+
+            // 重新渲染表格
+            const tbody = document.getElementById('pointsDetailsBody');
+            if (tbody) {
+                tbody.innerHTML = renderPointsDetailsRows();
+            }
+        }
+
+        // 全选/取消全选
+        function toggleAllPointsFilter(key, checked) {
+            if (!window.pointsFilters) window.pointsFilters = {};
+            if (checked) {
+                delete window.pointsFilters[key]; // 清空表示全选
+            } else {
+                window.pointsFilters[key] = []; // 空数组表示什么都不选
+            }
+            // 重新渲染表格
+            const tbody = document.getElementById('pointsDetailsBody');
+            if (tbody) {
+                tbody.innerHTML = renderPointsDetailsRows();
+            }
+        }
+
+        // 筛选下拉搜索
+        function filterDropdownOptions(input, key) {
+            const term = input.value.toLowerCase();
+            input.parentElement.querySelectorAll('label:not(:first-child)').forEach(label => {
+                label.style.display = label.textContent.toLowerCase().includes(term) ? 'flex' : 'none';
+            });
         }
         function openPointsModal() {
             const now = new Date(); pointsDateState = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() }; editingDateType = null; updateDateDisplay();
@@ -1092,8 +1230,52 @@
         function scrollDate(type, delta, target) { if (target === 'main') { if (editingDateType === type) return; if (type === 'year') { pointsDateState.year += delta; if (pointsDateState.year < 2000) pointsDateState.year = 2000; if (pointsDateState.year > 2100) pointsDateState.year = 2100; } else if (type === 'month') { pointsDateState.month += delta; if (pointsDateState.month > 12) { pointsDateState.month = 1; pointsDateState.year++; } if (pointsDateState.month < 1) { pointsDateState.month = 12; pointsDateState.year--; } } else if (type === 'day') { pointsDateState.day += delta; const maxDay = getMaxDay(pointsDateState.year, pointsDateState.month); if (pointsDateState.day > maxDay) { pointsDateState.day = 1; pointsDateState.month++; if (pointsDateState.month > 12) { pointsDateState.month = 1; pointsDateState.year++; } } if (pointsDateState.day < 1) { pointsDateState.month--; if (pointsDateState.month < 1) { pointsDateState.month = 12; pointsDateState.year--; } pointsDateState.day = getMaxDay(pointsDateState.year, pointsDateState.month); } } updateDateDisplay(); } else if (target === 'batch') { if (batchEditingDateType === type) return; if (type === 'year') { batchDateState.year += delta; if (batchDateState.year < 2000) batchDateState.year = 2000; if (batchDateState.year > 2100) batchDateState.year = 2100; } else if (type === 'month') { batchDateState.month += delta; if (batchDateState.month > 12) { batchDateState.month = 1; batchDateState.year++; } if (batchDateState.month < 1) { batchDateState.month = 12; batchDateState.year--; } } else if (type === 'day') { batchDateState.day += delta; const maxDay = getMaxDay(batchDateState.year, batchDateState.month); if (batchDateState.day > maxDay) { batchDateState.day = 1; batchDateState.month++; if (batchDateState.month > 12) { batchDateState.month = 1; batchDateState.year++; } } if (batchDateState.day < 1) { batchDateState.month--; if (batchDateState.month < 1) { batchDateState.month = 12; batchDateState.year--; } batchDateState.day = getMaxDay(batchDateState.year, batchDateState.month); } } updateBatchDateDisplay(); } }
         function getMaxDay(year, month) { return new Date(year, month, 0).getDate(); }
         function setPointsValue(v) { document.getElementById('pointsValue').value = v; }
-        async function addPointsRecord() { const suffix = document.getElementById('pointsStudentIdSuffix').value.trim(); const pointsVal = parseFloat(document.getElementById('pointsValue').value); const reason = document.getElementById('pointsReason').value.trim(); if (!suffix) { alert('请输入学号后两位'); return; } if (isNaN(pointsVal) || pointsVal < -100 || pointsVal > 300) { alert('积分必须在 -100 到 300 之间'); return; } if (!reason) { alert('请输入加分原因'); return; } const matched = rosterStudents.filter(s => { if (!s.studentId) return false; const sid = String(s.studentId); return sid.length >= 2 && sid.slice(-2) === suffix; }); if (matched.length === 0) { alert('未找到学号后两位为 "' + suffix + '" 的学生'); return; } if (matched.length > 1) { alert('匹配到多名学生，请检查学号后两位是否唯一：' + matched.map(s => s.name + '(' + s.studentId + ')').join('、')); return; } const student = matched[0]; const dateStr = pointsDateState.year + '-' + String(pointsDateState.month).padStart(2, '0') + '-' + String(pointsDateState.day).padStart(2, '0'); loadPointsDetailsData(); pointsDetailsData.push({ studentId: student.studentId, studentName: student.name, date: dateStr, points: pointsVal, reason: reason, createdAt: new Date().toISOString() }); await savePointsDetailsData(); document.getElementById('pointsStudentIdSuffix').value = ''; document.getElementById('pointsStudentNameDisplay').textContent = ''; document.getElementById('pointsReason').value = ''; document.getElementById('pointsValue').value = '1'; showPointsDetailsModule(); document.getElementById('pointsModal').classList.add('show'); showToast('✅ 已添加：' + student.name + ' ' + (pointsVal > 0 ? '+' : '') + pointsVal + ' 分', '#4CAF50'); setTimeout(() => document.getElementById('pointsStudentIdSuffix').focus(), 100); }
-        async function deletePointsRecord(i) { if (!confirm('确定删除这条积分记录吗？')) return; pointsDetailsData.splice(i, 1); await savePointsDetailsData(); showPointsDetailsModule(); }
+        async function addPointsRecord() { const suffix = document.getElementById('pointsStudentIdSuffix').value.trim(); const pointsVal = parseFloat(document.getElementById('pointsValue').value); const reason = document.getElementById('pointsReason').value.trim(); if (!suffix) { alert('请输入学号后两位'); return; } if (isNaN(pointsVal) || pointsVal < -100 || pointsVal > 300) { alert('积分必须在 -100 到 300 之间'); return; } if (!reason) { alert('请输入加分原因'); return; } const matched = rosterStudents.filter(s => { if (!s.studentId) return false; const sid = String(s.studentId); return sid.length >= 2 && sid.slice(-2) === suffix; }); if (matched.length === 0) { alert('未找到学号后两位为 "' + suffix + '" 的学生'); return; } if (matched.length > 1) { alert('匹配到多名学生，请检查学号后两位是否唯一：' + matched.map(s => s.name + '(' + s.studentId + ')').join('、')); return; } const student = matched[0]; const dateStr = pointsDateState.year + '-' + String(pointsDateState.month).padStart(2, '0') + '-' + String(pointsDateState.day).padStart(2, '0'); loadPointsDetailsData(); pointsDetailsData.push({ studentId: student.studentId, studentName: student.name, date: dateStr, points: pointsVal, reason: reason, createdAt: new Date().toISOString() }); await savePointsDetailsData();
+            window.pointsFilters = {}; // 添加后清空筛选
+            document.getElementById('pointsStudentIdSuffix').value = ''; document.getElementById('pointsStudentIdSuffix').value = ''; document.getElementById('pointsStudentNameDisplay').textContent = ''; document.getElementById('pointsReason').value = ''; document.getElementById('pointsValue').value = '1'; showPointsDetailsModule(); document.getElementById('pointsModal').classList.add('show'); showToast('✅ 已添加：' + student.name + ' ' + (pointsVal > 0 ? '+' : '') + pointsVal + ' 分', '#4CAF50'); setTimeout(() => document.getElementById('pointsStudentIdSuffix').focus(), 100); }
+        async function deletePointsRecord(i) {
+            // 注意：这里的 i 是当前筛选后表格的行号，不是原数组的索引
+            // 需要根据当前表格渲染出的内容反查对应原始数据
+            if (!confirm('确定删除这条积分记录吗？')) return;
+
+            // 获取当前筛选后的数据
+            const filters = window.pointsFilters || {};
+            let filteredData = pointsDetailsData;
+            Object.keys(filters).forEach(key => {
+                if (filters[key] && filters[key].length > 0) {
+                    const filterValues = filters[key];
+                    filteredData = filteredData.filter(p => {
+                        let val = '';
+                        if (key === 'week') val = getWeekByDate(p.date);
+                        else if (key === 'date') val = p.date || '';
+                        else if (key === 'studentId') val = p.studentId || '';
+                        else if (key === 'studentName') val = p.studentName || '';
+                        else if (key === 'points') val = p.points > 0 ? '+' + p.points.toFixed(1).replace(/\.0$/, '') : p.points.toFixed(1).replace(/\.0$/, '');
+                        else if (key === 'reason') val = String(p.reason || '');
+                        return filterValues.includes(val);
+                    });
+                }
+            });
+
+            const targetRow = filteredData[i];
+            if (!targetRow) return;
+
+            // 在原始数组中找匹配的项，然后删除
+            const originalIndex = pointsDetailsData.findIndex(p => 
+                p.studentId === targetRow.studentId && 
+                p.date === targetRow.date && 
+                p.reason === targetRow.reason &&
+                p.points === targetRow.points &&
+                p.createdAt === targetRow.createdAt
+            );
+
+            if (originalIndex !== -1) {
+                pointsDetailsData.splice(originalIndex, 1);
+                await savePointsDetailsData();
+                showPointsDetailsModule();
+                showToast('🗑️ 记录已删除', '#f44336');
+            }
+        }
         function exportPointsDetails() { try { const d = pointsDetailsData.map(p => ({ '周次': getWeekByDate(p.date), '日期': p.date || '', '学号': p.studentId || '', '姓名': p.studentName || '', '积分': p.points, '加分原因': String(p.reason || '') })); const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '积分明细'); XLSX.writeFile(wb, currentClass + '_积分明细.xlsx'); } catch (err) { alert('导出失败：' + err.message); } }
         function importPointsDetails() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.xlsx,.xls'; i.onchange = async function(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = async function(ev) { try { const d = new Uint8Array(ev.target.result); const wb = XLSX.read(d, { type: 'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; const jd = XLSX.utils.sheet_to_json(ws); if (!jd || !jd.length) { alert('Excel文件为空'); return; } const imported = jd.map(row => ({ studentId: String(row['学号'] || ''), studentName: row['姓名'] || '', date: row['日期'] || '', points: parseFloat(row['积分']) || 0, reason: row['加分原因'] || '', createdAt: new Date().toISOString() })).filter(p => p.studentId); if (imported.length === 0) { alert('没有有效数据'); return; } if (!confirm('导入将覆盖当前所有积分明细记录（' + pointsDetailsData.length + ' 条），确定继续？\n将导入 ' + imported.length + ' 条记录')) return; pointsDetailsData = imported; await savePointsDetailsData(); showPointsDetailsModule(); alert('导入成功！共 ' + imported.length + ' 条记录'); } catch (err) { alert('文件解析失败：' + err.message); } }; r.readAsArrayBuffer(f); }; i.click(); }
 
